@@ -43,11 +43,6 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		ReleaseUnmanagedResources();
 	}
 
-	public IVideoSurface CreateSurface()
-	{
-		return null!;
-	}
-
 	public void VideoDeviceActivated(IPlatformVideo video)
 	{
 		if (m_video != video)

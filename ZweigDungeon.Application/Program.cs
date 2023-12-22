@@ -17,6 +17,7 @@ internal static class Program
 		var serviceConfig = new ServiceConfiguration();
 		serviceConfig.AddSingleton<MessageBus>();
 		serviceConfig.AddSingleton<NativeLibraryLoader>();
+
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 		{
 			serviceConfig.AddSingleton<IPlatformWindow, Win32Window>();
