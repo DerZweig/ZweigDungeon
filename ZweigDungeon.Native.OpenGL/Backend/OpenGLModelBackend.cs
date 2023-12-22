@@ -3,7 +3,7 @@ using ZweigDungeon.Native.OpenGL.Prototypes;
 
 namespace ZweigDungeon.Native.OpenGL.Managers;
 
-internal class OpenGLModelManager : IDisposable
+internal class OpenGLModelBackend : IDisposable
 {
 	// ReSharper disable InconsistentNaming
 	private readonly PfnGenVertexArraysDelegate             glGenVertexArrays;
@@ -22,7 +22,7 @@ internal class OpenGLModelManager : IDisposable
 	private readonly PfnBufferSubDataDelegate               glBufferSubData;
 	// ReSharper restore InconsistentNaming
 	
-	public OpenGLModelManager(ICustomFunctionLoader loader)
+	public OpenGLModelBackend(ICustomFunctionLoader loader)
 	{
 		loader.LoadFunction(nameof(glGenVertexArrays), out glGenVertexArrays);
 		loader.LoadFunction(nameof(glDeleteVertexArrays), out glDeleteVertexArrays);
@@ -51,7 +51,7 @@ internal class OpenGLModelManager : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	~OpenGLModelManager()
+	~OpenGLModelBackend()
 	{
 		ReleaseUnmanagedResources();
 	}

@@ -3,7 +3,7 @@ using ZweigDungeon.Native.OpenGL.Prototypes;
 
 namespace ZweigDungeon.Native.OpenGL.Managers;
 
-internal class OpenGLTextureManager : IDisposable
+internal class OpenGLTextureBackend : IDisposable
 {
 	// ReSharper disable InconsistentNaming
 	private readonly PfnActiveTextureDelegate  glActiveTexture;
@@ -15,7 +15,7 @@ internal class OpenGLTextureManager : IDisposable
 	private readonly PfnTexSubImage2DDelegate  glTexSubImage2D;
 	// ReSharper restore InconsistentNaming
 
-	public OpenGLTextureManager(ICustomFunctionLoader loader)
+	public OpenGLTextureBackend(ICustomFunctionLoader loader)
 	{
 		loader.LoadFunction(nameof(glActiveTexture), out glActiveTexture);
 		loader.LoadFunction(nameof(glBindTexture), out glBindTexture);
@@ -37,7 +37,7 @@ internal class OpenGLTextureManager : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	~OpenGLTextureManager()
+	~OpenGLTextureBackend()
 	{
 		ReleaseUnmanagedResources();
 	}

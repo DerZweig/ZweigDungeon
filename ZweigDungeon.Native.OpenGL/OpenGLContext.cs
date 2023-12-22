@@ -12,10 +12,10 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 	private readonly IPlatformVideo m_video;
 	private readonly IDisposable    m_deviceSubscription;
 
-	private OpenGLStateManager?   m_stateManager;
-	private OpenGLModelManager?   m_arrayManager;
-	private OpenGLTextureManager? m_textureManager;
-	private OpenGLShaderManager?  m_shaderManager;
+	private OpenGLStateBackend?   m_stateBackend;
+	private OpenGLModelBackend?   m_modelBackend;
+	private OpenGLTextureBackend? m_textureBackend;
+	private OpenGLShaderBackend?  m_shaderBackend;
 
 	public OpenGLContext(IPlatformVideo video, MessageBus messageBus)
 	{
@@ -26,10 +26,10 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 	private void ReleaseUnmanagedResources()
 	{
 		m_deviceSubscription.Dispose();
-		m_stateManager?.Dispose();
-		m_arrayManager?.Dispose();
-		m_textureManager?.Dispose();
-		m_shaderManager?.Dispose();
+		m_stateBackend?.Dispose();
+		m_modelBackend?.Dispose();
+		m_textureBackend?.Dispose();
+		m_shaderBackend?.Dispose();
 	}
 
 	public void Dispose()
@@ -51,10 +51,10 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		}
 
 		var loader = (ICustomFunctionLoader)m_video;
-		m_stateManager   = new OpenGLStateManager(loader);
-		m_arrayManager   = new OpenGLModelManager(loader);
-		m_textureManager = new OpenGLTextureManager(loader);
-		m_shaderManager  = new OpenGLShaderManager(loader);
+		m_stateBackend   = new OpenGLStateBackend(loader);
+		m_modelBackend   = new OpenGLModelBackend(loader);
+		m_textureBackend = new OpenGLTextureBackend(loader);
+		m_shaderBackend  = new OpenGLShaderBackend(loader);
 	}
 
 	public void VideoDeviceDeactivating(IPlatformVideo video)
@@ -64,14 +64,14 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 			return;
 		}
 
-		m_stateManager?.Dispose();
-		m_arrayManager?.Dispose();
-		m_textureManager?.Dispose();
-		m_shaderManager?.Dispose();
+		m_stateBackend?.Dispose();
+		m_modelBackend?.Dispose();
+		m_textureBackend?.Dispose();
+		m_shaderBackend?.Dispose();
 
-		m_stateManager   = null;
-		m_arrayManager   = null;
-		m_textureManager = null;
-		m_shaderManager  = null;
+		m_stateBackend   = null;
+		m_modelBackend   = null;
+		m_textureBackend = null;
+		m_shaderBackend  = null;
 	}
 }

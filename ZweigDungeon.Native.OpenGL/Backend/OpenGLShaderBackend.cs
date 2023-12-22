@@ -4,7 +4,7 @@ using ZweigDungeon.Native.OpenGL.Prototypes;
 
 namespace ZweigDungeon.Native.OpenGL.Managers;
 
-internal class OpenGLShaderManager : IDisposable
+internal class OpenGLShaderBackend : IDisposable
 {
 	// ReSharper disable InconsistentNaming
 	private readonly PfnCreateProgramDelegate        glCreateProgram;
@@ -31,7 +31,7 @@ internal class OpenGLShaderManager : IDisposable
 	private readonly PfnUniformMatrix4FvDelegate     glUniformMatrix4fv;
 	// ReSharper restore InconsistentNaming
 
-	public OpenGLShaderManager(ICustomFunctionLoader loader)
+	public OpenGLShaderBackend(ICustomFunctionLoader loader)
 	{
 		loader.LoadFunction(nameof(glCreateProgram), out glCreateProgram);
 		loader.LoadFunction(nameof(glDeleteProgram), out glDeleteProgram);
@@ -68,7 +68,7 @@ internal class OpenGLShaderManager : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	~OpenGLShaderManager()
+	~OpenGLShaderBackend()
 	{
 		ReleaseUnmanagedResources();
 	}

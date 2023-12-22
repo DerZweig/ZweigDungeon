@@ -4,7 +4,7 @@ using ZweigDungeon.Native.OpenGL.Prototypes;
 
 namespace ZweigDungeon.Native.OpenGL.Managers;
 
-internal class OpenGLStateManager : IDisposable
+internal class OpenGLStateBackend : IDisposable
 {
 	// ReSharper disable InconsistentNaming
 	private readonly PfnEnableDelegate        glEnable;
@@ -24,7 +24,7 @@ internal class OpenGLStateManager : IDisposable
 	private readonly PfnScissorDelegate       glScissor;
 	// ReSharper restore InconsistentNaming
 
-	public OpenGLStateManager(ICustomFunctionLoader loader)
+	public OpenGLStateBackend(ICustomFunctionLoader loader)
 	{
 		loader.LoadFunction(nameof(glEnable), out glEnable);
 		loader.LoadFunction(nameof(glDisable), out glDisable);
@@ -53,7 +53,7 @@ internal class OpenGLStateManager : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	~OpenGLStateManager()
+	~OpenGLStateBackend()
 	{
 		ReleaseUnmanagedResources();
 	}
