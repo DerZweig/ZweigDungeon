@@ -60,7 +60,7 @@ public class Game : IDisposable, IWindowListener
 		//todo update menu layout
 	}
 
-	public void WinodwUpdateFrame(IPlatformWindow window)
+	public void WindowUpdateFrame(IPlatformWindow window)
 	{
 		//todo process current state
 	}

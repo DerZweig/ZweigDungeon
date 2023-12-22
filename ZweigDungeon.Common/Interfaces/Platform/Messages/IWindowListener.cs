@@ -6,5 +6,5 @@ public interface IWindowListener
 	void WindowClosing(IPlatformWindow window);
 	void WindowBeginFrame(IPlatformWindow window);
 	void WindowFinishFrame(IPlatformWindow window);
-	void WinodwUpdateFrame(IPlatformWindow window);
+	void WindowUpdateFrame(IPlatformWindow window);
 }
