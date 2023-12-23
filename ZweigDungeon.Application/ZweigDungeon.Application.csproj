@@ -13,4 +13,8 @@
       <ProjectReference Include="..\ZweigDungeon.Native.Win32\ZweigDungeon.Native.Win32.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Data\" />
+    </ItemGroup>
+
 </Project>
