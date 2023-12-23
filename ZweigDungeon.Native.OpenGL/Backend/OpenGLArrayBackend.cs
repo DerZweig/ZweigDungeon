@@ -1,4 +1,5 @@
 ﻿using ZweigDungeon.Common.Interfaces.Libraries;
+using ZweigDungeon.Native.OpenGL.Handles;
 using ZweigDungeon.Native.OpenGL.Prototypes;
 
 namespace ZweigDungeon.Native.OpenGL.Backend;
@@ -21,7 +22,10 @@ internal sealed class OpenGLArrayBackend : IDisposable
 	private readonly PfnBufferDataDelegate                  glBufferData;
 	private readonly PfnBufferSubDataDelegate               glBufferSubData;
 	// ReSharper restore InconsistentNaming
-	
+
+	private readonly Dictionary<OpenGLArrayHandle, uint>  m_arrays;
+	private readonly Dictionary<OpenGLBufferHandle, uint> m_buffers;
+
 	public OpenGLArrayBackend(ICustomFunctionLoader loader)
 	{
 		loader.LoadFunction(nameof(glGenVertexArrays), out glGenVertexArrays);
@@ -38,11 +42,28 @@ internal sealed class OpenGLArrayBackend : IDisposable
 		loader.LoadFunction(nameof(glBindBuffer), out glBindBuffer);
 		loader.LoadFunction(nameof(glBufferData), out glBufferData);
 		loader.LoadFunction(nameof(glBufferSubData), out glBufferSubData);
+
+		m_arrays  = new Dictionary<OpenGLArrayHandle, uint>();
+		m_buffers = new Dictionary<OpenGLBufferHandle, uint>();
 	}
 
 	private void ReleaseUnmanagedResources()
 	{
-		// TODO release unmanaged resources here
+		var arrayHandles  = m_arrays.Values.ToArray();
+		var bufferHandles = m_buffers.Values.ToArray();
+		
+		m_arrays.Clear();
+		m_buffers.Clear();
+
+		if (arrayHandles.Any())
+		{
+			glDeleteVertexArrays(arrayHandles.Length, arrayHandles);
+		}
+
+		if (bufferHandles.Any())
+		{
+			glDeleteBuffers(bufferHandles.Length, bufferHandles);
+		}
 	}
 
 	public void Dispose()
@@ -55,5 +76,4 @@ internal sealed class OpenGLArrayBackend : IDisposable
 	{
 		ReleaseUnmanagedResources();
 	}
-
 }

@@ -1,4 +1,5 @@
 ﻿using ZweigDungeon.Common.Interfaces.Libraries;
+using ZweigDungeon.Native.OpenGL.Handles;
 using ZweigDungeon.Native.OpenGL.Prototypes;
 
 namespace ZweigDungeon.Native.OpenGL.Backend;
@@ -30,6 +31,10 @@ internal sealed class OpenGLShaderBackend : IDisposable
 	private readonly PfnUniformMatrix4FvDelegate     glUniformMatrix4fv;
 	// ReSharper restore InconsistentNaming
 
+	private readonly Dictionary<OpenGLFragmentShaderHandle, uint> m_fragmentShaders;
+	private readonly Dictionary<OpenGLVertexShaderHandle, uint>   m_vertexShaders;
+	private readonly Dictionary<OpenGLProgramHandle, uint>        m_programs;
+
 	public OpenGLShaderBackend(ICustomFunctionLoader loader)
 	{
 		loader.LoadFunction(nameof(glCreateProgram), out glCreateProgram);
@@ -54,11 +59,36 @@ internal sealed class OpenGLShaderBackend : IDisposable
 		loader.LoadFunction(nameof(glUniform3f), out glUniform3f);
 		loader.LoadFunction(nameof(glUniform4f), out glUniform4f);
 		loader.LoadFunction(nameof(glUniformMatrix4fv), out glUniformMatrix4fv);
+
+		m_fragmentShaders = new Dictionary<OpenGLFragmentShaderHandle, uint>();
+		m_vertexShaders   = new Dictionary<OpenGLVertexShaderHandle, uint>();
+		m_programs        = new Dictionary<OpenGLProgramHandle, uint>();
 	}
 
 	private void ReleaseUnmanagedResources()
 	{
-		// TODO release unmanaged resources here
+		var programHandles        = m_programs.Values.ToArray();
+		var fragmentShaderHandles = m_fragmentShaders.Values.ToArray();
+		var vertexShaderHandles   = m_vertexShaders.Values.ToArray();
+
+		m_programs.Clear();
+		m_fragmentShaders.Clear();
+		m_vertexShaders.Clear();
+
+		foreach (var programHandle in programHandles)
+		{
+			glDeleteProgram(programHandle);
+		}
+
+		foreach (var fragmentShaderHandle in fragmentShaderHandles)
+		{
+			glDeleteShader(fragmentShaderHandle);
+		}
+
+		foreach (var vertexShaderHandle in vertexShaderHandles)
+		{
+			glDeleteShader(vertexShaderHandle);
+		}
 	}
 
 	public void Dispose()
@@ -71,5 +101,4 @@ internal sealed class OpenGLShaderBackend : IDisposable
 	{
 		ReleaseUnmanagedResources();
 	}
-
 }

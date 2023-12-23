@@ -3,7 +3,10 @@ using ZweigDungeon.Common.Interfaces.Platform;
 using ZweigDungeon.Common.Interfaces.Platform.Messages;
 using ZweigDungeon.Common.Services.Messages;
 using ZweigDungeon.Common.Services.Video;
+using ZweigDungeon.Common.Services.Video.Descriptors;
+using ZweigDungeon.Common.Services.Video.Resources;
 using ZweigDungeon.Native.OpenGL.Backend;
+using ZweigDungeon.Native.OpenGL.Resources;
 
 namespace ZweigDungeon.Native.OpenGL;
 
@@ -84,5 +87,41 @@ public sealed class OpenGLContext : VideoContext, IDisposable, IVideoDeviceListe
 		m_shaderBackend      = null;
 		m_queryBackend       = null;
 		m_frameBufferBackend = null;
+	}
+
+	public override bool CreateShader(in VideoPixelShaderDescription desc, out VideoShader shader)
+	{
+		throw new NotImplementedException();
+	}
+	public override bool CreateRenderTarget(in VideoRenderTargetDescription desc, out VideoRenderTarget renderTarget)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override bool CreateTexture2D(in VideoTexture2DDescription desc, out VideoTexture2D texture2D)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override bool CreateVertexBuffer(in VideoVertexBufferDescription desc, out VideoVertexBuffer buffer)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override void Delete(AbstractVideoResource resource)
+	{
+		switch (resource)
+		{
+			case OpenGLShader shader:
+				break;
+			case OpenGLTexture2D texture2D:
+				break;
+			case OpenGLVertexBuffer vertexBuffer:
+				break;
+			case OpenGLRenderTarget renderTarget:
+				break;
+			default:
+				throw new InvalidOperationException($"{resource.GetType().Name} is not a valid resource of {nameof(OpenGLContext)}.");
+		}
 	}
 }

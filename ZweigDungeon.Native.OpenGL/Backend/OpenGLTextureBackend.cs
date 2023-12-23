@@ -1,4 +1,5 @@
 ﻿using ZweigDungeon.Common.Interfaces.Libraries;
+using ZweigDungeon.Native.OpenGL.Handles;
 using ZweigDungeon.Native.OpenGL.Prototypes;
 
 namespace ZweigDungeon.Native.OpenGL.Backend;
@@ -15,6 +16,8 @@ internal sealed class OpenGLTextureBackend : IDisposable
 	private readonly PfnTexSubImage2DDelegate  glTexSubImage2D;
 	// ReSharper restore InconsistentNaming
 
+	private readonly Dictionary<OpenGLTexture2DHandle, uint> m_texture2Ds;
+
 	public OpenGLTextureBackend(ICustomFunctionLoader loader)
 	{
 		loader.LoadFunction(nameof(glActiveTexture), out glActiveTexture);
@@ -24,11 +27,19 @@ internal sealed class OpenGLTextureBackend : IDisposable
 		loader.LoadFunction(nameof(glTexImage2D), out glTexImage2D);
 		loader.LoadFunction(nameof(glTexParameteri), out glTexParameteri);
 		loader.LoadFunction(nameof(glTexSubImage2D), out glTexSubImage2D);
+
+		m_texture2Ds = new Dictionary<OpenGLTexture2DHandle, uint>();
 	}
 
 	private void ReleaseUnmanagedResources()
 	{
-		// TODO release unmanaged resources here
+		var texture2DHandles = m_texture2Ds.Values.ToArray();
+		m_texture2Ds.Clear();
+
+		if (texture2DHandles.Any())
+		{
+			glDeleteTextures(texture2DHandles.Length, texture2DHandles);
+		}
 	}
 
 	public void Dispose()
