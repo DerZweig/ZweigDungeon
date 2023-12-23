@@ -1,10 +1,10 @@
 ﻿
 using System.Runtime.InteropServices;
 using ZweigDungeon.Common.Interfaces.Platform;
-using ZweigDungeon.Common.Interfaces.Video;
 using ZweigDungeon.Common.Services;
 using ZweigDungeon.Common.Services.Libraries;
 using ZweigDungeon.Common.Services.Messages;
+using ZweigDungeon.Common.Services.Video;
 using ZweigDungeon.Native.OpenGL;
 using ZweigDungeon.Native.Win32;
 
@@ -25,7 +25,7 @@ internal static class Program
 			serviceConfig.AddSingleton<IPlatformMouse, Win32Mouse>();
 			serviceConfig.AddSingleton<IPlatformAudio, Win32AudioDevice>();
 			serviceConfig.AddSingleton<IPlatformVideo, Win32OpenGLDevice>();
-			serviceConfig.AddSingleton<IVideoContext, OpenGLContext>();
+			serviceConfig.AddSingleton<VideoContext, OpenGLContext>();
 		}
 		else
 		{

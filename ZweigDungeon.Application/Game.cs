@@ -1,17 +1,17 @@
 ﻿using ZweigDungeon.Common.Interfaces.Platform;
 using ZweigDungeon.Common.Interfaces.Platform.Messages;
-using ZweigDungeon.Common.Interfaces.Video;
 using ZweigDungeon.Common.Services.Messages;
+using ZweigDungeon.Common.Services.Video;
 
 namespace ZweigDungeon.Application;
 
 public class Game : IDisposable, IWindowListener
 {
-	private readonly IVideoContext           m_video;
+	private readonly VideoContext            m_video;
 	private readonly IDisposable             m_subscription;
 	private readonly CancellationTokenSource m_cancellationTokenSource;
 
-	public Game(MessageBus messageBus, IVideoContext video)
+	public Game(MessageBus messageBus, VideoContext video)
 	{
 		m_video                   = video;
 		m_subscription            = messageBus.Subscribe<IWindowListener>(this);
