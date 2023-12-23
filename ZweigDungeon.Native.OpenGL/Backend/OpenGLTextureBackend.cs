@@ -1,9 +1,9 @@
 ﻿using ZweigDungeon.Common.Interfaces.Libraries;
 using ZweigDungeon.Native.OpenGL.Prototypes;
 
-namespace ZweigDungeon.Native.OpenGL.Managers;
+namespace ZweigDungeon.Native.OpenGL.Backend;
 
-internal class OpenGLTextureBackend : IDisposable
+internal sealed class OpenGLTextureBackend : IDisposable
 {
 	// ReSharper disable InconsistentNaming
 	private readonly PfnActiveTextureDelegate  glActiveTexture;
