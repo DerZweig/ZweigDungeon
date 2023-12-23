@@ -1,21 +1,24 @@
 ﻿using ZweigDungeon.Common.Interfaces.Libraries;
 using ZweigDungeon.Common.Interfaces.Platform;
 using ZweigDungeon.Common.Interfaces.Platform.Messages;
-using ZweigDungeon.Common.Interfaces.Video;
 using ZweigDungeon.Common.Services.Messages;
-using ZweigDungeon.Native.OpenGL.Managers;
+using ZweigDungeon.Common.Services.Video;
+using ZweigDungeon.Native.OpenGL.Backend;
 
 namespace ZweigDungeon.Native.OpenGL;
 
-public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceListener
+public sealed class OpenGLContext : VideoContext, IDisposable, IVideoDeviceListener
 {
 	private readonly IPlatformVideo m_video;
 	private readonly IDisposable    m_deviceSubscription;
 
-	private OpenGLStateBackend?   m_stateBackend;
-	private OpenGLModelBackend?   m_modelBackend;
-	private OpenGLTextureBackend? m_textureBackend;
-	private OpenGLShaderBackend?  m_shaderBackend;
+	private OpenGLStateBackend?       m_stateBackend;
+	private OpenGLArrayBackend?       m_arrayBackend;
+	private OpenGLTextureBackend?     m_textureBackend;
+	private OpenGLShaderBackend?      m_shaderBackend;
+	private OpenGLQueryBackend?       m_queryBackend;
+	private OpenGLFrameBufferBackend? m_frameBufferBackend;
+	
 
 	public OpenGLContext(IPlatformVideo video, MessageBus messageBus)
 	{
@@ -27,9 +30,11 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 	{
 		m_deviceSubscription.Dispose();
 		m_stateBackend?.Dispose();
-		m_modelBackend?.Dispose();
+		m_arrayBackend?.Dispose();
 		m_textureBackend?.Dispose();
 		m_shaderBackend?.Dispose();
+		m_queryBackend?.Dispose();
+		m_frameBufferBackend?.Dispose();
 	}
 
 	public void Dispose()
@@ -51,10 +56,12 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		}
 
 		var loader = (ICustomFunctionLoader)m_video;
-		m_stateBackend   = new OpenGLStateBackend(loader);
-		m_modelBackend   = new OpenGLModelBackend(loader);
-		m_textureBackend = new OpenGLTextureBackend(loader);
-		m_shaderBackend  = new OpenGLShaderBackend(loader);
+		m_stateBackend       = new OpenGLStateBackend(loader);
+		m_arrayBackend       = new OpenGLArrayBackend(loader);
+		m_textureBackend     = new OpenGLTextureBackend(loader);
+		m_shaderBackend      = new OpenGLShaderBackend(loader);
+		m_queryBackend       = new OpenGLQueryBackend(loader);
+		m_frameBufferBackend = new OpenGLFrameBufferBackend(loader);
 	}
 
 	public void VideoDeviceDeactivating(IPlatformVideo video)
@@ -65,13 +72,17 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		}
 
 		m_stateBackend?.Dispose();
-		m_modelBackend?.Dispose();
+		m_arrayBackend?.Dispose();
 		m_textureBackend?.Dispose();
 		m_shaderBackend?.Dispose();
+		m_queryBackend?.Dispose();
+		m_frameBufferBackend?.Dispose();
 
-		m_stateBackend   = null;
-		m_modelBackend   = null;
-		m_textureBackend = null;
-		m_shaderBackend  = null;
+		m_stateBackend       = null;
+		m_arrayBackend       = null;
+		m_textureBackend     = null;
+		m_shaderBackend      = null;
+		m_queryBackend       = null;
+		m_frameBufferBackend = null;
 	}
 }
