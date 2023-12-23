@@ -1,10 +1,9 @@
-﻿using System.Reflection;
-using ZweigDungeon.Common.Interfaces.Libraries;
+﻿using ZweigDungeon.Common.Interfaces.Libraries;
 using ZweigDungeon.Native.OpenGL.Prototypes;
 
-namespace ZweigDungeon.Native.OpenGL.Managers;
+namespace ZweigDungeon.Native.OpenGL.Backend;
 
-internal class OpenGLShaderBackend : IDisposable
+internal sealed class OpenGLShaderBackend : IDisposable
 {
 	// ReSharper disable InconsistentNaming
 	private readonly PfnCreateProgramDelegate        glCreateProgram;

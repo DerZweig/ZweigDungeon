@@ -1,10 +1,9 @@
 ﻿using ZweigDungeon.Common.Interfaces.Libraries;
-using ZweigDungeon.Native.OpenGL.Constants;
 using ZweigDungeon.Native.OpenGL.Prototypes;
 
-namespace ZweigDungeon.Native.OpenGL.Managers;
+namespace ZweigDungeon.Native.OpenGL.Backend;
 
-internal class OpenGLStateBackend : IDisposable
+internal sealed class OpenGLStateBackend : IDisposable
 {
 	// ReSharper disable InconsistentNaming
 	private readonly PfnEnableDelegate        glEnable;
