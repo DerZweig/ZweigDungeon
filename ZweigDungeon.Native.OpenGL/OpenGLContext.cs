@@ -1,28 +1,44 @@
 ﻿using ZweigDungeon.Common.Interfaces.Libraries;
 using ZweigDungeon.Common.Interfaces.Platform;
 using ZweigDungeon.Common.Interfaces.Platform.Messages;
+using ZweigDungeon.Common.Interfaces.Video;
 using ZweigDungeon.Common.Services.Messages;
-using ZweigDungeon.Common.Services.Video;
-using ZweigDungeon.Common.Services.Video.Descriptors;
-using ZweigDungeon.Common.Services.Video.Resources;
-using ZweigDungeon.Native.OpenGL.Backend;
+using ZweigDungeon.Native.OpenGL.Constants;
+using ZweigDungeon.Native.OpenGL.Prototypes;
 using ZweigDungeon.Native.OpenGL.Resources;
 
 namespace ZweigDungeon.Native.OpenGL;
 
-public sealed class OpenGLContext : VideoContext, IDisposable, IVideoDeviceListener
+public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceListener
 {
 	private readonly IPlatformVideo m_video;
 	private readonly IDisposable    m_deviceSubscription;
 
-	private OpenGLStateBackend?       m_stateBackend;
-	private OpenGLArrayBackend?       m_arrayBackend;
-	private OpenGLTextureBackend?     m_textureBackend;
-	private OpenGLShaderBackend?      m_shaderBackend;
-	private OpenGLQueryBackend?       m_queryBackend;
-	private OpenGLFrameBufferBackend? m_frameBufferBackend;
-	
+	// ReSharper disable InconsistentNaming
+	private PfnEnableDelegate        glEnable     = null!;
+	private PfnDisableDelegate       glDisable    = null!;
+	private PfnClearColorDelegate    glClearColor = null!;
+	private PfnClearDepthDelegate    glClearDepth = null!;
+	private PfnClearDelegate         glClear      = null!;
+	private PfnBlendColorDelegate    glBlendColor = null!;
+	private PfnBlendFunctionDelegate glBlendFunc  = null!;
+	private PfnDepthFunctionDelegate glDepthFunc  = null!;
+	private PfnCullFaceDelegate      glCullFace   = null!;
+	private PfnFrontFaceDelegate     glFrontFace  = null!;
+	private PfnGetErrorDelegate      glGetError   = null!;
+	private PfnDepthMaskDelegate     glDepthMask  = null!;
+	private PfnColorMaskDelegate     glColorMask  = null!;
+	private PfnViewportDelegate      glViewport   = null!;
+	private PfnScissorDelegate       glScissor    = null!;
+	// ReSharper restore InconsistentNaming
 
+	private OpenGLArrayManager?       m_arrayManager;
+	private OpenGLFrameBufferManager? m_frameBufferManager;
+	private OpenGLTextureManager?     m_textureManager;
+	private OpenGLShaderManager?      m_shaderManager;
+	private OpenGLSpriteShader?       m_spriteShader;
+	private OpenGLSpriteModel?        m_spriteModel;
+	
 	public OpenGLContext(IPlatformVideo video, MessageBus messageBus)
 	{
 		m_video              = video;
@@ -31,13 +47,13 @@ public sealed class OpenGLContext : VideoContext, IDisposable, IVideoDeviceListe
 
 	private void ReleaseUnmanagedResources()
 	{
+		m_spriteModel?.Dispose();
+		m_spriteShader?.Dispose();
+		m_arrayManager?.Dispose();
+		m_frameBufferManager?.Dispose();
+		m_textureManager?.Dispose();
+		m_shaderManager?.Dispose();
 		m_deviceSubscription.Dispose();
-		m_stateBackend?.Dispose();
-		m_arrayBackend?.Dispose();
-		m_textureBackend?.Dispose();
-		m_shaderBackend?.Dispose();
-		m_queryBackend?.Dispose();
-		m_frameBufferBackend?.Dispose();
 	}
 
 	public void Dispose()
@@ -59,12 +75,28 @@ public sealed class OpenGLContext : VideoContext, IDisposable, IVideoDeviceListe
 		}
 
 		var loader = (ICustomFunctionLoader)m_video;
-		m_stateBackend       = new OpenGLStateBackend(loader);
-		m_arrayBackend       = new OpenGLArrayBackend(loader);
-		m_textureBackend     = new OpenGLTextureBackend(loader);
-		m_shaderBackend      = new OpenGLShaderBackend(loader);
-		m_queryBackend       = new OpenGLQueryBackend(loader);
-		m_frameBufferBackend = new OpenGLFrameBufferBackend(loader);
+		loader.LoadFunction(nameof(glEnable), out glEnable);
+		loader.LoadFunction(nameof(glDisable), out glDisable);
+		loader.LoadFunction(nameof(glClearColor), out glClearColor);
+		loader.LoadFunction(nameof(glClearDepth), out glClearDepth);
+		loader.LoadFunction(nameof(glClear), out glClear);
+		loader.LoadFunction(nameof(glBlendColor), out glBlendColor);
+		loader.LoadFunction(nameof(glBlendFunc), out glBlendFunc);
+		loader.LoadFunction(nameof(glDepthMask), out glDepthMask);
+		loader.LoadFunction(nameof(glDepthFunc), out glDepthFunc);
+		loader.LoadFunction(nameof(glCullFace), out glCullFace);
+		loader.LoadFunction(nameof(glFrontFace), out glFrontFace);
+		loader.LoadFunction(nameof(glGetError), out glGetError);
+		loader.LoadFunction(nameof(glColorMask), out glColorMask);
+		loader.LoadFunction(nameof(glViewport), out glViewport);
+		loader.LoadFunction(nameof(glScissor), out glScissor);
+
+		m_arrayManager       = new OpenGLArrayManager(loader);
+		m_frameBufferManager = new OpenGLFrameBufferManager(loader);
+		m_textureManager     = new OpenGLTextureManager(loader);
+		m_shaderManager      = new OpenGLShaderManager(loader);
+		m_spriteShader       = new OpenGLSpriteShader(m_shaderManager);
+		m_spriteModel        = new OpenGLSpriteModel(m_arrayManager);
 	}
 
 	public void VideoDeviceDeactivating(IPlatformVideo video)
@@ -74,54 +106,53 @@ public sealed class OpenGLContext : VideoContext, IDisposable, IVideoDeviceListe
 			return;
 		}
 
-		m_stateBackend?.Dispose();
-		m_arrayBackend?.Dispose();
-		m_textureBackend?.Dispose();
-		m_shaderBackend?.Dispose();
-		m_queryBackend?.Dispose();
-		m_frameBufferBackend?.Dispose();
+		glEnable     = null!;
+		glDisable    = null!;
+		glClearColor = null!;
+		glClearDepth = null!;
+		glClear      = null!;
+		glBlendColor = null!;
+		glBlendFunc  = null!;
+		glDepthFunc  = null!;
+		glCullFace   = null!;
+		glFrontFace  = null!;
+		glGetError   = null!;
+		glDepthMask  = null!;
+		glColorMask  = null!;
+		glViewport   = null!;
+		glScissor    = null!;
 
-		m_stateBackend       = null;
-		m_arrayBackend       = null;
-		m_textureBackend     = null;
-		m_shaderBackend      = null;
-		m_queryBackend       = null;
-		m_frameBufferBackend = null;
+		m_spriteModel?.Dispose();
+		m_spriteShader?.Dispose();
+		m_arrayManager?.Dispose();
+		m_frameBufferManager?.Dispose();
+		m_textureManager?.Dispose();
+		m_shaderManager?.Dispose();
+
+		m_spriteModel        = null;
+		m_spriteShader       = null;
+		m_arrayManager       = null;
+		m_frameBufferManager = null;
+		m_textureManager     = null;
+		m_shaderManager      = null;
 	}
 
-	public override bool CreateShader(in VideoPixelShaderDescription desc, out VideoShader shader)
+	public void BeginFrame(int viewportWidth, int viewportHeight)
 	{
-		throw new NotImplementedException();
-	}
-	public override bool CreateRenderTarget(in VideoRenderTargetDescription desc, out VideoRenderTarget renderTarget)
-	{
-		throw new NotImplementedException();
+		glViewport(0, 0, viewportWidth, viewportHeight);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearDepth(1.0);
+		glClear(OpenGLClearMask.ColorBufferBit | OpenGLClearMask.DepthBufferBit);
+		glEnable(OpenGLEnableCap.Blend);
+		glBlendFunc(OpenGLBlendSourceFactor.SrcAlpha, OpenGLBlendDestinationFactor.OneMinusSrcAlpha);
+
+		m_spriteShader!.Begin(viewportWidth, viewportHeight);
+		m_spriteModel!.Begin();
 	}
 
-	public override bool CreateTexture2D(in VideoTexture2DDescription desc, out VideoTexture2D texture2D)
+	public void FinishFrame()
 	{
-		throw new NotImplementedException();
-	}
-
-	public override bool CreateVertexBuffer(in VideoVertexBufferDescription desc, out VideoVertexBuffer buffer)
-	{
-		throw new NotImplementedException();
-	}
-
-	public override void Delete(AbstractVideoResource resource)
-	{
-		switch (resource)
-		{
-			case OpenGLShader shader:
-				break;
-			case OpenGLTexture2D texture2D:
-				break;
-			case OpenGLVertexBuffer vertexBuffer:
-				break;
-			case OpenGLRenderTarget renderTarget:
-				break;
-			default:
-				throw new InvalidOperationException($"{resource.GetType().Name} is not a valid resource of {nameof(OpenGLContext)}.");
-		}
+		m_spriteModel?.Finish();
+		m_spriteShader?.Finish();
 	}
 }

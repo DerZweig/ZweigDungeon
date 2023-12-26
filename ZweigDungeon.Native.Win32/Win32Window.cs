@@ -395,9 +395,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 					notified.Add(component);
 				}
 
-				m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowBeginFrame(this));
 				m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowUpdateFrame(this));
-				m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowFinishFrame(this));
 			}
 			finally
 			{

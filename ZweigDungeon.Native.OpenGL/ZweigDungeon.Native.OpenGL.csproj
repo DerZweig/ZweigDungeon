@@ -15,4 +15,9 @@
       <None Remove="Shaders\sprite.vert.glsl" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="Shaders\sprite.frag.glsl" />
+      <EmbeddedResource Include="Shaders\sprite.vert.glsl" />
+    </ItemGroup>
+
 </Project>

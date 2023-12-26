@@ -1,10 +1,10 @@
 ﻿
 using System.Runtime.InteropServices;
 using ZweigDungeon.Common.Interfaces.Platform;
+using ZweigDungeon.Common.Interfaces.Video;
 using ZweigDungeon.Common.Services;
 using ZweigDungeon.Common.Services.Libraries;
 using ZweigDungeon.Common.Services.Messages;
-using ZweigDungeon.Common.Services.Video;
 using ZweigDungeon.Native.OpenGL;
 using ZweigDungeon.Native.Win32;
 
@@ -17,6 +17,7 @@ internal static class Program
 		var serviceConfig = new ServiceConfiguration();
 		serviceConfig.AddSingleton<MessageBus>();
 		serviceConfig.AddSingleton<NativeLibraryLoader>();
+		serviceConfig.AddSingleton<IVideoContext, OpenGLContext>();
 
 		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 		{
@@ -25,12 +26,12 @@ internal static class Program
 			serviceConfig.AddSingleton<IPlatformMouse, Win32Mouse>();
 			serviceConfig.AddSingleton<IPlatformAudio, Win32AudioDevice>();
 			serviceConfig.AddSingleton<IPlatformVideo, Win32OpenGLDevice>();
-			serviceConfig.AddSingleton<VideoContext, OpenGLContext>();
 		}
 		else
 		{
 			throw new NotSupportedException("Platform is not implemented");
 		}
+		
 
 		serviceConfig.AddSingleton<Game>();
 		using (var services = serviceConfig.Build())

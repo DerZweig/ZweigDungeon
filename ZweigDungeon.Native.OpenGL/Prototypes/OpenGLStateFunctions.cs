@@ -32,3 +32,6 @@ internal delegate void PfnScissorDelegate(int x, int y, int width, int height);
 
 internal delegate void PfnViewportDelegate(int x, int y, int width, int height);
 
+internal delegate void PfnFinishDelegate();
+
+internal delegate void PfnFlushDelegate();

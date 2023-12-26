@@ -2,9 +2,9 @@
 using ZweigDungeon.Native.OpenGL.Handles;
 using ZweigDungeon.Native.OpenGL.Prototypes;
 
-namespace ZweigDungeon.Native.OpenGL.Backend;
+namespace ZweigDungeon.Native.OpenGL.Resources;
 
-internal sealed class OpenGLTextureBackend : IDisposable
+internal class OpenGLTextureManager : IDisposable
 {
 	// ReSharper disable InconsistentNaming
 	private readonly PfnActiveTextureDelegate  glActiveTexture;
@@ -16,9 +16,9 @@ internal sealed class OpenGLTextureBackend : IDisposable
 	private readonly PfnTexSubImage2DDelegate  glTexSubImage2D;
 	// ReSharper restore InconsistentNaming
 
-	private readonly Dictionary<OpenGLTexture2DHandle, uint> m_texture2Ds;
+	private readonly Dictionary<OpenGLTexture2DHandle, uint> m_textures;
 
-	public OpenGLTextureBackend(ICustomFunctionLoader loader)
+	public OpenGLTextureManager(ICustomFunctionLoader loader)
 	{
 		loader.LoadFunction(nameof(glActiveTexture), out glActiveTexture);
 		loader.LoadFunction(nameof(glBindTexture), out glBindTexture);
@@ -28,17 +28,16 @@ internal sealed class OpenGLTextureBackend : IDisposable
 		loader.LoadFunction(nameof(glTexParameteri), out glTexParameteri);
 		loader.LoadFunction(nameof(glTexSubImage2D), out glTexSubImage2D);
 
-		m_texture2Ds = new Dictionary<OpenGLTexture2DHandle, uint>();
+		m_textures = new Dictionary<OpenGLTexture2DHandle, uint>();
 	}
-
+	
 	private void ReleaseUnmanagedResources()
 	{
-		var texture2DHandles = m_texture2Ds.Values.ToArray();
-		m_texture2Ds.Clear();
-
-		if (texture2DHandles.Any())
+		if (m_textures.Any())
 		{
-			glDeleteTextures(texture2DHandles.Length, texture2DHandles);
+			var data = m_textures.Values.ToArray();
+			m_textures.Clear();
+			glDeleteTextures(data.Length, data);
 		}
 	}
 
@@ -48,8 +47,33 @@ internal sealed class OpenGLTextureBackend : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	~OpenGLTextureBackend()
+	~OpenGLTextureManager()
 	{
 		ReleaseUnmanagedResources();
+	}
+
+	public bool TryCreateTexture2D(out OpenGLTexture2DHandle texture)
+	{
+		var temp = new uint[1];
+		glGenTextures(1, temp);
+		if (temp[0] == 0u)
+		{
+			texture = null!;
+			return false;
+		}
+		else
+		{
+			texture = new OpenGLTexture2DHandle();
+			m_textures.Add(texture, temp[0]);
+			return true;
+		}
+	}
+
+	public void DeleteTexture(OpenGLTexture2DHandle texture)
+	{
+		if (m_textures.Remove(texture, out var data))
+		{
+			glDeleteTextures(1, new[] { data });
+		}
 	}
 }

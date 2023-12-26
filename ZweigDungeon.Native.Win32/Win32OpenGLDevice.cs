@@ -26,6 +26,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	private const int                                 OPENGL_VERSION_MAJOR                = 3;
 	private const int                                 OPENGL_VERSION_MINOR                = 3;
 
+	private readonly Dictionary<string, object?>     m_cachedResults;
 	private readonly NativeLibraryLoader             m_libraryLoader;
 	private readonly MessageBus                      m_messageBus;
 	private readonly Win32Window                     m_window;
@@ -38,7 +39,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	private readonly PfnDeleteContextDelegate        WglDeleteContext;
 	private readonly PfnGetProcAddressDelegate       WglGetProcAddress;
 	private readonly PfnMakeCurrentDelegate          WglMakeCurrent;
-	
+
 	private IntPtr m_device;
 	private IntPtr m_owner;
 	private IntPtr m_dummy;
@@ -46,9 +47,11 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 
 	public Win32OpenGLDevice(NativeLibraryLoader libraryLoader, MessageBus messageBus, Win32Window window)
 	{
+		m_cachedResults = new Dictionary<string, object?>();
 		m_libraryLoader = libraryLoader;
 		m_messageBus    = messageBus;
 		m_window        = window;
+
 		libraryLoader.LoadFunction("user32", "GetDC", out GetDeviceContext);
 		libraryLoader.LoadFunction("user32", "ReleaseDC", out ReleaseDeviceContext);
 		libraryLoader.LoadFunction("gdi32", "ChoosePixelFormat", out ChoosePixelFormat);
@@ -58,7 +61,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 		libraryLoader.LoadFunction("opengl32", "wglDeleteContext", out WglDeleteContext);
 		libraryLoader.LoadFunction("opengl32", "wglMakeCurrent", out WglMakeCurrent);
 		libraryLoader.LoadFunction("opengl32", "wglGetProcAddress", out WglGetProcAddress);
-		
+
 		m_window.AddComponent(this);
 	}
 
@@ -77,7 +80,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	{
 		ReleaseUnmanagedResources();
 	}
-	
+
 	public string Name => "Win32 OpenGL 3.3";
 
 	void IWin32WindowComponent.OnAttach()
@@ -147,6 +150,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 			throw new Exception("Couldn't activate opengl core context.");
 		}
 
+		m_cachedResults.Clear();
 		m_messageBus.Broadcast<IVideoDeviceListener>(listener => listener.VideoDeviceActivated(this));
 	}
 
@@ -163,6 +167,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 		}
 		finally
 		{
+			m_cachedResults.Clear();
 			if (m_dummy != IntPtr.Zero || m_graphics != IntPtr.Zero)
 			{
 				WglMakeCurrent(IntPtr.Zero, IntPtr.Zero);
@@ -201,7 +206,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	void IWin32WindowComponent.OnMessage(long lTime, nint hWindow, Win32MessageType uMessage, nint wParam, nint lParam)
 	{
 	}
-	
+
 	public void LoadFunction<TDelegate>(string exportName, out TDelegate func) where TDelegate : Delegate
 	{
 		if (!TryLoadFunction<TDelegate>(exportName, out var temp) || temp == null)
@@ -216,18 +221,27 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 
 	public bool TryLoadFunction<TDelegate>(string exportName, out TDelegate? func) where TDelegate : Delegate
 	{
+		if (m_cachedResults.TryGetValue(exportName, out var cached))
+		{
+			func = (TDelegate?)cached;
+			return func != null;
+		}
+
 		var address = WglGetProcAddress(exportName);
 		if (address != IntPtr.Zero)
 		{
 			func = Marshal.GetDelegateForFunctionPointer<TDelegate>(address);
+
+			m_cachedResults[exportName] = func;
 			return true;
 		}
-		else
+		else if (m_libraryLoader.TryLoadFunction("opengl32", exportName, out func))
 		{
-			return m_libraryLoader.TryLoadFunction("opengl32", exportName, out func);
+			m_cachedResults[exportName] = func;
+			return true;
 		}
+		return false;
 	}
 
 	private delegate IntPtr PfnWglCreateContextAttribsArb(IntPtr deviceContext, IntPtr openglContext, int[] attributes);
-
 }

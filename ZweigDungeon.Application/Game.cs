@@ -1,17 +1,17 @@
 ﻿using ZweigDungeon.Common.Interfaces.Platform;
 using ZweigDungeon.Common.Interfaces.Platform.Messages;
+using ZweigDungeon.Common.Interfaces.Video;
 using ZweigDungeon.Common.Services.Messages;
-using ZweigDungeon.Common.Services.Video;
 
 namespace ZweigDungeon.Application;
 
 public class Game : IDisposable, IWindowListener
 {
-	private readonly VideoContext            m_video;
+	private readonly IVideoContext           m_video;
 	private readonly IDisposable             m_subscription;
 	private readonly CancellationTokenSource m_cancellationTokenSource;
 
-	public Game(MessageBus messageBus, VideoContext video)
+	public Game(MessageBus messageBus, IVideoContext video)
 	{
 		m_video                   = video;
 		m_subscription            = messageBus.Subscribe<IWindowListener>(this);
@@ -55,18 +55,14 @@ public class Game : IDisposable, IWindowListener
 		m_cancellationTokenSource.Cancel();
 	}
 
-	public void WindowBeginFrame(IPlatformWindow window)
-	{
-		//todo update menu layout
-	}
-
 	public void WindowUpdateFrame(IPlatformWindow window)
 	{
-		//todo process current state
-	}
-
-	public void WindowFinishFrame(IPlatformWindow window)
-	{
-		//todo draw frame
+		var width  = window.GetViewportWidth();
+		var height = window.GetViewportHeight();
+		m_video.BeginFrame(width, height);
+		
+		//do drawing
+		
+		m_video.FinishFrame();
 	}
 }

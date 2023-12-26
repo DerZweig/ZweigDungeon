@@ -2,9 +2,9 @@
 using ZweigDungeon.Native.OpenGL.Handles;
 using ZweigDungeon.Native.OpenGL.Prototypes;
 
-namespace ZweigDungeon.Native.OpenGL.Backend;
+namespace ZweigDungeon.Native.OpenGL.Resources;
 
-internal class OpenGLFrameBufferBackend : IDisposable
+internal class OpenGLFrameBufferManager : IDisposable
 {
 	// ReSharper disable InconsistentNaming
 	private readonly PfnGenFramebuffersDelegate         glGenFramebuffers;
@@ -20,9 +20,9 @@ internal class OpenGLFrameBufferBackend : IDisposable
 	// ReSharper restore InconsistentNaming
 
 	private readonly Dictionary<OpenGLFrameBufferHandle, uint>  m_frameBuffers;
-	private readonly Dictionary<OpenGLRenderBufferHandle, uint> m_renderBuffer;
+	private readonly Dictionary<OpenGLRenderBufferHandle, uint> m_renderBuffers;
 
-	public OpenGLFrameBufferBackend(ICustomFunctionLoader loader)
+	public OpenGLFrameBufferManager(ICustomFunctionLoader loader)
 	{
 		loader.LoadFunction(nameof(glGenFramebuffers), out glGenFramebuffers);
 		loader.LoadFunction(nameof(glDeleteFramebuffers), out glDeleteFramebuffers);
@@ -36,25 +36,23 @@ internal class OpenGLFrameBufferBackend : IDisposable
 		loader.LoadFunction(nameof(glRenderbufferStorage), out glRenderbufferStorage);
 
 		m_frameBuffers  = new Dictionary<OpenGLFrameBufferHandle, uint>();
-		m_renderBuffer = new Dictionary<OpenGLRenderBufferHandle, uint>();
+		m_renderBuffers = new Dictionary<OpenGLRenderBufferHandle, uint>();
 	}
 
 	private void ReleaseUnmanagedResources()
 	{
-		var frameBufferHandles  = m_frameBuffers.Values.ToArray();
-		var renderBufferHandles = m_renderBuffer.Values.ToArray();
-		
-		m_frameBuffers.Clear();
-		m_renderBuffer.Clear();
-
-		if (frameBufferHandles.Any())
+		if (m_frameBuffers.Any())
 		{
-			glDeleteFramebuffers(frameBufferHandles.Length, frameBufferHandles);
+			var data = m_frameBuffers.Values.ToArray();
+			m_frameBuffers.Clear();
+			glDeleteFramebuffers(data.Length, data);
 		}
 
-		if (renderBufferHandles.Any())
+		if (m_renderBuffers.Any())
 		{
-			glDeleteRenderbuffers(renderBufferHandles.Length, renderBufferHandles);
+			var data = m_renderBuffers.Values.ToArray();
+			m_renderBuffers.Clear();
+			glDeleteRenderbuffers(data.Length, data);
 		}
 	}
 
@@ -64,8 +62,58 @@ internal class OpenGLFrameBufferBackend : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	~OpenGLFrameBufferBackend()
+	~OpenGLFrameBufferManager()
 	{
 		ReleaseUnmanagedResources();
+	}
+
+	public bool TryCreateFrameBuffer(out OpenGLFrameBufferHandle frameBuffer)
+	{
+		var temp = new uint[1];
+		glGenFramebuffers(1, temp);
+		if (temp[0] == 0u)
+		{
+			frameBuffer = null!;
+			return false;
+		}
+		else
+		{
+			frameBuffer = new OpenGLFrameBufferHandle();
+			m_frameBuffers.Add(frameBuffer, temp[0]);
+			return true;
+		}
+	}
+
+	public void DeleteFrameBuffer(OpenGLFrameBufferHandle frameBuffer)
+	{
+		if (m_frameBuffers.Remove(frameBuffer, out var data))
+		{
+			glDeleteFramebuffers(1, new[] { data });
+		}
+	}
+
+	public bool TryCreateRenderBuffer(out OpenGLRenderBufferHandle renderBuffer)
+	{
+		var temp = new uint[1];
+		glGenRenderbuffers(1, temp);
+		if (temp[0] == 0u)
+		{
+			renderBuffer = null!;
+			return false;
+		}
+		else
+		{
+			renderBuffer = new OpenGLRenderBufferHandle();
+			m_renderBuffers.Add(renderBuffer, temp[0]);
+			return true;
+		}
+	}
+
+	public void DeleteRenderBuffer(OpenGLRenderBufferHandle renderBuffer)
+	{
+		if (m_renderBuffers.Remove(renderBuffer, out var data))
+		{
+			glDeleteRenderbuffers(1, new[] { data });
+		}
 	}
 }
