@@ -17,8 +17,9 @@ public sealed class PinnedObject<TObject> : IDisposable
 
     public PinnedObject(TObject value, GCHandleType type)
     {
-        m_value  = value;
-        m_handle = GCHandle.Alloc(value, type);
+        m_value   = value;
+        m_handle  = GCHandle.Alloc(value, type);
+        m_pointer = m_handle.AddrOfPinnedObject();
     }
 
     public TObject GetValue()

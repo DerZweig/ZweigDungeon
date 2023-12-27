@@ -8,6 +8,6 @@ internal enum OpenGLTextureParameter
 	LinearMipmapNearest  = 0x2701,
 	NearestMipmapLinear  = 0x2702,
 	LinearMipmapLinear   = 0x2703,
-	Clamp                = 0x2900,
+	Clamp                = 0x812F,
 	Repeat               = 0x2901
 }

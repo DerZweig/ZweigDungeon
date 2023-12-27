@@ -10,6 +10,7 @@ public class Game : IDisposable, IWindowListener
 	private readonly IVideoContext           m_video;
 	private readonly IDisposable             m_subscription;
 	private readonly CancellationTokenSource m_cancellationTokenSource;
+	private          IVideoSurface?          m_testSurface;
 
 	public Game(MessageBus messageBus, IVideoContext video)
 	{
@@ -48,10 +49,19 @@ public class Game : IDisposable, IWindowListener
 		window.SetTitle("ZweigDungeon");
 		window.SetMinimumSize(640, 480);
 		window.Show();
+		m_video.CreateSurface(2, 2, out m_testSurface);
+		m_video.MapSurfaceData(m_testSurface, pixels =>
+		{
+			pixels[0] = new VideoColor { Red = 255, Green = 0, Blue = 0, Alpha = 255 };
+			pixels[1] = new VideoColor { Red = 0, Green = 255, Blue = 0, Alpha = 255 };
+			pixels[2] = new VideoColor { Red = 0, Green = 0, Blue = 255, Alpha = 255 };
+			pixels[3] = new VideoColor { Red = 255, Green = 255, Blue = 255, Alpha = 255 };
+		});
 	}
 
 	public void WindowClosing(IPlatformWindow window)
 	{
+		m_testSurface?.Dispose();
 		m_cancellationTokenSource.Cancel();
 	}
 
@@ -60,9 +70,22 @@ public class Game : IDisposable, IWindowListener
 		var width  = window.GetViewportWidth();
 		var height = window.GetViewportHeight();
 		m_video.BeginFrame(width, height);
-		
-		//do drawing
-		
+
+		if (m_testSurface != null)
+		{
+			var dst = new VideoRect { Left = 0, Top     = 0, Width  = 64, Height = 64 };
+			var src = new VideoRect { Left = 0, Top     = 0, Width  = 2, Height = 2 };
+			var col = new VideoColor { Red = 255, Green = 255, Blue = 255, Alpha   = 255 };
+
+			m_video.DrawSurface(m_testSurface, dst, src, col, VideoFlags.None);
+			dst.Left += 72;
+			m_video.DrawSurface(m_testSurface, dst, src, col, VideoFlags.MirrorHorizontal);
+			dst.Left += 72;
+			m_video.DrawSurface(m_testSurface, dst, src, col, VideoFlags.MirrorVertical);
+			dst.Left += 72;
+			m_video.DrawSurface(m_testSurface, dst, src, col, VideoFlags.MirrorHorizontal | VideoFlags.MirrorVertical);
+		}
+
 		m_video.FinishFrame();
 	}
 }

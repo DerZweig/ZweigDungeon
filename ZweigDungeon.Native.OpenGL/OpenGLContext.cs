@@ -5,7 +5,7 @@ using ZweigDungeon.Common.Interfaces.Video;
 using ZweigDungeon.Common.Services.Messages;
 using ZweigDungeon.Native.OpenGL.Constants;
 using ZweigDungeon.Native.OpenGL.Prototypes;
-using ZweigDungeon.Native.OpenGL.Resources;
+using ZweigDungeon.Native.OpenGL.Renderer;
 
 namespace ZweigDungeon.Native.OpenGL;
 
@@ -15,6 +15,8 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 	private readonly IDisposable    m_deviceSubscription;
 
 	// ReSharper disable InconsistentNaming
+	// ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
+
 	private PfnEnableDelegate        glEnable     = null!;
 	private PfnDisableDelegate       glDisable    = null!;
 	private PfnClearColorDelegate    glClearColor = null!;
@@ -30,15 +32,14 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 	private PfnColorMaskDelegate     glColorMask  = null!;
 	private PfnViewportDelegate      glViewport   = null!;
 	private PfnScissorDelegate       glScissor    = null!;
+
+	// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 	// ReSharper restore InconsistentNaming
 
-	private OpenGLArrayManager?       m_arrayManager;
-	private OpenGLFrameBufferManager? m_frameBufferManager;
-	private OpenGLTextureManager?     m_textureManager;
-	private OpenGLShaderManager?      m_shaderManager;
-	private OpenGLSpriteShader?       m_spriteShader;
-	private OpenGLSpriteModel?        m_spriteModel;
-	
+	private OpenGLSpriteShader?   m_spriteShader;
+	private OpenGLSpriteModel?    m_spriteModel;
+	private OpenGLSpriteTextures? m_spriteTextures;
+
 	public OpenGLContext(IPlatformVideo video, MessageBus messageBus)
 	{
 		m_video              = video;
@@ -47,12 +48,9 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 
 	private void ReleaseUnmanagedResources()
 	{
+		m_spriteTextures?.Dispose();
 		m_spriteModel?.Dispose();
 		m_spriteShader?.Dispose();
-		m_arrayManager?.Dispose();
-		m_frameBufferManager?.Dispose();
-		m_textureManager?.Dispose();
-		m_shaderManager?.Dispose();
 		m_deviceSubscription.Dispose();
 	}
 
@@ -91,12 +89,9 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		loader.LoadFunction(nameof(glViewport), out glViewport);
 		loader.LoadFunction(nameof(glScissor), out glScissor);
 
-		m_arrayManager       = new OpenGLArrayManager(loader);
-		m_frameBufferManager = new OpenGLFrameBufferManager(loader);
-		m_textureManager     = new OpenGLTextureManager(loader);
-		m_shaderManager      = new OpenGLShaderManager(loader);
-		m_spriteShader       = new OpenGLSpriteShader(m_shaderManager);
-		m_spriteModel        = new OpenGLSpriteModel(m_arrayManager);
+		m_spriteShader   = new OpenGLSpriteShader(loader);
+		m_spriteModel    = new OpenGLSpriteModel(loader);
+		m_spriteTextures = new OpenGLSpriteTextures(loader);
 	}
 
 	public void VideoDeviceDeactivating(IPlatformVideo video)
@@ -124,17 +119,11 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 
 		m_spriteModel?.Dispose();
 		m_spriteShader?.Dispose();
-		m_arrayManager?.Dispose();
-		m_frameBufferManager?.Dispose();
-		m_textureManager?.Dispose();
-		m_shaderManager?.Dispose();
+		m_spriteTextures?.Dispose();
 
-		m_spriteModel        = null;
-		m_spriteShader       = null;
-		m_arrayManager       = null;
-		m_frameBufferManager = null;
-		m_textureManager     = null;
-		m_shaderManager      = null;
+		m_spriteModel    = null;
+		m_spriteShader   = null;
+		m_spriteTextures = null;
 	}
 
 	public void BeginFrame(int viewportWidth, int viewportHeight)
@@ -154,5 +143,65 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 	{
 		m_spriteModel?.Finish();
 		m_spriteShader?.Finish();
+	}
+
+	public void CreateSurface(ushort width, ushort height, out IVideoSurface surface)
+	{
+		BindSurface(null);
+		var openglSurface = new OpenGLSurface(this, width, height);
+		m_spriteTextures?.Upload(openglSurface);
+		surface = openglSurface;
+	}
+
+	public void DestroySurface(IVideoSurface surface)
+	{
+		if (surface is OpenGLSurface openglSurface && openglSurface.Context == this)
+		{
+			BindSurface(null);
+			m_spriteTextures?.Release(openglSurface);
+			openglSurface.Context = null;
+		}
+		else
+		{
+			throw new AccessViolationException("Attempting to destroy a surface from another video context.");
+		}
+	}
+
+	public void MapSurfaceData(IVideoSurface surface, Action<VideoColor[]> mapper)
+	{
+		if (surface is OpenGLSurface openglSurface && openglSurface.Context == this)
+		{
+			BindSurface(null);
+			mapper(openglSurface.Data);
+			m_spriteTextures?.Upload(openglSurface);
+		}
+		else
+		{
+			throw new AccessViolationException("Attempting to map a surface from another video context.");
+		}
+	}
+
+	public void DrawSurface(IVideoSurface surface, in VideoRect dstRegion, in VideoRect srcRegion, in VideoColor tintColor, VideoFlags flags)
+	{
+		if (surface is OpenGLSurface openglSurface && openglSurface.Context == this)
+		{
+			BindSurface(openglSurface);
+			m_spriteModel?.Draw(dstRegion, srcRegion, tintColor, flags);
+		}
+		else
+		{
+			throw new AccessViolationException("Attempting to draw a surface from another video context.");
+		}
+	}
+
+	private void BindSurface(OpenGLSurface? surface)
+	{
+		if (m_spriteTextures == null || m_spriteTextures.ActiveSurface == surface)
+		{
+			return;
+		}
+
+		m_spriteModel?.Flush();
+		m_spriteTextures?.Bind(surface);
 	}
 }

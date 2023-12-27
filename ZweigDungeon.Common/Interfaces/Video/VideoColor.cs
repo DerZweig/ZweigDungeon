@@ -6,7 +6,7 @@ namespace ZweigDungeon.Common.Interfaces.Video;
 public struct VideoColor
 {
 	public byte Red;
-	public byte Blue;
 	public byte Green;
+	public byte Blue;
 	public byte Alpha;
 }
