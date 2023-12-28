@@ -26,10 +26,12 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	private const int                                 OPENGL_VERSION_MAJOR                = 3;
 	private const int                                 OPENGL_VERSION_MINOR                = 3;
 
-	private readonly Dictionary<string, object?>     m_cachedResults;
-	private readonly NativeLibraryLoader             m_libraryLoader;
-	private readonly MessageBus                      m_messageBus;
-	private readonly Win32Window                     m_window;
+	private readonly Dictionary<string, object?> m_cachedResults;
+	private readonly NativeLibraryLoader         m_libraryLoader;
+	private readonly MessageBus                  m_messageBus;
+	private readonly Win32Window                 m_window;
+
+	// ReSharper disable InconsistentNaming
 	private readonly PfnGetDeviceContextDelegate     GetDeviceContext;
 	private readonly PfnReleaseDeviceContextDelegate ReleaseDeviceContext;
 	private readonly PfnSetPixelFormatDelegate       SetPixelFormat;
@@ -39,6 +41,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	private readonly PfnDeleteContextDelegate        WglDeleteContext;
 	private readonly PfnGetProcAddressDelegate       WglGetProcAddress;
 	private readonly PfnMakeCurrentDelegate          WglMakeCurrent;
+	// ReSharper restore InconsistentNaming
 
 	private IntPtr m_device;
 	private IntPtr m_owner;
@@ -240,6 +243,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 			m_cachedResults[exportName] = func;
 			return true;
 		}
+
 		return false;
 	}
 
