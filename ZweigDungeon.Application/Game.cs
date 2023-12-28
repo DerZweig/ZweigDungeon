@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using ZweigDungeon.Common.Constants;
+﻿using ZweigDungeon.Application.Manager;
 using ZweigDungeon.Common.Interfaces.Platform;
 using ZweigDungeon.Common.Interfaces.Platform.Messages;
 using ZweigDungeon.Common.Interfaces.Video;
@@ -7,28 +6,23 @@ using ZweigDungeon.Common.Services.Messages;
 
 namespace ZweigDungeon.Application;
 
-public class Game : IDisposable, IWindowListener, IKeyboardListener
+public class Game : IDisposable, IWindowListener
 {
-	private readonly IVideoContext           m_video;
-	private readonly IDisposable             m_subscription;
-	private readonly IDisposable             m_keyboard;
-	private readonly CancellationTokenSource m_cancellationTokenSource;
+	private readonly IVideoContext m_video;
+	private readonly FontManager   m_fontManager;
+	private readonly IDisposable   m_subscription;
 
-	public Game(MessageBus messageBus, IVideoContext video)
+	public Game(MessageBus messageBus, IVideoContext video, FontManager fontManager)
 	{
-		m_video                   = video;
-		m_subscription            = messageBus.Subscribe<IWindowListener>(this);
-		m_keyboard                = messageBus.Subscribe<IKeyboardListener>(this);
-		m_cancellationTokenSource = new CancellationTokenSource();
+		m_video        = video;
+		m_fontManager  = fontManager;
+		m_subscription = messageBus.Subscribe<IWindowListener>(this);
 	}
 
 	private void ReleaseUnmanagedResources()
 	{
-		m_cancellationTokenSource.Dispose();
 		m_subscription.Dispose();
-		m_keyboard.Dispose();
 	}
-
 
 	public void Dispose()
 	{
@@ -50,7 +44,6 @@ public class Game : IDisposable, IWindowListener, IKeyboardListener
 
 	public void WindowClosing(IPlatformWindow window)
 	{
-		m_cancellationTokenSource.Cancel();
 	}
 
 	public void WindowUpdateFrame(IPlatformWindow window)
@@ -60,25 +53,5 @@ public class Game : IDisposable, IWindowListener, IKeyboardListener
 		m_video.BeginFrame(width, height);
 
 		m_video.FinishFrame();
-	}
-
-	public void KeyPressed(IPlatformKeyboard keyboard, KeyboardKey key)
-	{
-		if (Debugger.IsAttached)
-		{
-			Debug.WriteLine($"{nameof(KeyPressed)} {key}");
-		}
-	}
-
-	public void KeyReleased(IPlatformKeyboard keyboard, KeyboardKey key)
-	{
-		if (Debugger.IsAttached)
-		{
-			Debug.WriteLine($"{nameof(KeyReleased)} {key}");
-		}
-	}
-
-	public void KeyTyped(IPlatformKeyboard keyboard, char character)
-	{
 	}
 }

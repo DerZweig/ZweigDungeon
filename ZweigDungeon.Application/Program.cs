@@ -1,6 +1,7 @@
 ﻿
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using ZweigDungeon.Application.Manager;
 using ZweigDungeon.Common.Interfaces.Platform;
 using ZweigDungeon.Common.Interfaces.Video;
 using ZweigDungeon.Common.Services;
@@ -36,7 +37,9 @@ internal static class Program
 			}
 
 
+			serviceConfig.AddSingleton<FontManager>();
 			serviceConfig.AddSingleton<Game>();
+			
 			using (var services = serviceConfig.Build())
 			{
 				var window = services.GetRequiredService<IPlatformWindow>();

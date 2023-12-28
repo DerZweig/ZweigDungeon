@@ -15,43 +15,43 @@
 
     <ItemGroup>
       <None Remove="Data\fonts\arial_10.fnt" />
-      <AdditionalFiles Include="Data\fonts\arial_10.fnt">
+      <AdditionalFiles Include="Data\Fonts\arial_10.fnt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\fonts\arial_10_0.tga" />
-      <AdditionalFiles Include="Data\fonts\arial_10_0.tga">
+      <AdditionalFiles Include="Data\Fonts\arial_10_0.tga">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\fonts\arial_12.fnt" />
-      <AdditionalFiles Include="Data\fonts\arial_12.fnt">
+      <AdditionalFiles Include="Data\Fonts\arial_12.fnt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\fonts\arial_12_0.tga" />
-      <AdditionalFiles Include="Data\fonts\arial_12_0.tga">
+      <AdditionalFiles Include="Data\Fonts\arial_12_0.tga">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\fonts\arial_14.fnt" />
-      <AdditionalFiles Include="Data\fonts\arial_14.fnt">
+      <AdditionalFiles Include="Data\Fonts\arial_14.fnt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\fonts\arial_14_0.tga" />
-      <AdditionalFiles Include="Data\fonts\arial_14_0.tga">
+      <AdditionalFiles Include="Data\Fonts\arial_14_0.tga">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\fonts\arial_15.fnt" />
-      <AdditionalFiles Include="Data\fonts\arial_15.fnt">
+      <AdditionalFiles Include="Data\Fonts\arial_15.fnt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\fonts\arial_15_0.tga" />
-      <AdditionalFiles Include="Data\fonts\arial_15_0.tga">
+      <AdditionalFiles Include="Data\Fonts\arial_15_0.tga">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\fonts\arial_18.fnt" />
-      <AdditionalFiles Include="Data\fonts\arial_18.fnt">
+      <AdditionalFiles Include="Data\Fonts\arial_18.fnt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\fonts\arial_18_0.tga" />
-      <AdditionalFiles Include="Data\fonts\arial_18_0.tga">
+      <AdditionalFiles Include="Data\Fonts\arial_18_0.tga">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\ice.dds" />
