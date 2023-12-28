@@ -26,6 +26,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	private const string                    WINDOW_CLASS_NAME                 = "ZweigEngine::WindowClass";
 	private const Win32ClassStyles          WINDOW_CLASS_STYLE                = Win32ClassStyles.HorizontalRedraw | Win32ClassStyles.VerticalRedraw | Win32ClassStyles.OwnDeviceContext;
 
+	// ReSharper disable InconsistentNaming
 	private readonly PfnBeginPaintDelegate                BeginPaint;
 	private readonly PfnCreateWindowExDelegate            CreateWindowEx;
 	private readonly PfnDefaultWindowDelegate             DefaultWindowProc;
@@ -51,6 +52,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	private readonly PfnShowWindowDelegate                ShowWindow;
 	private readonly PfnTranslateMessageDelegate          TranslateMessage;
 	private readonly PfnUnregisterClassDelegate           UnregisterClass;
+	// ReSharper restore InconsistentNaming
 
 	private readonly MessageBus                    m_messageBus;
 	private readonly IServiceProvider              m_serviceProvider;
@@ -117,7 +119,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 
 	private void ReleaseUnmanagedResources()
 	{
-		Close();
+		CloseInternal();
 		if (m_class != INVALID_ATOM)
 		{
 			UnregisterClass(WINDOW_CLASS_NAME, m_owner);
@@ -153,13 +155,12 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 		if (!m_components.Contains(component))
 		{
 			m_components.Add(component);
-			
+
 			if (IsAvailable())
 			{
 				m_sync.ExecuteWithoutPending(component.OnAttach);
 			}
 		}
-
 	}
 
 	internal void RemoveComponent(IWin32WindowComponent component)
@@ -177,6 +178,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			ShowWindow(m_handle, Win32ShowWindowCommands.ShowDefault);
 			SetForegroundWindow(m_handle);
 			SetFocus(m_handle);
+			RethrowError();
 		}
 	}
 
@@ -220,17 +222,25 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			                          IntPtr.Zero,
 			                          m_owner,
 			                          IntPtr.Zero);
-
+			
+			RethrowError();
 			if (IsAvailable())
 			{
 				HandleResizeMessage();
 			}
 
 			NotifyWindowCreated();
+			RethrowError();
 		}
 	}
 
 	public void Close()
+	{
+		CloseInternal();
+		RethrowError();
+	}
+
+	private void CloseInternal()
 	{
 		if (IsAvailable())
 		{
@@ -251,8 +261,9 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			m_maximum_width   = int.MaxValue;
 			m_maximum_height  = int.MaxValue;
 		}
-	}
 
+	}
+	
 	public void Update()
 	{
 		while (IsAvailable() && PeekMessage(ref m_message, m_handle, 0, 0, Win32PeekMessageFlags.Remove))
@@ -285,6 +296,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			{
 				SetWindowText(m_handle, WINDOW_DEFAULT_TITLE);
 			}
+			RethrowError();
 		}
 	}
 
@@ -328,6 +340,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			             Win32SetWindowPositionCommands.NoSize |
 			             Win32SetWindowPositionCommands.NoMove |
 			             Win32SetWindowPositionCommands.NoActivate);
+			RethrowError();
 		}
 	}
 
@@ -342,6 +355,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 				             Win32SetWindowPositionCommands.NoZOrder |
 				             Win32SetWindowPositionCommands.NoActivate);
 			}
+			RethrowError();
 		}
 	}
 
@@ -359,6 +373,8 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 				             Win32SetWindowPositionCommands.NoZOrder |
 				             Win32SetWindowPositionCommands.NoActivate);
 			}
+			
+			RethrowError();
 		}
 	}
 
@@ -429,10 +445,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			}
 		});
 
-		WrapError(() =>
-		{
-			m_sync.Execute(() => m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowCreated(this)));
-		});
+		WrapError(() => { m_sync.Execute(() => m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowCreated(this))); });
 	}
 
 	private void NotifyWindowMessage(long lTime, IntPtr hWindow, Win32MessageType uMessage, IntPtr wParam, IntPtr lParam)
@@ -496,7 +509,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 				HandlePaintMessage();
 				return IntPtr.Zero;
 			case Win32MessageType.Close:
-				Close();
+				CloseInternal();
 				return IntPtr.Zero;
 		}
 
@@ -569,7 +582,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 		catch (Exception ex)
 		{
 			m_error = ex;
-			Close();
+			CloseInternal();
 		}
 	}
 }
