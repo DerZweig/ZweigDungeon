@@ -151,7 +151,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 
 	public void SetBlendMode(VideoBlendMode mode)
 	{
-		BindSurface(null);
+		BindTexture(null);
 		switch (mode)
 		{
 			case VideoBlendMode.Default:
@@ -174,54 +174,24 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 
 	public void CreateSurface(ushort width, ushort height, out IVideoImage image)
 	{
-		BindSurface(null);
+		BindTexture(null);
 		var openglSurface = new OpenGLImage(this, width, height);
 		m_spriteTextures?.Upload(openglSurface);
 		image = openglSurface;
 	}
 
-	public void DestroySurface(IVideoImage image)
+	internal void ReleaseTexture(OpenGLImage image)
 	{
-		if (image is OpenGLImage openglSurface && openglSurface.Context == this)
-		{
-			BindSurface(null);
-			m_spriteTextures?.Release(openglSurface);
-			openglSurface.Context = null;
-		}
-		else
-		{
-			throw new AccessViolationException("Attempting to destroy a surface from another video context.");
-		}
+		BindTexture(null);
+		m_spriteTextures?.Release(image);
 	}
 
-	public void MapSurfaceData(IVideoImage image, Action<VideoColor[]> mapper)
+	internal void DrawSurface(in VideoRect dstRegion, in VideoRect srcRegion, in VideoColor tintColor, VideoBlitFlags blitFlags)
 	{
-		if (image is OpenGLImage openglSurface && openglSurface.Context == this)
-		{
-			BindSurface(null);
-			mapper(openglSurface.Data);
-			m_spriteTextures?.Upload(openglSurface);
-		}
-		else
-		{
-			throw new AccessViolationException("Attempting to map a surface from another video context.");
-		}
+		m_spriteModel?.Draw(dstRegion, srcRegion, tintColor, blitFlags);
 	}
 
-	public void DrawSurface(IVideoImage image, in VideoRect dstRegion, in VideoRect srcRegion, in VideoColor tintColor, VideoBlitFlags blitFlags)
-	{
-		if (image is OpenGLImage openglSurface && openglSurface.Context == this)
-		{
-			BindSurface(openglSurface);
-			m_spriteModel?.Draw(dstRegion, srcRegion, tintColor, blitFlags);
-		}
-		else
-		{
-			throw new AccessViolationException("Attempting to draw a surface from another video context.");
-		}
-	}
-
-	private void BindSurface(OpenGLImage? surface)
+	internal void BindTexture(OpenGLImage? surface)
 	{
 		if (m_spriteTextures == null || m_spriteTextures.ActiveSurface == surface)
 		{
@@ -230,5 +200,10 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 
 		m_spriteModel?.Flush();
 		m_spriteTextures?.Bind(surface);
+	}
+
+	internal void UploadTexture(OpenGLImage surface)
+	{
+		m_spriteTextures?.Upload(surface);
 	}
 }
