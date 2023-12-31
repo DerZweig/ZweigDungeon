@@ -22,7 +22,7 @@ internal class OpenGLSpriteTextures : IDisposable
 
 	private readonly List<uint>                      m_allocated;
 	private readonly Stack<uint>                     m_freelist;
-	private readonly Dictionary<OpenGLSurface, uint> m_mappings;
+	private readonly Dictionary<OpenGLImage, uint> m_mappings;
 
 	public OpenGLSpriteTextures(ICustomFunctionLoader loader)
 	{
@@ -36,7 +36,7 @@ internal class OpenGLSpriteTextures : IDisposable
 
 		m_allocated = new List<uint>();
 		m_freelist  = new Stack<uint>();
-		m_mappings  = new Dictionary<OpenGLSurface, uint>();
+		m_mappings  = new Dictionary<OpenGLImage, uint>();
 	}
 
 	private void ReleaseUnmanagedResources()
@@ -62,9 +62,9 @@ internal class OpenGLSpriteTextures : IDisposable
 		ReleaseUnmanagedResources();
 	}
 	
-	public OpenGLSurface? ActiveSurface { get; private set; }
+	public OpenGLImage? ActiveSurface { get; private set; }
 
-	public void Bind(OpenGLSurface? surface)
+	public void Bind(OpenGLImage? surface)
 	{
 		if (surface == null)
 		{
@@ -85,17 +85,17 @@ internal class OpenGLSpriteTextures : IDisposable
 		}
 	}
 
-	public void Release(OpenGLSurface surface)
+	public void Release(OpenGLImage image)
 	{
-		if (m_mappings.Remove(surface, out var texture))
+		if (m_mappings.Remove(image, out var texture))
 		{
 			m_freelist.Push(texture);
 		}
 	}
 
-	public void Upload(OpenGLSurface surface)
+	public void Upload(OpenGLImage image)
 	{
-		if (!m_mappings.TryGetValue(surface, out var texture))
+		if (!m_mappings.TryGetValue(image, out var texture))
 		{
 			if (!m_freelist.TryPop(out texture))
 			{
@@ -111,13 +111,13 @@ internal class OpenGLSpriteTextures : IDisposable
 				m_allocated.Add(texture);
 			}
 			
-			m_mappings[surface] = texture;
+			m_mappings[image] = texture;
 		}
 		
-		ActiveSurface = surface;
+		ActiveSurface = image;
 		glActiveTexture(OpenGLTextureUnit.Texture0);
 		glBindTexture(OpenGLTextureTarget.Texture2D, texture);
-		UploadInternal(surface.Width, surface.Height, surface.Address);
+		UploadInternal(image.Width, image.Height, image.Address);
 	}
 
 	private void UploadInternal(ushort width, ushort height, IntPtr data)

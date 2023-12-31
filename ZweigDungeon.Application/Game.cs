@@ -1,5 +1,4 @@
-﻿using ZweigDungeon.Application.Manager;
-using ZweigDungeon.Common.Interfaces.Platform;
+﻿using ZweigDungeon.Common.Interfaces.Platform;
 using ZweigDungeon.Common.Interfaces.Platform.Messages;
 using ZweigDungeon.Common.Interfaces.Video;
 using ZweigDungeon.Common.Services.Messages;
@@ -9,13 +8,11 @@ namespace ZweigDungeon.Application;
 public class Game : IDisposable, IWindowListener
 {
 	private readonly IVideoContext m_video;
-	private readonly FontManager   m_fontManager;
 	private readonly IDisposable   m_subscription;
 
-	public Game(MessageBus messageBus, IVideoContext video, FontManager fontManager)
+	public Game(MessageBus messageBus, IVideoContext video)
 	{
 		m_video        = video;
-		m_fontManager  = fontManager;
 		m_subscription = messageBus.Subscribe<IWindowListener>(this);
 	}
 
@@ -48,10 +45,6 @@ public class Game : IDisposable, IWindowListener
 
 	public void WindowUpdateFrame(IPlatformWindow window)
 	{
-		var width  = window.GetViewportWidth();
-		var height = window.GetViewportHeight();
-		m_video.BeginFrame(width, height);
 
-		m_video.FinishFrame();
 	}
 }

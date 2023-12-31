@@ -1,6 +1,6 @@
 ﻿namespace ZweigDungeon.Common.Interfaces.Video;
 
-public interface IVideoSurface : IDisposable
+public interface IVideoImage : IDisposable
 {
 	ushort Width  { get; }
 	ushort Height { get; }

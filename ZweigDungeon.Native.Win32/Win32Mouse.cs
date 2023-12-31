@@ -1,5 +1,5 @@
-﻿using ZweigDungeon.Common.Constants;
-using ZweigDungeon.Common.Interfaces.Platform;
+﻿using ZweigDungeon.Common.Interfaces.Platform;
+using ZweigDungeon.Common.Interfaces.Platform.Constants;
 using ZweigDungeon.Common.Interfaces.Platform.Messages;
 using ZweigDungeon.Common.Services.Messages;
 using ZweigDungeon.Native.Win32.Constants;

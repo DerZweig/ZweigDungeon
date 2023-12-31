@@ -1,4 +1,4 @@
-﻿namespace ZweigDungeon.Common.Constants;
+﻿namespace ZweigDungeon.Common.Interfaces.Platform.Constants;
 
 public enum MouseButton : uint
 {

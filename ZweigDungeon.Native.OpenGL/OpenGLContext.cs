@@ -17,21 +17,21 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 	// ReSharper disable InconsistentNaming
 	// ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
 
-	private PfnEnableDelegate        glEnable     = null!;
-	private PfnDisableDelegate       glDisable    = null!;
-	private PfnClearColorDelegate    glClearColor = null!;
-	private PfnClearDepthDelegate    glClearDepth = null!;
-	private PfnClearDelegate         glClear      = null!;
-	private PfnBlendColorDelegate    glBlendColor = null!;
-	private PfnBlendFunctionDelegate glBlendFunc  = null!;
-	private PfnDepthFunctionDelegate glDepthFunc  = null!;
-	private PfnCullFaceDelegate      glCullFace   = null!;
-	private PfnFrontFaceDelegate     glFrontFace  = null!;
-	private PfnGetErrorDelegate      glGetError   = null!;
-	private PfnDepthMaskDelegate     glDepthMask  = null!;
-	private PfnColorMaskDelegate     glColorMask  = null!;
-	private PfnViewportDelegate      glViewport   = null!;
-	private PfnScissorDelegate       glScissor    = null!;
+	private PfnEnableDelegate        glEnable        = null!;
+	private PfnDisableDelegate       glDisable       = null!;
+	private PfnClearColorDelegate    glClearColor    = null!;
+	private PfnClearDepthDelegate    glClearDepth    = null!;
+	private PfnClearDelegate         glClear         = null!;
+	private PfnBlendColorDelegate    glBlendColor    = null!;
+	private PfnBlendFunctionDelegate glBlendFunc     = null!;
+	private PfnDepthFunctionDelegate glDepthFunc     = null!;
+	private PfnCullFaceDelegate      glCullFace      = null!;
+	private PfnFrontFaceDelegate     glFrontFace     = null!;
+	private PfnGetErrorDelegate      glGetError      = null!;
+	private PfnDepthMaskDelegate     glDepthMask     = null!;
+	private PfnColorMaskDelegate     glColorMask     = null!;
+	private PfnViewportDelegate      glViewport      = null!;
+	private PfnScissorDelegate       glScissor       = null!;
 
 	// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 	// ReSharper restore InconsistentNaming
@@ -126,36 +126,63 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		m_spriteTextures = null;
 	}
 
-	public void BeginFrame(int viewportWidth, int viewportHeight)
+	public void VideoDeviceBeginFrame(IPlatformVideo video)
 	{
-		glViewport(0, 0, viewportWidth, viewportHeight);
+		var width  = video.GetViewportWidth();
+		var height = video.GetViewportHeight();
+
+		glViewport(0, 0, width, height);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearDepth(1.0);
 		glClear(OpenGLClearMask.ColorBufferBit | OpenGLClearMask.DepthBufferBit);
+		glDisable(OpenGLEnableCap.DepthTest);
 		glEnable(OpenGLEnableCap.Blend);
-		glBlendFunc(OpenGLBlendSourceFactor.SrcAlpha, OpenGLBlendDestinationFactor.OneMinusSrcAlpha);
+		SetBlendMode(VideoBlendMode.Default);
 
-		m_spriteShader!.Begin(viewportWidth, viewportHeight);
+		m_spriteShader!.Begin(width, height);
 		m_spriteModel!.Begin();
 	}
 
-	public void FinishFrame()
+	public void VideoDeviceFinishFrame(IPlatformVideo video)
 	{
 		m_spriteModel?.Finish();
 		m_spriteShader?.Finish();
 	}
 
-	public void CreateSurface(ushort width, ushort height, out IVideoSurface surface)
+	public void SetBlendMode(VideoBlendMode mode)
 	{
 		BindSurface(null);
-		var openglSurface = new OpenGLSurface(this, width, height);
-		m_spriteTextures?.Upload(openglSurface);
-		surface = openglSurface;
+		switch (mode)
+		{
+			case VideoBlendMode.Default:
+			case VideoBlendMode.Alpha:
+				glBlendFunc(OpenGLBlendSourceFactor.SrcAlpha, OpenGLBlendDestinationFactor.OneMinusSrcAlpha);
+				break;
+			case VideoBlendMode.Additive:
+				glBlendFunc(OpenGLBlendSourceFactor.SrcAlpha, OpenGLBlendDestinationFactor.One);
+				break;
+			case VideoBlendMode.Multiply:
+				glBlendFunc(OpenGLBlendSourceFactor.Zero, OpenGLBlendDestinationFactor.SrcColor);
+				break;
+			case VideoBlendMode.Subtract:
+				glBlendFunc(OpenGLBlendSourceFactor.Zero, OpenGLBlendDestinationFactor.OneMinusSrcColor);
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+		}
 	}
 
-	public void DestroySurface(IVideoSurface surface)
+	public void CreateSurface(ushort width, ushort height, out IVideoImage image)
 	{
-		if (surface is OpenGLSurface openglSurface && openglSurface.Context == this)
+		BindSurface(null);
+		var openglSurface = new OpenGLImage(this, width, height);
+		m_spriteTextures?.Upload(openglSurface);
+		image = openglSurface;
+	}
+
+	public void DestroySurface(IVideoImage image)
+	{
+		if (image is OpenGLImage openglSurface && openglSurface.Context == this)
 		{
 			BindSurface(null);
 			m_spriteTextures?.Release(openglSurface);
@@ -167,9 +194,9 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		}
 	}
 
-	public void MapSurfaceData(IVideoSurface surface, Action<VideoColor[]> mapper)
+	public void MapSurfaceData(IVideoImage image, Action<VideoColor[]> mapper)
 	{
-		if (surface is OpenGLSurface openglSurface && openglSurface.Context == this)
+		if (image is OpenGLImage openglSurface && openglSurface.Context == this)
 		{
 			BindSurface(null);
 			mapper(openglSurface.Data);
@@ -181,12 +208,12 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		}
 	}
 
-	public void DrawSurface(IVideoSurface surface, in VideoRect dstRegion, in VideoRect srcRegion, in VideoColor tintColor, VideoFlags flags)
+	public void DrawSurface(IVideoImage image, in VideoRect dstRegion, in VideoRect srcRegion, in VideoColor tintColor, VideoBlitFlags blitFlags)
 	{
-		if (surface is OpenGLSurface openglSurface && openglSurface.Context == this)
+		if (image is OpenGLImage openglSurface && openglSurface.Context == this)
 		{
 			BindSurface(openglSurface);
-			m_spriteModel?.Draw(dstRegion, srcRegion, tintColor, flags);
+			m_spriteModel?.Draw(dstRegion, srcRegion, tintColor, blitFlags);
 		}
 		else
 		{
@@ -194,7 +221,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		}
 	}
 
-	private void BindSurface(OpenGLSurface? surface)
+	private void BindSurface(OpenGLImage? surface)
 	{
 		if (m_spriteTextures == null || m_spriteTextures.ActiveSurface == surface)
 		{

@@ -17,9 +17,9 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	private const byte                                PIXEL_FORMAT_STENCIL_BITS           = 8;
 	private const Win32PixelFormatDescriptorFlags     PIXEl_FORMAT_FLAGS                  = Win32PixelFormatDescriptorFlags.DrawToWindow | Win32PixelFormatDescriptorFlags.SupportOpenGL | Win32PixelFormatDescriptorFlags.Doublebuffer;
 	private const Win32PixelFormatDescriptorPixelType PIXEL_FORMAT_TYPE                   = Win32PixelFormatDescriptorPixelType.TypeRgba;
-	private const int                                 WGL_CONTEXT_ATTRIBUtE_FLAGS         = 0x2094;
+	private const int                                 WGL_CONTEXT_ATTRIBUTE_FLAGS         = 0x2094;
 	private const int                                 WGL_CONTEXT_ATTRIBUTE_MAJOR_VERSION = 0x2091;
-	private const int                                 WGL_CONTEXT_ATTRIBUtE_MINOR_VERSION = 0x2092;
+	private const int                                 WGL_CONTEXT_ATTRIBUTE_MINOR_VERSION = 0x2092;
 	private const int                                 WGL_CONTEXT_ATTRIBUTE_PROFILE_MASK  = 0x9126;
 	private const int                                 WGL_CONTEXT_CORE_PROFILE_BIT        = 0x00000001;
 	private const int                                 WGL_CONTEXT_FORWARD_COMPATIBLE_BIT  = 0x00000002;
@@ -47,6 +47,8 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	private IntPtr m_owner;
 	private IntPtr m_dummy;
 	private IntPtr m_graphics;
+	private int    m_width;
+	private int    m_height;
 
 	public Win32OpenGLDevice(NativeLibraryLoader libraryLoader, MessageBus messageBus, Win32Window window)
 	{
@@ -84,7 +86,9 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 		ReleaseUnmanagedResources();
 	}
 
-	public string Name => "Win32 OpenGL 3.3";
+	public string Name                => "Win32 OpenGL 3.3";
+	public int    GetViewportWidth()  => m_width;
+	public int    GetViewportHeight() => m_height;
 
 	void IWin32WindowComponent.OnAttach()
 	{
@@ -134,8 +138,8 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 		var contextAttributes = new[]
 		{
 			WGL_CONTEXT_ATTRIBUTE_MAJOR_VERSION, OPENGL_VERSION_MAJOR,
-			WGL_CONTEXT_ATTRIBUtE_MINOR_VERSION, OPENGL_VERSION_MINOR,
-			WGL_CONTEXT_ATTRIBUtE_FLAGS, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT,
+			WGL_CONTEXT_ATTRIBUTE_MINOR_VERSION, OPENGL_VERSION_MINOR,
+			WGL_CONTEXT_ATTRIBUTE_FLAGS, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT,
 			WGL_CONTEXT_ATTRIBUTE_PROFILE_MASK, WGL_CONTEXT_CORE_PROFILE_BIT,
 			0
 		};
@@ -154,6 +158,8 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 		}
 
 		m_cachedResults.Clear();
+		m_width  = m_window.GetViewportWidth();
+		m_height = m_window.GetViewportHeight();
 		m_messageBus.Broadcast<IVideoDeviceListener>(listener => listener.VideoDeviceActivated(this));
 	}
 
@@ -194,6 +200,9 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 
 	void IWin32WindowComponent.OnBeginUpdate()
 	{
+		m_width  = m_window.GetViewportWidth();
+		m_height = m_window.GetViewportHeight();
+		m_messageBus.Broadcast<IVideoDeviceListener>(listener => listener.VideoDeviceBeginFrame(this));
 	}
 
 	void IWin32WindowComponent.OnFinishUpdate()
@@ -203,7 +212,14 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 			return;
 		}
 
-		SwapBuffers(m_device);
+		try
+		{
+			m_messageBus.Broadcast<IVideoDeviceListener>(listener => listener.VideoDeviceFinishFrame(this));
+		}
+		finally
+		{
+			SwapBuffers(m_device);
+		}
 	}
 
 	void IWin32WindowComponent.OnMessage(long lTime, nint hWindow, Win32MessageType uMessage, nint wParam, nint lParam)

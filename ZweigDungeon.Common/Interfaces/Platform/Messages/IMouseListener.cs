@@ -1,4 +1,4 @@
-﻿using ZweigDungeon.Common.Constants;
+﻿using ZweigDungeon.Common.Interfaces.Platform.Constants;
 
 namespace ZweigDungeon.Common.Interfaces.Platform.Messages;
 

@@ -4,11 +4,11 @@ using ZweigDungeon.Common.Utility.Interop;
 
 namespace ZweigDungeon.Native.OpenGL;
 
-internal class OpenGLSurface : IVideoSurface
+internal class OpenGLImage : IVideoImage
 {
 	private readonly PinnedObject<VideoColor[]> m_pinned;
 
-	public OpenGLSurface(OpenGLContext context, ushort width, ushort height)
+	public OpenGLImage(OpenGLContext context, ushort width, ushort height)
 	{
 		Context  = context;
 		Width    = width;
@@ -35,7 +35,7 @@ internal class OpenGLSurface : IVideoSurface
 		GC.SuppressFinalize(this);
 	}
 
-	~OpenGLSurface()
+	~OpenGLImage()
 	{
 		ReleaseUnmanagedResources();
 	}

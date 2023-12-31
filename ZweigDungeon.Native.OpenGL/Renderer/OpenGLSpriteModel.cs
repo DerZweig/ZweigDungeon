@@ -185,7 +185,7 @@ internal class OpenGLSpriteModel : IDisposable
 		glBindVertexArray(0u);
 	}
 
-	public void Draw(in VideoRect dst, in VideoRect src, in VideoColor tint, VideoFlags flags)
+	public void Draw(in VideoRect dst, in VideoRect src, in VideoColor tint, VideoBlitFlags blitFlags)
 	{
 		if (m_commandSize >= COMMAND_BUFFER_CAPACITY)
 		{
@@ -196,8 +196,8 @@ internal class OpenGLSpriteModel : IDisposable
 		cmd.Destination = dst;
 		cmd.Source      = src;
 		cmd.Tint        = tint;
-		cmd.Flags.Red   = flags.HasFlag(VideoFlags.MirrorHorizontal) ? byte.MaxValue : byte.MinValue;
-		cmd.Flags.Green = flags.HasFlag(VideoFlags.MirrorVertical) ? byte.MaxValue : byte.MinValue;
+		cmd.Flags.Red   = blitFlags.HasFlag(VideoBlitFlags.MirrorHorizontal) ? byte.MaxValue : byte.MinValue;
+		cmd.Flags.Green = blitFlags.HasFlag(VideoBlitFlags.MirrorVertical) ? byte.MaxValue : byte.MinValue;
 		++m_commandSize;
 	}
 
