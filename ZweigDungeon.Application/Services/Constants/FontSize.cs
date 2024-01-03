@@ -1,4 +1,4 @@
-﻿namespace ZweigDungeon.Application.Manager.Constants;
+﻿namespace ZweigDungeon.Application.Services.Constants;
 
 public enum FontSize : uint
 {

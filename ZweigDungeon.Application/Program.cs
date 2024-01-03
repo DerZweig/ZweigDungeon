@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using ZweigDungeon.Application.Manager.Implementation;
-using ZweigDungeon.Application.Manager.Interfaces;
+using ZweigDungeon.Application.Services.Implementation;
+using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Interfaces.Platform;
 using ZweigEngine.Common.Interfaces.Video;
 using ZweigEngine.Common.Services;
@@ -36,6 +36,7 @@ internal static class Program
 				throw new NotSupportedException("Platform is not implemented");
 			}
 			
+			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
 			serviceConfig.AddSingleton<IImageManager, ImageManager>();
 			serviceConfig.AddSingleton<IFontManager, FontManager>();
 			serviceConfig.AddSingleton<App>();

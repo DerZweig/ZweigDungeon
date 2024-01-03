@@ -1,12 +1,12 @@
 ﻿using System.Text;
-using ZweigDungeon.Application.Manager.Constants;
-using ZweigDungeon.Application.Manager.Interfaces;
+using ZweigDungeon.Application.Services.Constants;
+using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Interfaces.Platform;
 using ZweigEngine.Common.Interfaces.Platform.Messages;
 using ZweigEngine.Common.Interfaces.Video;
 using ZweigEngine.Common.Services.Messages;
 
-namespace ZweigDungeon.Application.Manager.Implementation;
+namespace ZweigDungeon.Application.Services.Implementation;
 
 public class FontManager : IDisposable, IWindowListener, IFontManager
 {
@@ -17,19 +17,21 @@ public class FontManager : IDisposable, IWindowListener, IFontManager
 	private const string FONT_DEFINITION_MEDIUM = "Data/Gui/font_medium.fnt";
 	private const string FONT_DEFINITION_LARGE  = "Data/Gui/font_large.fnt";
 
-	private readonly IImageManager m_imageManager;
-	private readonly IDisposable   m_subscription;
-	private readonly FontType      m_small;
-	private readonly FontType      m_medium;
-	private readonly FontType      m_large;
+	private readonly IImageManager       m_imageManager;
+	private readonly IGlobalCancellation m_cancellation;
+	private readonly IDisposable         m_subscription;
+	private readonly FontType            m_small;
+	private readonly FontType            m_medium;
+	private readonly FontType            m_large;
 
-	public FontManager(MessageBus messageBus, IImageManager imageManager)
+	public FontManager(MessageBus messageBus, IImageManager imageManager, IGlobalCancellation cancellation)
 	{
-		m_imageManager = imageManager;
-		m_subscription = messageBus.Subscribe<IWindowListener>(this);
-		m_small        = new FontType();
-		m_medium       = new FontType();
-		m_large        = new FontType();
+		m_imageManager       = imageManager;
+		m_cancellation = cancellation;
+		m_subscription       = messageBus.Subscribe<IWindowListener>(this);
+		m_small              = new FontType();
+		m_medium             = new FontType();
+		m_large              = new FontType();
 	}
 
 	private void ReleaseUnmanagedResources()
@@ -298,12 +300,12 @@ public class FontManager : IDisposable, IWindowListener, IFontManager
 		return 0;
 	}
 
-	private static void LoadFontDefinition(FontType dst, string path)
+	private async void LoadFontDefinition(FontType dst, string path)
 	{
 		dst.Chars.Clear();
 		dst.Kernings.Clear();
 
-		var fontScript = File.ReadAllText(path);
+		var fontScript = await File.ReadAllTextAsync(path, m_cancellation.Token);
 		var parsed     = ParseFontDefinition(fontScript);
 
 		foreach (var element in parsed)

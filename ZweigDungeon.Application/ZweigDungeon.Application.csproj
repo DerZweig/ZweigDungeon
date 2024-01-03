@@ -41,4 +41,9 @@
       </AdditionalFiles>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Data\Portraits\" />
+      <Folder Include="Services\" />
+    </ItemGroup>
+
 </Project>

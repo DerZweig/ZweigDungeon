@@ -1,6 +1,6 @@
 ﻿using ZweigEngine.Common.Interfaces.Video;
 
-namespace ZweigDungeon.Application.Manager.Interfaces;
+namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IImageManager
 {

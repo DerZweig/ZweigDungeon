@@ -1,25 +1,24 @@
-﻿using ZweigDungeon.Application.Manager.Interfaces;
+﻿using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Interfaces.Video;
-using ZweigEngine.Common.Utility.Concurrency;
 using ZweigEngine.Image;
 using ZweigEngine.Image.DDS;
 using ZweigEngine.Image.TGA;
 
-namespace ZweigDungeon.Application.Manager.Implementation;
+namespace ZweigDungeon.Application.Services.Implementation;
 
 public class ImageManager : IDisposable, IImageManager
 {
 	private readonly IVideoContext                    m_video;
-	private readonly ExclusiveTaskFactory             m_sync;
+	private readonly IGlobalCancellation              m_cancellation;
 	private readonly DDSImageReader                   m_ddsImageReader;
 	private readonly TGAImageReader                   m_tgaImageReader;
 	private readonly IVideoImage                      m_undefined;
 	private readonly Dictionary<string, IVideoImage?> m_images;
 
-	public ImageManager(IVideoContext video)
+	public ImageManager(IVideoContext video, IGlobalCancellation cancellation)
 	{
 		m_video          = video;
-		m_sync           = new ExclusiveTaskFactory();
+		m_cancellation   = cancellation;
 		m_ddsImageReader = new DDSImageReader();
 		m_tgaImageReader = new TGAImageReader();
 		m_images         = new Dictionary<string, IVideoImage?>();
@@ -77,16 +76,16 @@ public class ImageManager : IDisposable, IImageManager
 			{
 				await using (var stream = File.OpenRead(ddsPath))
 				{
-					info = await m_ddsImageReader.LoadInfoBlockAsync(stream, CancellationToken.None);
-					data = await m_ddsImageReader.LoadPixelDataAsync(stream, info, CancellationToken.None);
+					info = await m_ddsImageReader.LoadInfoBlockAsync(stream, m_cancellation.Token);
+					data = await m_ddsImageReader.LoadPixelDataAsync(stream, info, m_cancellation.Token);
 				}
 			}
 			else if (File.Exists(tgaPath))
 			{
 				await using (var stream = File.OpenRead(tgaPath))
 				{
-					info = await m_tgaImageReader.LoadInfoBlockAsync(stream, CancellationToken.None);
-					data = await m_tgaImageReader.LoadPixelDataAsync(stream, info, CancellationToken.None);
+					info = await m_tgaImageReader.LoadInfoBlockAsync(stream, m_cancellation.Token);
+					data = await m_tgaImageReader.LoadPixelDataAsync(stream, info, m_cancellation.Token);
 				}
 			}
 
@@ -124,6 +123,10 @@ public class ImageManager : IDisposable, IImageManager
 					}
 				});
 			}
+		}
+		catch
+		{
+			// ignored
 		}
 		finally
 		{

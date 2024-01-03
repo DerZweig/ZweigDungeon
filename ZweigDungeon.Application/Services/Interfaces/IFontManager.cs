@@ -1,7 +1,7 @@
-﻿using ZweigDungeon.Application.Manager.Constants;
+﻿using ZweigDungeon.Application.Services.Constants;
 using ZweigEngine.Common.Interfaces.Video;
 
-namespace ZweigDungeon.Application.Manager.Interfaces;
+namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IFontManager
 {
