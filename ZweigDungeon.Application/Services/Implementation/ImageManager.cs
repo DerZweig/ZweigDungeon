@@ -1,4 +1,5 @@
 ﻿using ZweigDungeon.Application.Services.Interfaces;
+using ZweigEngine.Common.Interfaces.Platform;
 using ZweigEngine.Common.Interfaces.Video;
 using ZweigEngine.Image;
 using ZweigEngine.Image.DDS;
@@ -10,15 +11,17 @@ public class ImageManager : IDisposable, IImageManager
 {
 	private readonly IVideoContext                    m_video;
 	private readonly IGlobalCancellation              m_cancellation;
+	private readonly IPlatformSynchronization                  m_sync;
 	private readonly DDSImageReader                   m_ddsImageReader;
 	private readonly TGAImageReader                   m_tgaImageReader;
 	private readonly IVideoImage                      m_undefined;
 	private readonly Dictionary<string, IVideoImage?> m_images;
 
-	public ImageManager(IVideoContext video, IGlobalCancellation cancellation)
+	public ImageManager(IVideoContext video, IGlobalCancellation cancellation, IPlatformSynchronization sync)
 	{
 		m_video          = video;
 		m_cancellation   = cancellation;
+		m_sync           = sync;
 		m_ddsImageReader = new DDSImageReader();
 		m_tgaImageReader = new TGAImageReader();
 		m_images         = new Dictionary<string, IVideoImage?>();
@@ -57,7 +60,7 @@ public class ImageManager : IDisposable, IImageManager
 		ReleaseUnmanagedResources();
 	}
 
-	public async void Load(string name)
+	public Task Load(string name) => m_sync.Invoke(async () =>
 	{
 		if (!m_images.TryAdd(name, null))
 		{
@@ -101,32 +104,39 @@ public class ImageManager : IDisposable, IImageManager
 
 				texture.Map(pixels =>
 				{
-					if (info.ImagePixelType == ImagePixelFormat.RGB8)
+					switch (info.ImagePixelType)
 					{
-						for (var index = 0; index < pixels.Length; ++index)
+						case ImagePixelFormat.RGB8:
 						{
-							pixels[index].Red   = data![index * 3 + 0];
-							pixels[index].Green = data[index * 3 + 1];
-							pixels[index].Blue  = data[index * 3 + 2];
-							pixels[index].Alpha = 255;
+							for (var index = 0; index < pixels.Length; ++index)
+							{
+								pixels[index].Red   = data![index * 3 + 0];
+								pixels[index].Green = data[index * 3 + 1];
+								pixels[index].Blue  = data[index * 3 + 2];
+								pixels[index].Alpha = 255;
+							}
+
+							break;
 						}
-					}
-					else if (info.ImagePixelType == ImagePixelFormat.RGBA8)
-					{
-						for (var index = 0; index < pixels.Length; ++index)
+						case ImagePixelFormat.RGBA8:
 						{
-							pixels[index].Red   = data![index * 4 + 0];
-							pixels[index].Green = data[index * 4 + 1];
-							pixels[index].Blue  = data[index * 4 + 2];
-							pixels[index].Alpha = data[index * 4 + 3];
+							for (var index = 0; index < pixels.Length; ++index)
+							{
+								pixels[index].Red   = data![index * 4 + 0];
+								pixels[index].Green = data[index * 4 + 1];
+								pixels[index].Blue  = data[index * 4 + 2];
+								pixels[index].Alpha = data[index * 4 + 3];
+							}
+
+							break;
 						}
+						case ImagePixelFormat.R8:
+						case ImagePixelFormat.R16:
+						default:
+							throw new ArgumentOutOfRangeException();
 					}
 				});
 			}
-		}
-		catch
-		{
-			// ignored
 		}
 		finally
 		{
@@ -135,13 +145,13 @@ public class ImageManager : IDisposable, IImageManager
 				m_images[name] = m_undefined;
 			}
 		}
-	}
+	}, m_cancellation.Token);
 
-	public void Bind(string name, Action<IVideoImage> work)
+	public Task Bind(string name, Action<IVideoImage> work) => m_sync.Invoke(() =>
 	{
 		if (m_images.TryGetValue(name, out var image) && image != null)
 		{
 			work(image);
 		}
-	}
+	});
 }

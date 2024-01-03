@@ -4,6 +4,6 @@ namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IImageManager
 {
-	public void Load(string name);
-	public void Bind(string name, Action<IVideoImage> work);
+	public Task Load(string name);
+	public Task Bind(string name, Action<IVideoImage> work);
 }

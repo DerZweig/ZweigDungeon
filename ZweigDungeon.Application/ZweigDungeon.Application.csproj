@@ -43,6 +43,7 @@
 
     <ItemGroup>
       <Folder Include="Data\Portraits\" />
+      <Folder Include="Entities\" />
       <Folder Include="Services\" />
     </ItemGroup>
 

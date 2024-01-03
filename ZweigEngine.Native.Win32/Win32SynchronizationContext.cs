@@ -1,19 +1,41 @@
 ﻿using System.Collections.Concurrent;
+using ZweigEngine.Common.Interfaces.Platform;
 
 namespace ZweigEngine.Native.Win32;
 
-internal sealed class Win32SynchronizationContext : SynchronizationContext
+public sealed class Win32SynchronizationContext : SynchronizationContext, IPlatformSynchronization
 {
 	private readonly ConcurrentQueue<Action> m_pending;
+	private readonly TaskFactory             m_factory;
 
 	public Win32SynchronizationContext()
 	{
-		m_pending = new ConcurrentQueue<Action>();
+		var previous = Current;
+		try
+		{
+			SetSynchronizationContext(this);
+			m_pending = new ConcurrentQueue<Action>();
+			m_factory = new TaskFactory(CancellationToken.None,
+			                            TaskCreationOptions.DenyChildAttach,
+			                            TaskContinuationOptions.None,
+			                            TaskScheduler.FromCurrentSynchronizationContext());
+		}
+		finally
+		{
+			SetSynchronizationContext(previous);
+		}
 	}
 
 	public override void Post(SendOrPostCallback d, object? state)
 	{
-		m_pending.Enqueue(() => d(state));
+		if (Current == this)
+		{
+			d(state);
+		}
+		else
+		{
+			m_pending.Enqueue(() => d(state));
+		}
 	}
 
 	public override void Send(SendOrPostCallback d, object? state)
@@ -23,10 +45,10 @@ internal sealed class Win32SynchronizationContext : SynchronizationContext
 
 	public override SynchronizationContext CreateCopy()
 	{
-		throw new NotSupportedException();
+		return this;
 	}
 
-	public void ExecuteWithoutPending(Action action)
+	internal void ExecuteWithoutPending(Action action)
 	{
 		if (Current != this)
 		{
@@ -48,7 +70,7 @@ internal sealed class Win32SynchronizationContext : SynchronizationContext
 		}
 	}
 
-	public void Execute(Action action)
+	internal void Execute(Action action)
 	{
 		if (Current != this)
 		{
@@ -78,5 +100,45 @@ internal sealed class Win32SynchronizationContext : SynchronizationContext
 		{
 			work();
 		}
+	}
+	
+	public Task Invoke(Action work)
+	{
+		return m_factory.StartNew(work);
+	}
+
+	public Task Invoke(Action work, CancellationToken cancellationToken)
+	{
+		return m_factory.StartNew(work, cancellationToken);
+	}
+
+	public Task<TResult> Invoke<TResult>(Func<TResult> work)
+	{
+		return m_factory.StartNew(work);
+	}
+
+	public Task<TResult> Invoke<TResult>(Func<TResult> work, CancellationToken cancellationToken)
+	{
+		return m_factory.StartNew(work, cancellationToken);
+	}
+	
+	public Task Invoke(Func<Task> work)
+	{
+		return m_factory.StartNew(work).Unwrap();
+	}
+
+	public Task Invoke(Func<Task> work, CancellationToken cancellationToken)
+	{
+		return m_factory.StartNew(work, cancellationToken).Unwrap();
+	}
+
+	public Task<TResult> Invoke<TResult>(Func<Task<TResult>> work)
+	{
+		return m_factory.StartNew(work).Unwrap();
+	}
+
+	public Task<TResult> Invoke<TResult>(Func<Task<TResult>> work, CancellationToken cancellationToken)
+	{
+		return m_factory.StartNew(work, cancellationToken).Unwrap();
 	}
 }
