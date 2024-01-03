@@ -80,12 +80,12 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	private          Win32Message                  m_message;
 	private          Exception?                    m_error;
 
-	public Win32Window(NativeLibraryLoader libraryLoader, Win32SynchronizationContext synchronizationContext, MessageBus messageBus, IServiceProvider serviceProvider)
+	public Win32Window(NativeLibraryLoader libraryLoader, MessageBus messageBus, IServiceProvider serviceProvider)
 	{
 		m_messageBus      = messageBus;
 		m_serviceProvider = serviceProvider;
 		m_proc            = new PinnedDelegate<PfnWindowProc>(Process, GCHandleType.Normal);
-		m_sync            = synchronizationContext;
+		m_sync            = new Win32SynchronizationContext();
 		m_components      = new List<IWin32WindowComponent>(16);
 		m_maximum_width   = int.MaxValue;
 		m_maximum_height  = int.MaxValue;

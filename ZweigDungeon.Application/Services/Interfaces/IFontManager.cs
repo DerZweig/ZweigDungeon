@@ -5,6 +5,6 @@ namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IFontManager
 {
-	Task<string> Layout(FontSize size, int viewportWidth, string text);
-	Task         Draw(FontSize size, string text, int left, int top, VideoRect clip, VideoColor color);
+	void Layout(FontSize size, int viewportWidth, string text, out string result);
+	void Draw(FontSize size, string text, int left, int top, VideoRect clip, VideoColor color);
 }

@@ -25,7 +25,6 @@ internal static class Program
 
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
-				serviceConfig.AddSingleton<IPlatformSynchronization, Win32SynchronizationContext>();
 				serviceConfig.AddSingleton<IPlatformWindow, Win32Window>();
 				serviceConfig.AddSingleton<IPlatformKeyboard, Win32Keyboard>();
 				serviceConfig.AddSingleton<IPlatformMouse, Win32Mouse>();

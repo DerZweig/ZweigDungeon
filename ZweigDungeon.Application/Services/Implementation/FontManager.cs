@@ -19,21 +19,19 @@ public class FontManager : IDisposable, IWindowListener, IFontManager
 
 	private readonly IImageManager       m_imageManager;
 	private readonly IGlobalCancellation m_cancellation;
-	private readonly IPlatformSynchronization     m_sync;
 	private readonly IDisposable         m_subscription;
 	private readonly FontType            m_small;
 	private readonly FontType            m_medium;
 	private readonly FontType            m_large;
 
-	public FontManager(MessageBus messageBus, IImageManager imageManager, IGlobalCancellation cancellation, IPlatformSynchronization sync)
+	public FontManager(MessageBus messageBus, IImageManager imageManager, IGlobalCancellation cancellation)
 	{
-		m_imageManager = imageManager;
+		m_imageManager       = imageManager;
 		m_cancellation = cancellation;
-		m_sync         = sync;
-		m_subscription = messageBus.Subscribe<IWindowListener>(this);
-		m_small        = new FontType();
-		m_medium       = new FontType();
-		m_large        = new FontType();
+		m_subscription       = messageBus.Subscribe<IWindowListener>(this);
+		m_small              = new FontType();
+		m_medium             = new FontType();
+		m_large              = new FontType();
 	}
 
 	private void ReleaseUnmanagedResources()
@@ -52,14 +50,14 @@ public class FontManager : IDisposable, IWindowListener, IFontManager
 		ReleaseUnmanagedResources();
 	}
 
-	public async void WindowCreated(IPlatformWindow window)
+	public void WindowCreated(IPlatformWindow window)
 	{
-		await m_imageManager.Load(FONT_IMAGE_SMALL);
-		await m_imageManager.Load(FONT_IMAGE_MEDIUM);
-		await m_imageManager.Load(FONT_IMAGE_LARGE);
-		await LoadFontDefinition(m_small, FONT_DEFINITION_SMALL);
-		await LoadFontDefinition(m_medium, FONT_DEFINITION_MEDIUM);
-		await LoadFontDefinition(m_large, FONT_DEFINITION_LARGE);
+		m_imageManager.Load(FONT_IMAGE_SMALL);
+		m_imageManager.Load(FONT_IMAGE_MEDIUM);
+		m_imageManager.Load(FONT_IMAGE_LARGE);
+		LoadFontDefinition(m_small, FONT_DEFINITION_SMALL);
+		LoadFontDefinition(m_medium, FONT_DEFINITION_MEDIUM);
+		LoadFontDefinition(m_large, FONT_DEFINITION_LARGE);
 	}
 
 	public void WindowClosing(IPlatformWindow window)
@@ -70,37 +68,43 @@ public class FontManager : IDisposable, IWindowListener, IFontManager
 	{
 	}
 
-	public Task<string> Layout(FontSize size, int viewportWidth, string text) => m_sync.Invoke(() =>
+	public void Layout(FontSize size, int viewportWidth, string text, out string result)
 	{
 		switch (size)
 		{
 			case FontSize.Small:
-				return Layout(m_small, viewportWidth, text);
+				Layout(m_small, viewportWidth, text, out result);
+				break;
 			case FontSize.Medium:
-				return Layout(m_medium, viewportWidth, text);
+				Layout(m_medium, viewportWidth, text, out result);
+				break;
 			case FontSize.Large:
-				return Layout(m_large, viewportWidth, text);
-			default:
-				throw new ArgumentOutOfRangeException(nameof(size), size, null);
-		}
-	});
-	
-	public Task Draw(FontSize size, string text, int left, int top, VideoRect clip, VideoColor color)
-	{
-		switch (size)
-		{
-			case FontSize.Small:
-				return m_imageManager.Bind(FONT_IMAGE_SMALL, texture => Draw(texture, m_small, text, left, top, clip, color));
-			case FontSize.Medium:
-				return m_imageManager.Bind(FONT_IMAGE_MEDIUM, texture => Draw(texture, m_medium, text, left, top, clip, color));
-			case FontSize.Large:
-				return m_imageManager.Bind(FONT_IMAGE_LARGE, texture => Draw(texture, m_large, text, left, top, clip, color));
+				Layout(m_large, viewportWidth, text, out result);
+				break;
 			default:
 				throw new ArgumentOutOfRangeException(nameof(size), size, null);
 		}
 	}
 
-	private string Layout(FontType type, int viewportWidth, string text)
+	public void Draw(FontSize size, string text, int left, int top, VideoRect clip, VideoColor color)
+	{
+		switch (size)
+		{
+			case FontSize.Small:
+				m_imageManager.Bind(FONT_IMAGE_SMALL, texture => Draw(texture, m_small, text, left, top, clip, color));
+				break;
+			case FontSize.Medium:
+				m_imageManager.Bind(FONT_IMAGE_MEDIUM, texture => Draw(texture, m_medium, text, left, top, clip, color));
+				break;
+			case FontSize.Large:
+				m_imageManager.Bind(FONT_IMAGE_LARGE, texture => Draw(texture, m_large, text, left, top, clip, color));
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(size), size, null);
+		}
+	}
+
+	private void Layout(FontType type, int viewportWidth, string text, out string result)
 	{
 		var lineBuilder   = new StringBuilder();
 		var resultBuilder = new StringBuilder();
@@ -150,7 +154,7 @@ public class FontManager : IDisposable, IWindowListener, IFontManager
 				lineBuilder.Clear();
 			}
 
-			return resultBuilder.ToString();
+			result = resultBuilder.ToString();
 		}
 	}
 
@@ -296,7 +300,7 @@ public class FontManager : IDisposable, IWindowListener, IFontManager
 		return 0;
 	}
 
-	private Task LoadFontDefinition(FontType dst, string path) => m_sync.Invoke(async () =>
+	private async void LoadFontDefinition(FontType dst, string path)
 	{
 		dst.Chars.Clear();
 		dst.Kernings.Clear();
@@ -320,7 +324,7 @@ public class FontManager : IDisposable, IWindowListener, IFontManager
 					break;
 			}
 		}
-	}, m_cancellation.Token);
+	}
 
 	private static IEnumerable<ScriptElement> ParseFontDefinition(string source)
 	{
@@ -355,7 +359,7 @@ public class FontManager : IDisposable, IWindowListener, IFontManager
 		{
 			var offsetX = 0;
 			var offsetY = 0;
-			var advance = widthValue;
+			var advance = (int)widthValue;
 
 			if (element.Properties.TryGetValue("xoffset", out var offsetXScript) && int.TryParse(offsetXScript, out var offsetXValue))
 			{
