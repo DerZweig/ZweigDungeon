@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ZweigEngine.Common\ZweigEngine.Common.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Shaders\sprite.frag.glsl" />
+      <None Remove="Shaders\sprite.vert.glsl" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Shaders\sprite.frag.glsl" />
+      <EmbeddedResource Include="Shaders\sprite.vert.glsl" />
+    </ItemGroup>
+
+</Project>

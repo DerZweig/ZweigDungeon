@@ -1,13 +1,14 @@
-﻿
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using ZweigDungeon.Common.Interfaces.Platform;
-using ZweigDungeon.Common.Interfaces.Video;
-using ZweigDungeon.Common.Services;
-using ZweigDungeon.Common.Services.Libraries;
-using ZweigDungeon.Common.Services.Messages;
-using ZweigDungeon.Native.OpenGL;
-using ZweigDungeon.Native.Win32;
+using ZweigDungeon.Application.Manager.Implementation;
+using ZweigDungeon.Application.Manager.Interfaces;
+using ZweigEngine.Common.Interfaces.Platform;
+using ZweigEngine.Common.Interfaces.Video;
+using ZweigEngine.Common.Services;
+using ZweigEngine.Common.Services.Libraries;
+using ZweigEngine.Common.Services.Messages;
+using ZweigEngine.Native.OpenGL;
+using ZweigEngine.Native.Win32;
 
 namespace ZweigDungeon.Application;
 
@@ -34,10 +35,12 @@ internal static class Program
 			{
 				throw new NotSupportedException("Platform is not implemented");
 			}
-
-
-			serviceConfig.AddSingleton<Game>();
 			
+			serviceConfig.AddSingleton<IImageManager, ImageManager>();
+			serviceConfig.AddSingleton<IFontManager, FontManager>();
+			serviceConfig.AddSingleton<App>();
+			
+
 			using (var services = serviceConfig.Build())
 			{
 				var window = services.GetRequiredService<IPlatformWindow>();
@@ -48,7 +51,7 @@ internal static class Program
 				}
 			}
 		}
-		catch(Exception ex)
+		catch (Exception ex)
 		{
 			if (Debugger.IsAttached)
 			{
