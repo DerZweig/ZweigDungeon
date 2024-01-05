@@ -3,6 +3,7 @@ using ZweigEngine.Common.Interfaces.Platform;
 using ZweigEngine.Common.Interfaces.Platform.Messages;
 using ZweigEngine.Common.Interfaces.Video;
 using ZweigEngine.Common.Services.Messages;
+using ZweigEngine.Common.Utility.Exceptions;
 using ZweigEngine.Native.OpenGL.Constants;
 using ZweigEngine.Native.OpenGL.Prototypes;
 using ZweigEngine.Native.OpenGL.Renderer;
@@ -168,7 +169,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 				glBlendFunc(OpenGLBlendSourceFactor.Zero, OpenGLBlendDestinationFactor.OneMinusSrcColor);
 				break;
 			default:
-				throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+				throw new EnumOutOfRangeException<VideoBlendMode>(mode);
 		}
 	}
 

@@ -6,7 +6,7 @@ namespace ZweigEngine.Image.DDS;
 internal sealed class DDSImageInfo : IImageInfo
 {
 	public long             StreamPosition { get; internal set; }
-	public ImagePixelFormat ImagePixelType { get; internal set; }
+	public ImagePixelFormat PixelType { get; internal set; }
 	public int              Height         { get; internal set; }
 	public int              Width          { get; internal set; }
 	public DDSImageFormat   FileFormat     { get; internal set; }

@@ -2,7 +2,7 @@
 
 public interface IImageInfo
 {
-	ImagePixelFormat ImagePixelType { get; }
+	ImagePixelFormat PixelType { get; }
 	int              Width          { get; }
 	int              Height         { get; }
 }

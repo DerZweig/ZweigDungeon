@@ -19,7 +19,7 @@ public sealed class TGAImageReader : IImageReader
 				return new TGAImageInfo
 				{
 					StreamPosition = stream.Position,
-					ImagePixelType = ImagePixelFormat.RGB8,
+					PixelType = ImagePixelFormat.RGB8,
 					Width          = header.SizeWidth,
 					Height         = header.SizeHeight,
 					FileType       = header.ImageType,
@@ -29,7 +29,7 @@ public sealed class TGAImageReader : IImageReader
 				return new TGAImageInfo
 				{
 					StreamPosition = stream.Position,
-					ImagePixelType = ImagePixelFormat.RGBA8,
+					PixelType = ImagePixelFormat.RGBA8,
 					Width          = header.SizeWidth,
 					Height         = header.SizeHeight,
 					FileType       = header.ImageType,
@@ -43,7 +43,7 @@ public sealed class TGAImageReader : IImageReader
 	public async Task<IReadOnlyList<byte>> LoadPixelDataAsync(Stream stream, IImageInfo imageInfo, CancellationToken cancellationToken)
 	{
 		var tgaImage = imageInfo as TGAImageInfo ?? throw new ArgumentOutOfRangeException(nameof(imageInfo));
-		var pixelSize = tgaImage.ImagePixelType switch
+		var pixelSize = tgaImage.PixelType switch
 		                {
 			                ImagePixelFormat.RGBA8 => 32,
 			                ImagePixelFormat.RGB8 => 24,
@@ -57,7 +57,7 @@ public sealed class TGAImageReader : IImageReader
 			                _ => throw new FileLoadException("Invalid image type.")
 		                };
 
-		var decoded = await Task.Run(() => tgaImage.ImagePixelType switch
+		var decoded = await Task.Run(() => tgaImage.PixelType switch
 		                                   {
 			                                   ImagePixelFormat.RGB8 => DecodePixelDataRGB(tgaImage, pixelData),
 			                                   ImagePixelFormat.RGBA8 => DecodePixelDataRGBA(tgaImage, pixelData),

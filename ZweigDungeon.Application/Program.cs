@@ -25,6 +25,7 @@ internal static class Program
 
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
+				serviceConfig.AddSingleton<IPlatformSynchronization, Win32Synchronization>();
 				serviceConfig.AddSingleton<IPlatformWindow, Win32Window>();
 				serviceConfig.AddSingleton<IPlatformKeyboard, Win32Keyboard>();
 				serviceConfig.AddSingleton<IPlatformMouse, Win32Mouse>();
@@ -35,12 +36,13 @@ internal static class Program
 			{
 				throw new NotSupportedException("Platform is not implemented");
 			}
-			
+
 			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
 			serviceConfig.AddSingleton<IImageManager, ImageManager>();
 			serviceConfig.AddSingleton<IFontManager, FontManager>();
+			serviceConfig.AddSingleton<IMenuManager, MenuManager>();
+			serviceConfig.AddSingleton<ILayoutManager, LayoutManager>();
 			serviceConfig.AddSingleton<App>();
-			
 
 			using (var services = serviceConfig.Build())
 			{

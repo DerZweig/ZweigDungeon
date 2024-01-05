@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Panel MinimumWidth="300" MinimumHeight="200" HorizontalAlignment="Center" Layout="Horizontal">
+    <Button FontSize="Medium" Height="30" Margin="5">Load</Button>
+    <Button FontSize="Medium" Height="30" Margin="5">Options</Button>
+    <Button FontSize="Medium" Height="30" Margin="5">Quit</Button>
+</Panel>

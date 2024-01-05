@@ -50,36 +50,36 @@ public sealed class DDSImageReader : IImageReader
 		switch (image.FileFormat)
 		{
 			case DDSImageFormat.DXT1:
-				image.ImagePixelType = ImagePixelFormat.RGBA8;
+				image.PixelType = ImagePixelFormat.RGBA8;
 				image.FileDecoder    = new DDSCompressedDXT1Decoder();
 				break;
 			case DDSImageFormat.DXT2:
-				image.ImagePixelType = ImagePixelFormat.RGBA8;
+				image.PixelType = ImagePixelFormat.RGBA8;
 				image.FileDecoder    = new DDSCompressedDXT2Decoder();
 				break;
 			case DDSImageFormat.DXT3:
-				image.ImagePixelType = ImagePixelFormat.RGBA8;
+				image.PixelType = ImagePixelFormat.RGBA8;
 				image.FileDecoder    = new DDSCompressedDXT3Decoder();
 				break;
 			case DDSImageFormat.DXT4:
-				image.ImagePixelType = ImagePixelFormat.RGBA8;
+				image.PixelType = ImagePixelFormat.RGBA8;
 				image.FileDecoder    = new DDSCompressedDXT4Decoder();
 				break;
 			case DDSImageFormat.DXT5:
-				image.ImagePixelType = ImagePixelFormat.RGBA8;
+				image.PixelType = ImagePixelFormat.RGBA8;
 				image.FileDecoder    = new DDSCompressedDXT5Decoder();
 				break;
 			case DDSImageFormat.LuminanceHigh:
-				image.ImagePixelType = ImagePixelFormat.R16;
+				image.PixelType = ImagePixelFormat.R16;
 				image.FileDecoder    = new DDSUncompressedLuminanceDecoder();
 				break;
 			case DDSImageFormat.Luminance:
-				image.ImagePixelType = ImagePixelFormat.R8;
+				image.PixelType = ImagePixelFormat.R8;
 				image.FileDecoder    = new DDSUncompressedLuminanceDecoder();
 				break;
 			case DDSImageFormat.ARGB:
 			case DDSImageFormat.ABGR:
-				image.ImagePixelType = ImagePixelFormat.RGBA8;
+				image.PixelType = ImagePixelFormat.RGBA8;
 				image.FileDecoder    = new DDSUncompressedRGBADecoder();
 				break;
 			default:

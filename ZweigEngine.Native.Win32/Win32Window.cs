@@ -55,9 +55,8 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	// ReSharper restore InconsistentNaming
 
 	private readonly MessageBus                    m_messageBus;
-	private readonly IServiceProvider              m_serviceProvider;
+	private readonly Win32Synchronization          m_synchronization;
 	private readonly PinnedDelegate<PfnWindowProc> m_proc;
-	private readonly Win32SynchronizationContext   m_sync;
 	private readonly List<IWin32WindowComponent>   m_components;
 	private          IntPtr                        m_owner;
 	private          IntPtr                        m_icon;
@@ -80,12 +79,11 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	private          Win32Message                  m_message;
 	private          Exception?                    m_error;
 
-	public Win32Window(NativeLibraryLoader libraryLoader, MessageBus messageBus, IServiceProvider serviceProvider)
+	public Win32Window(NativeLibraryLoader libraryLoader, MessageBus messageBus, Win32Synchronization synchronization)
 	{
 		m_messageBus      = messageBus;
-		m_serviceProvider = serviceProvider;
+		m_synchronization = synchronization;
 		m_proc            = new PinnedDelegate<PfnWindowProc>(Process, GCHandleType.Normal);
-		m_sync            = new Win32SynchronizationContext();
 		m_components      = new List<IWin32WindowComponent>(16);
 		m_maximum_width   = int.MaxValue;
 		m_maximum_height  = int.MaxValue;
@@ -158,7 +156,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 
 			if (IsAvailable())
 			{
-				m_sync.ExecuteWithoutPending(component.OnAttach);
+				m_synchronization.ExecuteWithoutPending(component.OnAttach);
 			}
 		}
 	}
@@ -167,7 +165,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	{
 		if (m_components.Remove(component) && IsAvailable())
 		{
-			m_sync.ExecuteWithoutPending(component.OnDetach);
+			m_synchronization.ExecuteWithoutPending(component.OnDetach);
 		}
 	}
 
@@ -222,7 +220,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			                          IntPtr.Zero,
 			                          m_owner,
 			                          IntPtr.Zero);
-			
+
 			RethrowError();
 			if (IsAvailable())
 			{
@@ -261,9 +259,8 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			m_maximum_width   = int.MaxValue;
 			m_maximum_height  = int.MaxValue;
 		}
-
 	}
-	
+
 	public void Update()
 	{
 		while (IsAvailable() && PeekMessage(ref m_message, m_handle, 0, 0, Win32PeekMessageFlags.Remove))
@@ -296,6 +293,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			{
 				SetWindowText(m_handle, WINDOW_DEFAULT_TITLE);
 			}
+
 			RethrowError();
 		}
 	}
@@ -355,6 +353,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 				             Win32SetWindowPositionCommands.NoZOrder |
 				             Win32SetWindowPositionCommands.NoActivate);
 			}
+
 			RethrowError();
 		}
 	}
@@ -373,7 +372,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 				             Win32SetWindowPositionCommands.NoZOrder |
 				             Win32SetWindowPositionCommands.NoActivate);
 			}
-			
+
 			RethrowError();
 		}
 	}
@@ -400,34 +399,41 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 
 	private void NotifyWindowUpdate()
 	{
-		var notified = new List<IWin32WindowComponent>();
-		WrapError(() => m_sync.Execute(() =>
+		WrapError(() =>
 		{
+			var notified = new Stack<IWin32WindowComponent>();
 			try
 			{
-				foreach (var component in m_components)
+				m_synchronization.ExecuteWithoutPending(() =>
 				{
-					WrapError(component.OnBeginUpdate);
-					notified.Add(component);
-				}
+					foreach (var component in m_components)
+					{
+						component.OnBeginUpdate();
+						notified.Push(component);
+					}
+				});
 
-				m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowUpdateFrame(this));
+				m_synchronization.Execute(() => { m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowUpdateFrame(this)); });
 			}
 			finally
 			{
-				foreach (var component in notified)
+				m_synchronization.ExecuteWithoutPending(() =>
 				{
-					WrapError(component.OnFinishUpdate);
-				}
+					while (notified.TryPop(out var component))
+					{
+						WrapError(component.OnFinishUpdate);
+					}
+				});
 			}
-		}));
+		});
 	}
 
 	private void NotifyWindowClosing()
 	{
-		WrapError(() => m_sync.Execute(() => { m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowClosing(this)); }));
-		m_sync.ExecuteWithoutPending(() =>
+		m_synchronization.ExecuteWithoutPending(() =>
 		{
+			WrapError(() => m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowClosing(this)));
+
 			foreach (var component in m_components)
 			{
 				WrapError(component.OnDetach);
@@ -437,29 +443,26 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 
 	private void NotifyWindowCreated()
 	{
-		m_sync.ExecuteWithoutPending(() =>
+		m_synchronization.ExecuteWithoutPending(() =>
 		{
 			foreach (var component in m_components)
 			{
 				WrapError(component.OnAttach);
 			}
-		});
 
-		WrapError(() => { m_sync.Execute(() => m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowCreated(this))); });
+			WrapError(() => m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowCreated(this)));
+		});
 	}
 
 	private void NotifyWindowMessage(long lTime, IntPtr hWindow, Win32MessageType uMessage, IntPtr wParam, IntPtr lParam)
 	{
-		WrapError(() =>
+		WrapError(() => m_synchronization.ExecuteWithoutPending(() =>
 		{
-			m_sync.ExecuteWithoutPending(() =>
+			foreach (var component in m_components)
 			{
-				foreach (var component in m_components)
-				{
-					component.OnMessage(lTime, hWindow, uMessage, wParam, lParam);
-				}
-			});
-		});
+				component.OnMessage(lTime, hWindow, uMessage, wParam, lParam);
+			}
+		}));
 	}
 
 	private IntPtr Process(IntPtr hWindow, Win32MessageType uMessage, IntPtr wParam, IntPtr lParam)

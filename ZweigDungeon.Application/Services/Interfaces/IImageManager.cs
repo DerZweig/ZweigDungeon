@@ -1,9 +1,8 @@
-﻿using ZweigEngine.Common.Interfaces.Video;
+﻿using ZweigEngine.Image;
 
 namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IImageManager
 {
-	public void Load(string name);
-	public void Bind(string name, Action<IVideoImage> work);
+	Task<IImageInfo> LoadImage(string name);
 }
