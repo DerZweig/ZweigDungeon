@@ -1,8 +1,9 @@
-﻿using ZweigEngine.Image;
+﻿using ZweigDungeon.Application.Entities.Assets;
+using ZweigEngine.Image;
 
 namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IImageRepository
 {
-	Task<IImageInfo> LoadImage(string name);
+	Task<Image> LoadImage(string name);
 }

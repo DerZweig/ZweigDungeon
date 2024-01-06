@@ -24,7 +24,7 @@ public class ImageRepository : IImageRepository
 		m_images          = new Dictionary<string, Entry>();
 	}
 
-	public Task<IImageInfo> LoadImage(string name) => m_synchronization.Invoke<IImageInfo>(async () =>
+	public Task<Image> LoadImage(string name) => m_synchronization.Invoke(async () =>
 	{
 		var normalized = name.Trim().ToLower();
 		if (m_images.TryGetValue(normalized, out var entry))
