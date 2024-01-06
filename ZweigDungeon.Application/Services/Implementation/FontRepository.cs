@@ -6,13 +6,13 @@ using ZweigEngine.Common.Utility.Concurrency;
 
 namespace ZweigDungeon.Application.Services.Implementation;
 
-public class FontManager : IFontManager
+public class FontRepository : IFontRepository
 {
 	private readonly IGlobalCancellation       m_cancellation;
 	private readonly ExclusiveTaskFactory      m_synchronization;
 	private readonly Dictionary<string, Entry> m_fonts;
 
-	public FontManager(IGlobalCancellation cancellation)
+	public FontRepository(IGlobalCancellation cancellation)
 	{
 		m_cancellation    = cancellation;
 		m_synchronization = new ExclusiveTaskFactory();

@@ -73,6 +73,29 @@ public class Win32Synchronization : IPlatformSynchronization
 		}
 	}
 
+	public void ExecuteWithGuard(Action work)
+	{
+		if (SynchronizationContext.Current == m_context)
+		{
+			work();
+		}
+		else
+		{
+			throw new AccessViolationException("Executing platform work from invalid synchronization context.");
+		}
+	}
+
+	public TResult ExecuteWithGuard<TResult>(Func<TResult> work)
+	{
+		if (SynchronizationContext.Current == m_context)
+		{
+			return work();
+		}
+
+		throw new AccessViolationException("Executing platform work from invalid synchronization context.");
+
+	}
+
 	public Task Invoke(Action work)
 	{
 		return m_factory.StartNew(work);

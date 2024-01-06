@@ -2,7 +2,7 @@
 
 namespace ZweigDungeon.Application.Services.Interfaces;
 
-public interface IImageManager
+public interface IImageRepository
 {
 	Task<IImageInfo> LoadImage(string name);
 }

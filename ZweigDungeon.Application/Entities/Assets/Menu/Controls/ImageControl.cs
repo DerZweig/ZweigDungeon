@@ -1,6 +1,4 @@
-﻿using ZweigEngine.Common.Interfaces.Video;
-
-namespace ZweigDungeon.Application.Entities.Assets.Menu.Controls;
+﻿namespace ZweigDungeon.Application.Entities.Assets.Menu.Controls;
 
 public class ImageControl : BasicControl
 {

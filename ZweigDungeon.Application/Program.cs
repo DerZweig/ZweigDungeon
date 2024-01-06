@@ -38,10 +38,10 @@ internal static class Program
 			}
 
 			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
-			serviceConfig.AddSingleton<IImageManager, ImageManager>();
-			serviceConfig.AddSingleton<IFontManager, FontManager>();
-			serviceConfig.AddSingleton<IMenuManager, MenuManager>();
-			serviceConfig.AddSingleton<ILayoutManager, LayoutManager>();
+			serviceConfig.AddSingleton<IImageRepository, ImageRepository>();
+			serviceConfig.AddSingleton<IFontRepository, FontRepository>();
+			serviceConfig.AddSingleton<IMenuRepository, MenuRepository>();
+			serviceConfig.AddSingleton<ILayoutBuilder, LayoutBuilder>();
 			serviceConfig.AddSingleton<App>();
 
 			using (var services = serviceConfig.Build())

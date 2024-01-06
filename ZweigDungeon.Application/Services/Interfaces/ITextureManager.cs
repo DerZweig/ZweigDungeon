@@ -3,7 +3,9 @@ using ZweigEngine.Common.Interfaces.Video;
 
 namespace ZweigDungeon.Application.Services.Interfaces;
 
-public interface ILayoutManager
+public interface ITextureManager
 {
-	void UpdateLayout(MenuDefinition menu, in VideoRect viewport);
+	public void Clear();
+    public void Upload(Image image);
+	public void Bind(Image image, Action<IVideoImage> work);
 }

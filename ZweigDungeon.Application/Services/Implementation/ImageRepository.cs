@@ -7,7 +7,7 @@ using ZweigEngine.Image.TGA;
 
 namespace ZweigDungeon.Application.Services.Implementation;
 
-public class ImageManager : IImageManager
+public class ImageRepository : IImageRepository
 {
 	private readonly IGlobalCancellation       m_cancellation;
 	private readonly ExclusiveTaskFactory      m_synchronization;
@@ -15,7 +15,7 @@ public class ImageManager : IImageManager
 	private readonly IImageReader              m_tgaImageReader;
 	private readonly Dictionary<string, Entry> m_images;
 
-	public ImageManager(IGlobalCancellation cancellation)
+	public ImageRepository(IGlobalCancellation cancellation)
 	{
 		m_cancellation    = cancellation;
 		m_synchronization = new ExclusiveTaskFactory();

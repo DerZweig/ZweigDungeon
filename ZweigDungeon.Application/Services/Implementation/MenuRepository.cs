@@ -7,13 +7,13 @@ using ZweigEngine.Common.Utility.Concurrency;
 
 namespace ZweigDungeon.Application.Services.Implementation;
 
-public class MenuManager : IMenuManager
+public class MenuRepository : IMenuRepository
 {
 	private readonly IGlobalCancellation       m_cancellation;
 	private readonly ExclusiveTaskFactory      m_synchronization;
 	private readonly Dictionary<string, Entry> m_menus;
 
-	public MenuManager(IGlobalCancellation cancellation)
+	public MenuRepository(IGlobalCancellation cancellation)
 	{
 		m_cancellation    = cancellation;
 		m_synchronization = new ExclusiveTaskFactory();

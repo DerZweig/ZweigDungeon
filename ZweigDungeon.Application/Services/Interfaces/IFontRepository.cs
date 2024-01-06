@@ -2,7 +2,7 @@
 
 namespace ZweigDungeon.Application.Services.Interfaces;
 
-public interface IFontManager
+public interface IFontRepository
 {
 	Task<FontDefinition> LoadFont(string name);
 }

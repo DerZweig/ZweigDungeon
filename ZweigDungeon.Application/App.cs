@@ -9,16 +9,16 @@ namespace ZweigDungeon.Application;
 
 public class App : IDisposable, IWindowListener
 {
-	private readonly IMenuManager    m_menuManager;
-	private readonly ILayoutManager  m_layoutManager;
+	private readonly IMenuRepository m_menuRepository;
+	private readonly ILayoutBuilder  m_layoutBuilder;
 	private readonly IDisposable     m_subscription;
 	private          MenuDefinition? m_activeMenu;
 
-	public App(MessageBus messageBus, IMenuManager menuManager, ILayoutManager layoutManager)
+	public App(MessageBus messageBus, IMenuRepository menuRepository, ILayoutBuilder layoutBuilder)
 	{
-		m_menuManager   = menuManager;
-		m_layoutManager = layoutManager;
-		m_subscription  = messageBus.Subscribe<IWindowListener>(this);
+		m_menuRepository = menuRepository;
+		m_layoutBuilder  = layoutBuilder;
+		m_subscription   = messageBus.Subscribe<IWindowListener>(this);
 	}
 
 	private void ReleaseUnmanagedResources()
@@ -44,7 +44,7 @@ public class App : IDisposable, IWindowListener
 		window.SetMinimumSize(640, 480);
 		window.Show();
 
-		m_activeMenu = await m_menuManager.LoadMenu("Menu/StartupMenu");
+		m_activeMenu = await m_menuRepository.LoadMenu("Menu/StartupMenu");
 	}
 
 	public void WindowClosing(IPlatformWindow window)
@@ -58,7 +58,7 @@ public class App : IDisposable, IWindowListener
 
 		if (m_activeMenu != null)
 		{
-			m_layoutManager.UpdateLayout(m_activeMenu, new VideoRect { Left = 0, Top = 0, Width = width, Height = height });
+			m_layoutBuilder.UpdateLayout(m_activeMenu, new VideoRect { Left = 0, Top = 0, Width = width, Height = height });
 		}
 	}
 }

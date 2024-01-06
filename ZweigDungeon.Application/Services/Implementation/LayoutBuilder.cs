@@ -10,17 +10,17 @@ using ZweigEngine.Common.Utility.Exceptions;
 
 namespace ZweigDungeon.Application.Services.Implementation;
 
-public class LayoutManager : IDisposable, IWindowListener, ILayoutManager
+public class LayoutBuilder : IDisposable, IWindowListener, ILayoutBuilder
 {
-	private readonly IFontManager    m_fontManager;
+	private readonly IFontRepository    m_fontRepository;
 	private readonly IDisposable     m_subscription;
 	private          FontDefinition? m_small;
 	private          FontDefinition? m_medium;
 	private          FontDefinition? m_large;
 
-	public LayoutManager(IFontManager fontManager, MessageBus messageBus)
+	public LayoutBuilder(IFontRepository fontRepository, MessageBus messageBus)
 	{
-		m_fontManager  = fontManager;
+		m_fontRepository  = fontRepository;
 		m_subscription = messageBus.Subscribe<IWindowListener>(this);
 	}
 
@@ -35,16 +35,16 @@ public class LayoutManager : IDisposable, IWindowListener, ILayoutManager
 		GC.SuppressFinalize(this);
 	}
 
-	~LayoutManager()
+	~LayoutBuilder()
 	{
 		ReleaseUnmanagedResources();
 	}
 
 	public async void WindowCreated(IPlatformWindow window)
 	{
-		m_small  = await m_fontManager.LoadFont("Gui/font_large.fnt");
-		m_medium = await m_fontManager.LoadFont("Gui/font_medium.fnt");
-		m_large  = await m_fontManager.LoadFont("Gui/font_large.fnt");
+		m_small  = await m_fontRepository.LoadFont("Gui/font_large.fnt");
+		m_medium = await m_fontRepository.LoadFont("Gui/font_medium.fnt");
+		m_large  = await m_fontRepository.LoadFont("Gui/font_large.fnt");
 	}
 
 	public void WindowClosing(IPlatformWindow window)

@@ -3,7 +3,7 @@ using ZweigEngine.Common.Interfaces.Video;
 
 namespace ZweigDungeon.Application.Services.Interfaces;
 
-public interface IMenuManager
+public interface ILayoutBuilder
 {
-	public Task<MenuDefinition> LoadMenu(string name);
+	void UpdateLayout(MenuDefinition menu, in VideoRect viewport);
 }

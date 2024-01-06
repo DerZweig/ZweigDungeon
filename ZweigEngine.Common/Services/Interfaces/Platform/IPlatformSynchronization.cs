@@ -2,6 +2,8 @@
 
 public interface IPlatformSynchronization
 {
+	void          ExecuteWithGuard(Action work);
+	TResult       ExecuteWithGuard<TResult>(Func<TResult> work);
 	Task          Invoke(Action work);
 	Task          Invoke(Action work, CancellationToken cancellationToken);
 	Task<TResult> Invoke<TResult>(Func<TResult> work);
