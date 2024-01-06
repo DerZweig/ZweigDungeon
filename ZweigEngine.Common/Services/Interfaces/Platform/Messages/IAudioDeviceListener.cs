@@ -1,4 +1,4 @@
-﻿namespace ZweigEngine.Common.Interfaces.Platform.Messages;
+﻿namespace ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 
 public interface IAudioDeviceListener
 {

@@ -1,6 +1,6 @@
-﻿using ZweigEngine.Common.Interfaces.Platform;
-using ZweigEngine.Common.Interfaces.Platform.Constants;
-using ZweigEngine.Common.Interfaces.Platform.Messages;
+﻿using ZweigEngine.Common.Services.Interfaces.Platform;
+using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
+using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Native.Win32.Constants;
 

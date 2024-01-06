@@ -2,9 +2,9 @@
 using System.Runtime.InteropServices;
 using ZweigDungeon.Application.Services.Implementation;
 using ZweigDungeon.Application.Services.Interfaces;
-using ZweigEngine.Common.Interfaces.Platform;
 using ZweigEngine.Common.Interfaces.Video;
 using ZweigEngine.Common.Services;
+using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Libraries;
 using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Native.OpenGL;
@@ -41,7 +41,6 @@ internal static class Program
 			serviceConfig.AddSingleton<IImageRepository, ImageRepository>();
 			serviceConfig.AddSingleton<IFontRepository, FontRepository>();
 			serviceConfig.AddSingleton<IMenuRepository, MenuRepository>();
-			serviceConfig.AddSingleton<ILayoutBuilder, LayoutBuilder>();
 			serviceConfig.AddSingleton<App>();
 
 			using (var services = serviceConfig.Build())

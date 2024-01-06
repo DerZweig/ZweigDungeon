@@ -1,4 +1,4 @@
-﻿using ZweigEngine.Common.Interfaces.Platform;
+﻿using ZweigEngine.Common.Services.Interfaces.Platform;
 
 namespace ZweigEngine.Native.Win32;
 

@@ -1,4 +1,4 @@
-﻿namespace ZweigEngine.Common.Interfaces.Platform;
+﻿namespace ZweigEngine.Common.Services.Interfaces.Platform;
 
 public interface IPlatformWindow
 {

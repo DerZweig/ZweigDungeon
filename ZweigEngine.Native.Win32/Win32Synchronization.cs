@@ -1,5 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using ZweigEngine.Common.Interfaces.Platform;
+using ZweigEngine.Common.Services.Interfaces.Platform;
 
 namespace ZweigEngine.Native.Win32;
 
@@ -93,7 +93,32 @@ public class Win32Synchronization : IPlatformSynchronization
 		}
 
 		throw new AccessViolationException("Executing platform work from invalid synchronization context.");
+	}
 
+	public void ExecuteWithGuard(Func<Task> work)
+	{
+		if (SynchronizationContext.Current == m_context)
+		{
+			var task = work();
+			WaitForTask(task);
+			task.GetAwaiter().GetResult();
+		}
+		else
+		{
+			throw new AccessViolationException("Executing platform work from invalid synchronization context.");
+		}
+	}
+
+	public TResult ExecuteWithGuard<TResult>(Func<Task<TResult>> work)
+	{
+		if (SynchronizationContext.Current == m_context)
+		{
+			var task = work();
+			WaitForTask(task);
+			return task.GetAwaiter().GetResult();
+		}
+
+		throw new AccessViolationException("Executing platform work from invalid synchronization context.");
 	}
 
 	public Task Invoke(Action work)
@@ -134,6 +159,30 @@ public class Win32Synchronization : IPlatformSynchronization
 	public Task<TResult> Invoke<TResult>(Func<Task<TResult>> work, CancellationToken cancellationToken)
 	{
 		return m_factory.StartNew(work, cancellationToken).Unwrap();
+	}
+
+	private void WaitForTask(Task task)
+	{
+		var error = (Exception?)null;
+		while (!(task.IsCanceled || task.IsCompleted || task.IsFaulted))
+		{
+			if (m_queue.TryDequeue(out var work))
+			{
+				try
+				{
+					work();
+				}
+				catch (Exception ex)
+				{
+					error = ex;
+				}
+			}
+		}
+
+		if (error != null)
+		{
+			throw error;
+		}
 	}
 
 	private class Context : SynchronizationContext

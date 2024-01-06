@@ -1,6 +1,6 @@
-﻿using ZweigEngine.Common.Interfaces.Platform.Constants;
+﻿using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
 
-namespace ZweigEngine.Common.Interfaces.Platform.Messages;
+namespace ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 
 public interface IKeyboardListener
 {

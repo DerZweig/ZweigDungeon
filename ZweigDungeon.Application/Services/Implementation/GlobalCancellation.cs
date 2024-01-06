@@ -1,6 +1,6 @@
 ﻿using ZweigDungeon.Application.Services.Interfaces;
-using ZweigEngine.Common.Interfaces.Platform;
-using ZweigEngine.Common.Interfaces.Platform.Messages;
+using ZweigEngine.Common.Services.Interfaces.Platform;
+using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 
 namespace ZweigDungeon.Application.Services.Implementation;
 

@@ -1,7 +1,7 @@
 ﻿using ZweigDungeon.Application.Entities.Assets;
 using ZweigDungeon.Application.Services.Interfaces;
-using ZweigEngine.Common.Interfaces.Platform;
 using ZweigEngine.Common.Interfaces.Video;
+using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Image;
 
 namespace ZweigDungeon.Application.Services.Implementation;
@@ -14,9 +14,9 @@ public class TextureManager : IDisposable, ITextureManager
 
 	public TextureManager(IVideoContext video, IPlatformSynchronization synchronization)
 	{
-		m_video                = video;
+		m_video           = video;
 		m_synchronization = synchronization;
-		m_textures             = new Dictionary<Image, IVideoImage>();
+		m_textures        = new Dictionary<Image, IVideoImage>();
 	}
 
 	private void ReleaseUnmanagedResources()

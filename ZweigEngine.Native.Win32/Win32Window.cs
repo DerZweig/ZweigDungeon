@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using ZweigEngine.Common.Interfaces.Platform;
-using ZweigEngine.Common.Interfaces.Platform.Messages;
+using ZweigEngine.Common.Services.Interfaces.Platform;
+using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 using ZweigEngine.Common.Services.Libraries;
 using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Common.Utility.Interop;
