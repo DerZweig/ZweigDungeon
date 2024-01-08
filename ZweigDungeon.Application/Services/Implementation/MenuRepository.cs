@@ -82,7 +82,7 @@ public class MenuRepository : IMenuRepository
 					break;
 				case TextControl text:
 					text.FontSize = ParseEnumProperty(node, nameof(TextControl.FontSize), FontSize.Small);
-					text.Text     = ParseStringProperty(node, nameof(TextControl.Text)) ?? string.Empty;
+					text.Text     = ParseStringProperty(node, nameof(TextControl.Text)) ?? node.Value;
 					break;
 				case PanelControl panel:
 					panel.Layout = ParseEnumProperty(node, nameof(PanelControl.Layout), PanelLayout.None);
@@ -253,7 +253,7 @@ public class MenuRepository : IMenuRepository
 						break;
 					case TextControl text:
 						text.FontSize = ParseEnumProperty(childNode, nameof(TextControl.FontSize), FontSize.Small);
-						text.Text     = ParseStringProperty(childNode, nameof(TextControl.Text)) ?? string.Empty;
+						text.Text     = ParseStringProperty(childNode, nameof(TextControl.Text)) ?? childNode.Value;
 						break;
 					case PanelControl panel:
 						panel.Layout = ParseEnumProperty(childNode, nameof(PanelControl.Layout), PanelLayout.None);

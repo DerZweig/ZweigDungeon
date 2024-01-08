@@ -1,5 +1,4 @@
 ﻿using ZweigDungeon.Application.Entities.Assets.Menu.Constants;
-using ZweigEngine.Common.Interfaces.Video;
 
 namespace ZweigDungeon.Application.Entities.Assets.Menu.Controls;
 
@@ -11,7 +10,6 @@ public abstract class BasicControl
 		VerticalAlignment   = VerticalAlignment.Top;
 	}
 
-	public VideoRect           LayoutRect          { get; set; }
 	public HorizontalAlignment HorizontalAlignment { get; set; }
 	public VerticalAlignment   VerticalAlignment   { get; set; }
 	public int?                MinimumWidth        { get; set; }
