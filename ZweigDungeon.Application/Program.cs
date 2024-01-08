@@ -40,9 +40,7 @@ internal static class Program
 			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
 			serviceConfig.AddSingleton<IImageRepository, ImageRepository>();
 			serviceConfig.AddSingleton<IFontRepository, FontRepository>();
-			serviceConfig.AddSingleton<IMenuRepository, MenuRepository>();
 			serviceConfig.AddSingleton<ITextureManager, TextureManager>();
-			serviceConfig.AddSingleton<IMenuRenderer, MenuRenderer>();
 			serviceConfig.AddSingleton<App>();
 
 			using (var services = serviceConfig.Build())

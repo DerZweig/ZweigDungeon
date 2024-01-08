@@ -40,13 +40,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\Menu\StartupMenu.xml" />
-      <AdditionalFiles Include="Data\Menu\StartupMenu.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Entities\Layout\" />
       <Folder Include="Services\" />
     </ItemGroup>
 

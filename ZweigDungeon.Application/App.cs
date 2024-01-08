@@ -1,24 +1,18 @@
-﻿using ZweigDungeon.Application.Entities.Assets;
-using ZweigDungeon.Application.Services.Interfaces;
-using ZweigEngine.Common.Services.Interfaces.Platform;
+﻿using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
-using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Messages;
 
 namespace ZweigDungeon.Application;
 
 public class App : IDisposable, IWindowListener
 {
-	private readonly IMenuRepository m_menuRepository;
-	private readonly IMenuRenderer   m_menuRenderer;
-	private readonly IDisposable     m_subscription;
-	private          Menu? m_menuActive;
+	private readonly IPlatformSynchronization m_synchronization;
+	private readonly IDisposable              m_subscription;
 
-	public App(MessageBus messageBus, IMenuRepository menuRepository, IMenuRenderer menuRenderer)
+	public App(MessageBus messageBus, IPlatformSynchronization synchronization)
 	{
-		m_menuRepository = menuRepository;
-		m_menuRenderer   = menuRenderer;
-		m_subscription   = messageBus.Subscribe<IWindowListener>(this);
+		m_synchronization = synchronization;
+		m_subscription    = messageBus.Subscribe<IWindowListener>(this);
 	}
 
 	private void ReleaseUnmanagedResources()
@@ -43,7 +37,6 @@ public class App : IDisposable, IWindowListener
 		window.SetStyle(true, true);
 		window.SetMinimumSize(640, 480);
 		window.Show();
-		m_menuActive = await m_menuRepository.LoadMenu("Menu/StartupMenu");
 	}
 
 	public void WindowClosing(IPlatformWindow window)
@@ -54,11 +47,5 @@ public class App : IDisposable, IWindowListener
 	{
 		var width    = window.GetViewportWidth();
 		var height   = window.GetViewportHeight();
-		var viewport = new VideoRect { Left = 0, Top = 0, Width = width, Height = height };
-
-		if (m_menuActive != null)
-		{
-			m_menuRenderer.Draw(m_menuActive, viewport);
-		}
 	}
 }
