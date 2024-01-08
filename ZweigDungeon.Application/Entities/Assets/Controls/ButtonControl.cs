@@ -1,4 +1,4 @@
-﻿namespace ZweigDungeon.Application.Entities.Assets.Menu.Controls;
+﻿namespace ZweigDungeon.Application.Entities.Assets.Controls;
 
 public class ButtonControl : BasicControl
 {

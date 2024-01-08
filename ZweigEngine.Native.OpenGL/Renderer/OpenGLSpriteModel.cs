@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using ZweigEngine.Common.Interfaces.Libraries;
-using ZweigEngine.Common.Interfaces.Video;
+using ZweigEngine.Common.Services.Interfaces.Libraries;
+using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Utility.Interop;
 using ZweigEngine.Native.OpenGL.Constants;
 using ZweigEngine.Native.OpenGL.Prototypes;

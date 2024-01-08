@@ -1,4 +1,4 @@
-﻿namespace ZweigDungeon.Application.Entities.Assets.Menu.Constants;
+﻿namespace ZweigDungeon.Application.Entities.Assets.Constants;
 
 public enum VerticalAlignment : uint
 {

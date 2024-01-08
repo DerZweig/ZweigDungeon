@@ -1,4 +1,4 @@
-﻿namespace ZweigEngine.Common.Interfaces.Libraries;
+﻿namespace ZweigEngine.Common.Services.Interfaces.Libraries;
 
 public interface ICustomFunctionLoader
 {

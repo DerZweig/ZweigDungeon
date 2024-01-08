@@ -1,7 +1,7 @@
 ﻿using System.Xml.Linq;
 using ZweigDungeon.Application.Entities.Assets;
-using ZweigDungeon.Application.Entities.Assets.Menu.Constants;
-using ZweigDungeon.Application.Entities.Assets.Menu.Controls;
+using ZweigDungeon.Application.Entities.Assets.Constants;
+using ZweigDungeon.Application.Entities.Assets.Controls;
 using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Utility.Concurrency;
 
@@ -20,7 +20,7 @@ public class MenuRepository : IMenuRepository
 		m_menus           = new Dictionary<string, Entry>();
 	}
 
-	public Task<MenuDefinition> LoadMenu(string name) => m_synchronization.Invoke(async () =>
+	public Task<Menu> LoadMenu(string name) => m_synchronization.Invoke(async () =>
 	{
 		var normalized = name.Trim().ToLower();
 		if (m_menus.TryGetValue(normalized, out var entry))
@@ -43,7 +43,7 @@ public class MenuRepository : IMenuRepository
 		return entry.Menu ?? throw new NullReferenceException();
 	}, m_cancellation.Token);
 
-	private async Task<MenuDefinition> LoadMenuDefinition(string name, CancellationToken cancellationToken)
+	private async Task<Menu> LoadMenuDefinition(string name, CancellationToken cancellationToken)
 	{
 		var path     = Path.Combine("Data", name.Trim());
 		var xmlPath  = Path.ChangeExtension(path, ".xml");
@@ -56,7 +56,7 @@ public class MenuRepository : IMenuRepository
 			throw new FileLoadException("Menu definition does not contain valid root.");
 		}
 
-		var menu    = new MenuDefinition();
+		var menu    = new Menu();
 		var pending = new Queue<(BasicControl control, XElement node)>();
 		pending.Enqueue(new(menu.Panel, root));
 
@@ -358,6 +358,6 @@ public class MenuRepository : IMenuRepository
 	private class Entry
 	{
 		public Task?           Pending;
-		public MenuDefinition? Menu;
+		public Menu? Menu;
 	}
 }

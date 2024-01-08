@@ -1,4 +1,4 @@
-﻿namespace ZweigDungeon.Application.Entities.Assets.Font;
+﻿namespace ZweigDungeon.Application.Entities.Assets;
 
 public readonly struct FontKerning
 {

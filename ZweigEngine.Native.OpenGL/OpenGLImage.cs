@@ -1,5 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-using ZweigEngine.Common.Interfaces.Video;
+using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Utility.Interop;
 
 namespace ZweigEngine.Native.OpenGL;

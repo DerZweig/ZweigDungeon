@@ -1,6 +1,6 @@
-﻿using ZweigEngine.Common.Interfaces.Video;
+﻿using ZweigEngine.Common.Services.Interfaces.Video;
 
-namespace ZweigDungeon.Application.Entities.Assets.Font;
+namespace ZweigDungeon.Application.Entities.Assets;
 
 public class FontChar
 {

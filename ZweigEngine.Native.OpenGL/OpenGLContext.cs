@@ -1,7 +1,7 @@
-﻿using ZweigEngine.Common.Interfaces.Libraries;
-using ZweigEngine.Common.Interfaces.Video;
+﻿using ZweigEngine.Common.Services.Interfaces.Libraries;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
+using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Common.Utility.Exceptions;
 using ZweigEngine.Native.OpenGL.Constants;

@@ -1,5 +1,5 @@
 ﻿using ZweigDungeon.Application.Entities.Assets;
-using ZweigEngine.Common.Interfaces.Video;
+using ZweigEngine.Common.Services.Interfaces.Video;
 
 namespace ZweigDungeon.Application.Services.Interfaces;
 

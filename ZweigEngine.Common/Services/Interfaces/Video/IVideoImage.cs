@@ -1,4 +1,4 @@
-﻿namespace ZweigEngine.Common.Interfaces.Video;
+﻿namespace ZweigEngine.Common.Services.Interfaces.Video;
 
 public interface IVideoImage : IDisposable
 {

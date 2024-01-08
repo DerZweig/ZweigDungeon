@@ -1,12 +1,11 @@
 ﻿using System.Text;
 using ZweigDungeon.Application.Entities.Assets;
-using ZweigDungeon.Application.Entities.Assets.Font;
-using ZweigDungeon.Application.Entities.Assets.Menu.Constants;
-using ZweigDungeon.Application.Entities.Assets.Menu.Controls;
+using ZweigDungeon.Application.Entities.Assets.Constants;
+using ZweigDungeon.Application.Entities.Assets.Controls;
 using ZweigDungeon.Application.Services.Interfaces;
-using ZweigEngine.Common.Interfaces.Video;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
+using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Common.Utility.Exceptions;
 
@@ -18,10 +17,10 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 	private readonly IFontRepository                       m_fontRepository;
 	private readonly IImageRepository                      m_imageRepository;
 	private readonly ITextureManager                       m_textureManager;
-	private readonly Dictionary<MenuDefinition, MenuEntry> m_processed;
-	private          FontDefinition?                       m_smallFontDefinition;
-	private          FontDefinition?                       m_mediumFontDefinition;
-	private          FontDefinition?                       m_largeFontDefinition;
+	private readonly Dictionary<Menu, MenuEntry> m_processed;
+	private          Font?                       m_smallFontDefinition;
+	private          Font?                       m_mediumFontDefinition;
+	private          Font?                       m_largeFontDefinition;
 	private          Image?                                m_smallFontImage;
 	private          Image?                                m_mediumFontImage;
 	private          Image?                                m_largeFontImage;
@@ -32,7 +31,7 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 		m_fontRepository  = fontRepository;
 		m_imageRepository = imageRepository;
 		m_textureManager  = textureManager;
-		m_processed       = new Dictionary<MenuDefinition, MenuEntry>();
+		m_processed       = new Dictionary<Menu, MenuEntry>();
 	}
 
 	private void ReleaseUnmanagedResources()
@@ -73,7 +72,7 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 	{
 	}
 
-	public void Draw(MenuDefinition menu, in VideoRect viewport)
+	public void Draw(Menu menu, in VideoRect viewport)
 	{
 		if (m_smallFontDefinition == null ||
 		    m_mediumFontDefinition == null ||
@@ -150,7 +149,7 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 		UpdateTextLayoutString(texts);
 	}
 
-	private static void BuildHierarchy(MenuEntry cached, MenuDefinition menu)
+	private static void BuildHierarchy(MenuEntry cached, Menu menu)
 	{
 		var unwind = new Queue<PanelEntry>();
 		unwind.Enqueue(new PanelEntry(menu.Panel)
@@ -457,7 +456,7 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 		};
 	}
 
-	private static int MeasureString(FontDefinition fontDefinition, string word)
+	private static int MeasureString(Font font, string word)
 	{
 		var wordSize = 0;
 		using (var enumerator = word.GetEnumerator())
@@ -469,9 +468,9 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 				{
 					var nextChar = enumerator.Current;
 					var kerning  = new FontKerning(currentChar, nextChar);
-					wordSize += MeasureCharacter(fontDefinition, currentChar);
+					wordSize += MeasureCharacter(font, currentChar);
 
-					if (fontDefinition.Kernings.TryGetValue(kerning, out var amount))
+					if (font.Kernings.TryGetValue(kerning, out var amount))
 					{
 						wordSize += amount;
 					}
@@ -479,16 +478,16 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 					currentChar = nextChar;
 				}
 
-				wordSize += MeasureCharacter(fontDefinition, currentChar);
+				wordSize += MeasureCharacter(font, currentChar);
 			}
 		}
 
 		return wordSize;
 	}
 
-	private static int MeasureCharacter(FontDefinition fontDefinition, char character)
+	private static int MeasureCharacter(Font font, char character)
 	{
-		if (fontDefinition.Chars.TryGetValue(character, out var charInfo) || fontDefinition.Chars.TryGetValue(' ', out charInfo))
+		if (font.Chars.TryGetValue(character, out var charInfo) || font.Chars.TryGetValue(' ', out charInfo))
 		{
 			return charInfo.Advance + charInfo.OffsetLeft;
 		}
@@ -496,7 +495,7 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 		return 0;
 	}
 
-	private static void DrawText(FontDefinition font, IVideoImage texture, TextEntry entry, in VideoColor color)
+	private static void DrawText(Font font, IVideoImage texture, TextEntry entry, in VideoColor color)
 	{
 		var top  = entry.Rect.Top;
 		var clip = entry.Rect;
@@ -541,7 +540,7 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 		}
 	}
 
-	private static void DrawString(FontDefinition font, IVideoImage texture, string text, int left, int top, in VideoColor color, in VideoRect clip)
+	private static void DrawString(Font font, IVideoImage texture, string text, int left, int top, in VideoColor color, in VideoRect clip)
 	{
 		using (var enumerator = text.GetEnumerator())
 		{
@@ -567,7 +566,7 @@ public class MenuRenderer : IDisposable, IWindowListener, IMenuRenderer
 		}
 	}
 
-	private static int DrawCharacter(FontDefinition font, char character, IVideoImage texture, int left, int top, in VideoRect clip, in VideoColor color)
+	private static int DrawCharacter(Font font, char character, IVideoImage texture, int left, int top, in VideoRect clip, in VideoColor color)
 	{
 		if (font.Chars.TryGetValue(character, out var charInfo) || font.Chars.TryGetValue(' ', out charInfo))
 		{

@@ -1,10 +1,10 @@
-﻿using ZweigDungeon.Application.Entities.Assets.Menu.Controls;
+﻿using ZweigDungeon.Application.Entities.Assets.Controls;
 
 namespace ZweigDungeon.Application.Entities.Assets;
 
-public class MenuDefinition
+public class Menu
 {
-	public MenuDefinition()
+	public Menu()
 	{
 		Panel = new PanelControl();
 	}

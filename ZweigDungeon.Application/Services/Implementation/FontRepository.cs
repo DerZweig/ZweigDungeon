@@ -1,7 +1,6 @@
 ﻿using ZweigDungeon.Application.Entities.Assets;
-using ZweigDungeon.Application.Entities.Assets.Font;
 using ZweigDungeon.Application.Services.Interfaces;
-using ZweigEngine.Common.Interfaces.Video;
+using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Utility.Concurrency;
 
 namespace ZweigDungeon.Application.Services.Implementation;
@@ -19,7 +18,7 @@ public class FontRepository : IFontRepository
 		m_fonts           = new Dictionary<string, Entry>();
 	}
 
-	public Task<FontDefinition> LoadFont(string name) => m_synchronization.Invoke(async () =>
+	public Task<Font> LoadFont(string name) => m_synchronization.Invoke(async () =>
 	{
 		var normalized = name.Trim().ToLower();
 		if (m_fonts.TryGetValue(normalized, out var entry))
@@ -42,7 +41,7 @@ public class FontRepository : IFontRepository
 		return entry.Font ?? throw new NullReferenceException();
 	}, m_cancellation.Token);
 
-	private async Task<FontDefinition> LoadFontDefinition(string name)
+	private async Task<Font> LoadFontDefinition(string name)
 	{
 		var path       = Path.Combine("Data", name.Trim());
 		var fntPath    = Path.ChangeExtension(path, ".fnt");
@@ -113,7 +112,7 @@ public class FontRepository : IFontRepository
 			}
 		}
 
-		return new FontDefinition
+		return new Font
 		{
 			Chars      = characters,
 			Kernings   = kernings,
@@ -147,7 +146,7 @@ public class FontRepository : IFontRepository
 	private class Entry
 	{
 		public Task? Pending { get; set; }
-		public FontDefinition? Font    { get; set; }
+		public Font? Font    { get; set; }
 	}
 
 	private class ScriptElement

@@ -4,5 +4,5 @@ namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IMenuRepository
 {
-	public Task<MenuDefinition> LoadMenu(string name);
+	public Task<Menu> LoadMenu(string name);
 }

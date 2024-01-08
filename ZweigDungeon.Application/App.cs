@@ -1,8 +1,8 @@
 ﻿using ZweigDungeon.Application.Entities.Assets;
 using ZweigDungeon.Application.Services.Interfaces;
-using ZweigEngine.Common.Interfaces.Video;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
+using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Messages;
 
 namespace ZweigDungeon.Application;
@@ -12,7 +12,7 @@ public class App : IDisposable, IWindowListener
 	private readonly IMenuRepository m_menuRepository;
 	private readonly IMenuRenderer   m_menuRenderer;
 	private readonly IDisposable     m_subscription;
-	private          MenuDefinition? m_menuActive;
+	private          Menu? m_menuActive;
 
 	public App(MessageBus messageBus, IMenuRepository menuRepository, IMenuRenderer menuRenderer)
 	{

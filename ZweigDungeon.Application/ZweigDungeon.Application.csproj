@@ -46,6 +46,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Entities\Layout\" />
       <Folder Include="Services\" />
     </ItemGroup>
 

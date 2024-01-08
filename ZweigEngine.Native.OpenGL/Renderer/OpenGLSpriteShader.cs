@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using ZweigEngine.Common.Interfaces.Libraries;
+using ZweigEngine.Common.Services.Interfaces.Libraries;
 using ZweigEngine.Native.OpenGL.Constants;
 using ZweigEngine.Native.OpenGL.Prototypes;
 

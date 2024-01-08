@@ -4,5 +4,5 @@ namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IFontRepository
 {
-	Task<FontDefinition> LoadFont(string name);
+	Task<Font> LoadFont(string name);
 }
