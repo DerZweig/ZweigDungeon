@@ -5,5 +5,5 @@ namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IImageRepository
 {
-	Task<Image> LoadImage(string name);
+	Task<Image> LoadImage(string path);
 }

@@ -18,9 +18,9 @@ public class FontRepository : IFontRepository
 		m_fonts           = new Dictionary<string, Entry>();
 	}
 
-	public Task<Font> LoadFont(string name) => m_synchronization.Invoke(async () =>
+	public Task<Font> LoadFont(string path) => m_synchronization.Invoke(async () =>
 	{
-		var normalized = name.Trim().ToLower();
+		var normalized = path.Trim().ToLower();
 		if (m_fonts.TryGetValue(normalized, out var entry))
 		{
 			if (entry.Pending != null)
@@ -34,17 +34,23 @@ public class FontRepository : IFontRepository
 		entry = new Entry();
 		m_fonts.Add(normalized, entry);
 
-		var worker = LoadFontDefinition(name);
-		entry.Pending = worker;
-		entry.Font    = await worker;
-		entry.Pending = null;
-		return entry.Font ?? throw new NullReferenceException();
+		try
+		{
+			var worker = LoadFontDefinition(path);
+			entry.Pending = worker;
+			entry.Font    = await worker;
+			return entry.Font ?? throw new NullReferenceException();
+		}
+		finally
+		{
+			entry.Pending = null;
+		}
 	}, m_cancellation.Token);
 
-	private async Task<Font> LoadFontDefinition(string name)
+	private async Task<Font> LoadFontDefinition(string path)
 	{
-		var path       = Path.Combine("Data", name.Trim());
-		var fntPath    = Path.ChangeExtension(path, ".fnt");
+		var dataPath   = Path.Combine("Data", path.Trim());
+		var fntPath    = Path.ChangeExtension(dataPath, ".fnt");
 		var fontScript = await File.ReadAllTextAsync(fntPath, m_cancellation.Token);
 		var parsed     = ParseFontDefinition(fontScript);
 

@@ -4,12 +4,10 @@ namespace ZweigDungeon.Application;
 
 public class App : IDisposable
 {
-	private readonly IPlatformSynchronization m_synchronization;
-	private readonly IPlatformWindow          m_window;
+	private readonly IPlatformWindow m_window;
 
-	public App(IPlatformSynchronization synchronization, IPlatformWindow window)
+	public App(IPlatformWindow window)
 	{
-		m_synchronization  =  synchronization;
 		m_window           =  window;
 		m_window.OnCreated += HandleWindowCreated;
 		m_window.OnClosing += HandleWindowClosing;
@@ -31,7 +29,7 @@ public class App : IDisposable
 		ReleaseUnmanagedResources();
 	}
 
-	private void HandleWindowCreated(IPlatformWindow window)
+	private async void HandleWindowCreated(IPlatformWindow window)
 	{
 		window.SetTitle("ZweigDungeon");
 		window.SetStyle(true, true);

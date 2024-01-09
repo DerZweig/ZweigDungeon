@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using ZweigDungeon.Application.Entities.Menu;
+using ZweigDungeon.Application.Entities;
 using ZweigDungeon.Application.Services.Implementation;
 using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services;
@@ -41,6 +41,7 @@ internal static class Program
 			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
 			serviceConfig.AddSingleton<IImageRepository, ImageRepository>();
 			serviceConfig.AddSingleton<IFontRepository, FontRepository>();
+			serviceConfig.AddSingleton<IPanelRepository, PanelRepository>();
 			serviceConfig.AddSingleton<ITextureManager, TextureManager>();
 			serviceConfig.AddSingleton<App>();
 

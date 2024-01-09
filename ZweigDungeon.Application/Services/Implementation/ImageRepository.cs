@@ -24,9 +24,9 @@ public class ImageRepository : IImageRepository
 		m_images          = new Dictionary<string, Entry>();
 	}
 
-	public Task<Image> LoadImage(string name) => m_synchronization.Invoke(async () =>
+	public Task<Image> LoadImage(string path) => m_synchronization.Invoke(async () =>
 	{
-		var normalized = name.Trim().ToLower();
+		var normalized = path.Trim().ToLower();
 		if (m_images.TryGetValue(normalized, out var entry))
 		{
 			if (entry.Pending != null)
@@ -40,18 +40,24 @@ public class ImageRepository : IImageRepository
 		entry = new Entry();
 		m_images.Add(normalized, entry);
 
-		var worker = LoadImageFile(name);
-		entry.Pending = worker;
-		entry.Image   = await worker;
-		entry.Pending = null;
-		return entry.Image ?? throw new NullReferenceException();
+		try
+		{
+			var worker = LoadImageFile(path);
+			entry.Pending = worker;
+			entry.Image   = await worker;
+			return entry.Image ?? throw new NullReferenceException();
+		}
+		finally
+		{
+			entry.Pending = null;
+		}
 	}, m_cancellation.Token);
 
-	private async Task<Image> LoadImageFile(string name)
+	private async Task<Image> LoadImageFile(string path)
 	{
-		var path              = Path.Combine("Data", name.Trim());
-		var ddsPath           = Path.ChangeExtension(path, ".dds");
-		var tgaPath           = Path.ChangeExtension(path, ".tga");
+		var dataPath          = Path.Combine("Data", path.Trim());
+		var ddsPath           = Path.ChangeExtension(dataPath, ".dds");
+		var tgaPath           = Path.ChangeExtension(dataPath, ".tga");
 		var info              = (IImageInfo?)null;
 		var data              = (IReadOnlyList<byte>?)null;
 		var cancellationToken = m_cancellation.Token;
@@ -75,7 +81,7 @@ public class ImageRepository : IImageRepository
 
 		if (info == null || data == null)
 		{
-			throw new FileLoadException($"Couldn't load image {name}");
+			throw new FileLoadException($"Couldn't load image {path}");
 		}
 
 		return new Image

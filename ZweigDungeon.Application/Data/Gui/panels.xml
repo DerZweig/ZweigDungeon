@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Panels>
+    <Panel name="main.popup" rect="0,0,96,96" border="16"/>
+</Panels>
