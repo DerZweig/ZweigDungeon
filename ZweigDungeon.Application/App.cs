@@ -1,23 +1,23 @@
 ﻿using ZweigEngine.Common.Services.Interfaces.Platform;
-using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
-using ZweigEngine.Common.Services.Messages;
 
 namespace ZweigDungeon.Application;
 
-public class App : IDisposable, IWindowListener
+public class App : IDisposable
 {
 	private readonly IPlatformSynchronization m_synchronization;
-	private readonly IDisposable              m_subscription;
+	private readonly IPlatformWindow          m_window;
 
-	public App(MessageBus messageBus, IPlatformSynchronization synchronization)
+	public App(IPlatformSynchronization synchronization, IPlatformWindow window)
 	{
-		m_synchronization = synchronization;
-		m_subscription    = messageBus.Subscribe<IWindowListener>(this);
+		m_synchronization  =  synchronization;
+		m_window           =  window;
+		m_window.OnCreated += HandleWindowCreated;
+		m_window.OnClosing += HandleWindowClosing;
+		m_window.OnUpdate  += HandleWindowUpdate;
 	}
 
 	private void ReleaseUnmanagedResources()
 	{
-		m_subscription.Dispose();
 	}
 
 	public void Dispose()
@@ -31,7 +31,7 @@ public class App : IDisposable, IWindowListener
 		ReleaseUnmanagedResources();
 	}
 
-	public async void WindowCreated(IPlatformWindow window)
+	private void HandleWindowCreated(IPlatformWindow window)
 	{
 		window.SetTitle("ZweigDungeon");
 		window.SetStyle(true, true);
@@ -39,13 +39,13 @@ public class App : IDisposable, IWindowListener
 		window.Show();
 	}
 
-	public void WindowClosing(IPlatformWindow window)
+	private void HandleWindowClosing(IPlatformWindow window)
 	{
 	}
 
-	public void WindowUpdateFrame(IPlatformWindow window)
+	private void HandleWindowUpdate(IPlatformWindow window)
 	{
-		var width    = window.GetViewportWidth();
-		var height   = window.GetViewportHeight();
+		var width  = window.GetViewportWidth();
+		var height = window.GetViewportHeight();
 	}
 }

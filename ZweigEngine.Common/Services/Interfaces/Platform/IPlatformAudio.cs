@@ -2,5 +2,5 @@
 
 public interface IPlatformAudio
 {
-	string Name { get; }
+	string GetDeviceName();
 }

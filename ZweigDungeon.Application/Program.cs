@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using ZweigDungeon.Application.Entities.Menu;
 using ZweigDungeon.Application.Services.Implementation;
 using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Libraries;
-using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Native.OpenGL;
 using ZweigEngine.Native.Win32;
 
@@ -19,7 +19,6 @@ internal static class Program
 		try
 		{
 			var serviceConfig = new ServiceConfiguration();
-			serviceConfig.AddSingleton<MessageBus>();
 			serviceConfig.AddSingleton<NativeLibraryLoader>();
 			serviceConfig.AddSingleton<IVideoContext, OpenGLContext>();
 
@@ -36,6 +35,8 @@ internal static class Program
 			{
 				throw new NotSupportedException("Platform is not implemented");
 			}
+			
+			serviceConfig.AddSingleton<CurrentMenu>();
 
 			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
 			serviceConfig.AddSingleton<IImageRepository, ImageRepository>();

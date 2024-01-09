@@ -42,8 +42,4 @@
       <None Remove="Data\Menu\StartupMenu.xml" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Services\" />
-    </ItemGroup>
-
 </Project>

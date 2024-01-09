@@ -1,8 +1,6 @@
 ﻿using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
-using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 using ZweigEngine.Common.Services.Libraries;
-using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Native.Win32.Constants;
 using ZweigEngine.Native.Win32.Prototypes;
 
@@ -16,7 +14,6 @@ public sealed class Win32Keyboard : IDisposable, IPlatformKeyboard, IWin32Window
 	private static readonly KeyboardKey[] g_mapper;
 	private static readonly KeyboardKey[] g_allKeys;
 
-	private readonly MessageBus  m_messageBus;
 	private readonly Win32Window m_window;
 	private readonly bool[]      m_currentStates;
 
@@ -156,9 +153,8 @@ public sealed class Win32Keyboard : IDisposable, IPlatformKeyboard, IWin32Window
 		g_mapper[0x04A] = KeyboardKey.KeypadSubtract;
 	}
 
-	public Win32Keyboard(NativeLibraryLoader libraryLoader, MessageBus messageBus, Win32Window window)
+	public Win32Keyboard(NativeLibraryLoader libraryLoader, Win32Window window)
 	{
-		m_messageBus    = messageBus;
 		m_window        = window;
 		m_currentStates = new bool[KEYBOARD_TABLES_SIZE];
 
@@ -183,6 +179,10 @@ public sealed class Win32Keyboard : IDisposable, IPlatformKeyboard, IWin32Window
 	{
 		ReleaseUnmanagedResources();
 	}
+
+	public event PlatformKeyPressedDelegate?  OnKeyPressed;
+	public event PlatformKeyReleasedDelegate? OnKeyReleased;
+	public event PlatformKeyTypedDelegate?    OnKeyTyped;
 
 	public bool IsKeyPressed(KeyboardKey key)
 	{
@@ -347,7 +347,7 @@ public sealed class Win32Keyboard : IDisposable, IPlatformKeyboard, IWin32Window
 
 	private void TranslateKeyTyped(IntPtr wParam)
 	{
-		m_messageBus.Broadcast<IKeyboardListener>(listener => listener.KeyTyped(this, (char)wParam.ToInt64()));
+		OnKeyTyped?.Invoke(this, (char)wParam.ToInt64());
 	}
 
 	private void UpdateState(bool pressed, KeyboardKey key)
@@ -356,7 +356,7 @@ public sealed class Win32Keyboard : IDisposable, IPlatformKeyboard, IWin32Window
 		{
 			return;
 		}
-		
+
 		var index   = (int)key;
 		var state   = m_currentStates[index];
 		var changed = state != pressed;
@@ -366,11 +366,11 @@ public sealed class Win32Keyboard : IDisposable, IPlatformKeyboard, IWin32Window
 		{
 			if (pressed)
 			{
-				m_messageBus.Broadcast<IKeyboardListener>(listener => listener.KeyPressed(this, key));
+				OnKeyPressed?.Invoke(this, key);
 			}
 			else
 			{
-				m_messageBus.Broadcast<IKeyboardListener>(listener => listener.KeyReleased(this, key));
+				OnKeyReleased?.Invoke(this, key);
 			}
 		}
 	}

@@ -1,8 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using ZweigEngine.Common.Services.Interfaces.Platform;
-using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 using ZweigEngine.Common.Services.Libraries;
-using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Common.Utility.Interop;
 using ZweigEngine.Native.Win32.Constants;
 using ZweigEngine.Native.Win32.Prototypes;
@@ -54,7 +52,6 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	private readonly PfnUnregisterClassDelegate           UnregisterClass;
 	// ReSharper restore InconsistentNaming
 
-	private readonly MessageBus                    m_messageBus;
 	private readonly Win32Synchronization          m_synchronization;
 	private readonly PinnedDelegate<PfnWindowProc> m_proc;
 	private readonly List<IWin32WindowComponent>   m_components;
@@ -79,9 +76,8 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	private          Win32Message                  m_message;
 	private          Exception?                    m_error;
 
-	public Win32Window(NativeLibraryLoader libraryLoader, MessageBus messageBus, Win32Synchronization synchronization)
+	public Win32Window(NativeLibraryLoader libraryLoader, Win32Synchronization synchronization)
 	{
-		m_messageBus      = messageBus;
 		m_synchronization = synchronization;
 		m_proc            = new PinnedDelegate<PfnWindowProc>(Process, GCHandleType.Normal);
 		m_components      = new List<IWin32WindowComponent>(16);
@@ -138,15 +134,18 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 		ReleaseUnmanagedResources();
 	}
 
-	internal IntPtr GetHandle()         => m_handle;
-	public   bool   IsAvailable()       => m_handle != IntPtr.Zero && !m_closing;
-	public   bool   IsFocused()         => m_handle != IntPtr.Zero && m_focused;
-	public   int    GetPositionLeft()   => m_position_left;
-	public   int    GetPositionTop()    => m_position_top;
-	public   int    GetSizeWidth()      => m_size_width;
-	public   int    GetSizeHeight()     => m_size_height;
-	public   int    GetViewportWidth()  => m_viewport_width;
-	public   int    GetViewportHeight() => m_viewport_height;
+	internal IntPtr                      GetHandle() => m_handle;
+	public event PlatformWindowDelegate? OnCreated;
+	public event PlatformWindowDelegate? OnClosing;
+	public event PlatformWindowDelegate? OnUpdate;
+	public bool                          IsAvailable()       => m_handle != IntPtr.Zero && !m_closing;
+	public bool                          IsFocused()         => m_handle != IntPtr.Zero && m_focused;
+	public int                           GetPositionLeft()   => m_position_left;
+	public int                           GetPositionTop()    => m_position_top;
+	public int                           GetSizeWidth()      => m_size_width;
+	public int                           GetSizeHeight()     => m_size_height;
+	public int                           GetViewportWidth()  => m_viewport_width;
+	public int                           GetViewportHeight() => m_viewport_height;
 
 	internal void AddComponent(IWin32WindowComponent component)
 	{
@@ -413,7 +412,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 					}
 				});
 
-				m_synchronization.Execute(() => { m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowUpdateFrame(this)); });
+				m_synchronization.Execute(() => OnUpdate?.Invoke(this));
 			}
 			finally
 			{
@@ -432,7 +431,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	{
 		m_synchronization.ExecuteWithoutPending(() =>
 		{
-			WrapError(() => m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowClosing(this)));
+			WrapError(() => OnClosing?.Invoke(this));
 
 			foreach (var component in m_components)
 			{
@@ -450,7 +449,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 				WrapError(component.OnAttach);
 			}
 
-			WrapError(() => m_messageBus.Broadcast<IWindowListener>(listener => listener.WindowCreated(this)));
+			WrapError(() => OnCreated?.Invoke(this));
 		});
 	}
 

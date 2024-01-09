@@ -1,8 +1,6 @@
 ﻿using ZweigEngine.Common.Services.Interfaces.Libraries;
 using ZweigEngine.Common.Services.Interfaces.Platform;
-using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 using ZweigEngine.Common.Services.Interfaces.Video;
-using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Common.Utility.Exceptions;
 using ZweigEngine.Native.OpenGL.Constants;
 using ZweigEngine.Native.OpenGL.Prototypes;
@@ -10,29 +8,28 @@ using ZweigEngine.Native.OpenGL.Renderer;
 
 namespace ZweigEngine.Native.OpenGL;
 
-public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceListener
+public sealed class OpenGLContext : IDisposable, IVideoContext
 {
 	private readonly IPlatformVideo m_video;
-	private readonly IDisposable    m_deviceSubscription;
 
 	// ReSharper disable InconsistentNaming
 	// ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
 
-	private PfnEnableDelegate        glEnable        = null!;
-	private PfnDisableDelegate       glDisable       = null!;
-	private PfnClearColorDelegate    glClearColor    = null!;
-	private PfnClearDepthDelegate    glClearDepth    = null!;
-	private PfnClearDelegate         glClear         = null!;
-	private PfnBlendColorDelegate    glBlendColor    = null!;
-	private PfnBlendFunctionDelegate glBlendFunc     = null!;
-	private PfnDepthFunctionDelegate glDepthFunc     = null!;
-	private PfnCullFaceDelegate      glCullFace      = null!;
-	private PfnFrontFaceDelegate     glFrontFace     = null!;
-	private PfnGetErrorDelegate      glGetError      = null!;
-	private PfnDepthMaskDelegate     glDepthMask     = null!;
-	private PfnColorMaskDelegate     glColorMask     = null!;
-	private PfnViewportDelegate      glViewport      = null!;
-	private PfnScissorDelegate       glScissor       = null!;
+	private PfnEnableDelegate        glEnable     = null!;
+	private PfnDisableDelegate       glDisable    = null!;
+	private PfnClearColorDelegate    glClearColor = null!;
+	private PfnClearDepthDelegate    glClearDepth = null!;
+	private PfnClearDelegate         glClear      = null!;
+	private PfnBlendColorDelegate    glBlendColor = null!;
+	private PfnBlendFunctionDelegate glBlendFunc  = null!;
+	private PfnDepthFunctionDelegate glDepthFunc  = null!;
+	private PfnCullFaceDelegate      glCullFace   = null!;
+	private PfnFrontFaceDelegate     glFrontFace  = null!;
+	private PfnGetErrorDelegate      glGetError   = null!;
+	private PfnDepthMaskDelegate     glDepthMask  = null!;
+	private PfnColorMaskDelegate     glColorMask  = null!;
+	private PfnViewportDelegate      glViewport   = null!;
+	private PfnScissorDelegate       glScissor    = null!;
 
 	// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 	// ReSharper restore InconsistentNaming
@@ -41,10 +38,13 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 	private OpenGLSpriteModel?    m_spriteModel;
 	private OpenGLSpriteTextures? m_spriteTextures;
 
-	public OpenGLContext(IPlatformVideo video, MessageBus messageBus)
+	public OpenGLContext(IPlatformVideo video)
 	{
-		m_video              = video;
-		m_deviceSubscription = messageBus.Subscribe<IVideoDeviceListener>(this);
+		m_video                =  video;
+		m_video.OnActivated    += HandleVideoActivated;
+		m_video.OnDeactivating += HandleVideoDeactivating;
+		m_video.OnBeginFrame   += HandleVideoBeginFrame;
+		m_video.OnFinishFrame  += HandleVideoFinishFrame;
 	}
 
 	private void ReleaseUnmanagedResources()
@@ -52,7 +52,10 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		m_spriteTextures?.Dispose();
 		m_spriteModel?.Dispose();
 		m_spriteShader?.Dispose();
-		m_deviceSubscription.Dispose();
+		m_video.OnActivated    -= HandleVideoActivated;
+		m_video.OnDeactivating -= HandleVideoDeactivating;
+		m_video.OnBeginFrame   -= HandleVideoBeginFrame;
+		m_video.OnFinishFrame  -= HandleVideoFinishFrame;
 	}
 
 	public void Dispose()
@@ -66,7 +69,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		ReleaseUnmanagedResources();
 	}
 
-	public void VideoDeviceActivated(IPlatformVideo video)
+	private void HandleVideoActivated(IPlatformVideo video)
 	{
 		if (m_video != video)
 		{
@@ -95,7 +98,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		m_spriteTextures = new OpenGLSpriteTextures(loader);
 	}
 
-	public void VideoDeviceDeactivating(IPlatformVideo video)
+	private void HandleVideoDeactivating(IPlatformVideo video)
 	{
 		if (m_video != video)
 		{
@@ -127,7 +130,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		m_spriteTextures = null;
 	}
 
-	public void VideoDeviceBeginFrame(IPlatformVideo video)
+	private void HandleVideoBeginFrame(IPlatformVideo video)
 	{
 		var width  = video.GetViewportWidth();
 		var height = video.GetViewportHeight();
@@ -144,7 +147,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext, IVideoDeviceList
 		m_spriteModel!.Begin();
 	}
 
-	public void VideoDeviceFinishFrame(IPlatformVideo video)
+	private void HandleVideoFinishFrame(IPlatformVideo video)
 	{
 		m_spriteModel?.Finish();
 		m_spriteShader?.Finish();

@@ -1,22 +1,18 @@
 ﻿using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
-using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
-using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Native.Win32.Constants;
 
 namespace ZweigEngine.Native.Win32;
 
 public sealed class Win32Mouse : IDisposable, IPlatformMouse, IWin32WindowComponent
 {
-	private readonly MessageBus  m_messageBus;
 	private readonly Win32Window m_window;
 	private readonly bool[]      m_buttonStates;
 	private          int         m_positionLeft;
 	private          int         m_positionTop;
 
-	public Win32Mouse(MessageBus messageBus, Win32Window window)
+	public Win32Mouse(Win32Window window)
 	{
-		m_messageBus   = messageBus;
 		m_window       = window;
 		m_buttonStates = new bool[8];
 		m_window.AddComponent(this);
@@ -37,6 +33,12 @@ public sealed class Win32Mouse : IDisposable, IPlatformMouse, IWin32WindowCompon
 	{
 		ReleaseUnmanagedResources();
 	}
+
+	public event PlatformMouseMovedDelegate?    OnMouseMoved;
+	public event PlatformMousePressedDelegate?  OnMousePressed;
+	public event PlatformMouseReleasedDelegate? OnMouseReleased;
+	public event PlatformMouseScrolledDelegate? OnMouseScrolledHorizontal;
+	public event PlatformMouseScrolledDelegate? OnMouseScrolledVertical;
 
 	public int GetPositionLeft()
 	{
@@ -148,7 +150,7 @@ public sealed class Win32Mouse : IDisposable, IPlatformMouse, IWin32WindowCompon
 		{
 			m_positionLeft = left;
 			m_positionTop  = top;
-			m_messageBus.Broadcast<IMouseListener>(listener => listener.MouseMoved(this, left, top));
+			OnMouseMoved?.Invoke(this, left, top);
 		}
 	}
 
@@ -161,11 +163,11 @@ public sealed class Win32Mouse : IDisposable, IPlatformMouse, IWin32WindowCompon
 
 		if (state && changed)
 		{
-			m_messageBus.Broadcast<IMouseListener>(listener => listener.ButtonPressed(this, button));
+			OnMousePressed?.Invoke(this, m_positionLeft, m_positionTop, button);
 		}
 		else if (changed)
 		{
-			m_messageBus.Broadcast<IMouseListener>(listener => listener.ButtonReleased(this, button));
+			OnMouseReleased?.Invoke(this, m_positionLeft, m_positionTop, button);
 		}
 	}
 
@@ -173,14 +175,14 @@ public sealed class Win32Mouse : IDisposable, IPlatformMouse, IWin32WindowCompon
 	{
 		var value  = (ulong)wParam.ToInt64();
 		var offset = (short)(value >> 16);
-		m_messageBus.Broadcast<IMouseListener>(listener => listener.ScrolledVertical(this, offset));
+		OnMouseScrolledVertical?.Invoke(this, m_positionLeft, m_positionTop, offset);
 	}
 
 	private void TranslateHorizontalScroll(IntPtr wParam)
 	{
 		var value  = (ulong)wParam.ToInt64();
 		var offset = (short)(value >> 16);
-		m_messageBus.Broadcast<IMouseListener>(listener => listener.ScrolledHorizontal(this, offset));
+		OnMouseScrolledHorizontal?.Invoke(this, m_positionLeft, m_positionTop, offset);
 	}
 
 	private void UpdateButtons(IntPtr wParam)

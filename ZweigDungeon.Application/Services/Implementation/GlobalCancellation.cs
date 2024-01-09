@@ -1,21 +1,24 @@
 ﻿using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services.Interfaces.Platform;
-using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 
 namespace ZweigDungeon.Application.Services.Implementation;
 
-public class GlobalCancellation : IDisposable, IWindowListener, IGlobalCancellation
+public class GlobalCancellation : IDisposable, IGlobalCancellation
 {
+	private readonly IPlatformWindow         m_window;
 	private readonly CancellationTokenSource m_cancellation;
-	
-	public GlobalCancellation()
+
+	public GlobalCancellation(IPlatformWindow window)
 	{
-		m_cancellation = new CancellationTokenSource();
+		m_window         =  window;
+		m_cancellation   =  new CancellationTokenSource();
+		window.OnClosing += HandleWindowClosing;
 	}
-	
+
 	private void ReleaseUnmanagedResources()
 	{
 		m_cancellation.Cancel();
+		m_window.OnClosing -= HandleWindowClosing;
 	}
 
 	public void Dispose()
@@ -29,19 +32,10 @@ public class GlobalCancellation : IDisposable, IWindowListener, IGlobalCancellat
 		ReleaseUnmanagedResources();
 	}
 
-	public void WindowCreated(IPlatformWindow window)
-	{
-		
-	}
+	public CancellationToken Token => m_cancellation.Token;
 
-	public void WindowClosing(IPlatformWindow window)
+	private void HandleWindowClosing(IPlatformWindow window)
 	{
 		m_cancellation.Cancel();
 	}
-
-	public void WindowUpdateFrame(IPlatformWindow window)
-	{
-	}
-
-	public CancellationToken Token => m_cancellation.Token;
 }

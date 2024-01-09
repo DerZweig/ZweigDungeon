@@ -1,7 +1,13 @@
 ﻿namespace ZweigEngine.Common.Services.Interfaces.Platform;
 
+public delegate void PlatformWindowDelegate(IPlatformWindow window);
+
 public interface IPlatformWindow
 {
+	event PlatformWindowDelegate OnCreated;
+	event PlatformWindowDelegate OnClosing;
+	event PlatformWindowDelegate OnUpdate;
+	
 	bool IsAvailable();
 	bool IsFocused();
 	int  GetPositionLeft();

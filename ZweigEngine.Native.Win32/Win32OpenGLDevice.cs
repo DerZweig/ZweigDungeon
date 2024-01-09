@@ -1,9 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using ZweigEngine.Common.Services.Interfaces.Libraries;
 using ZweigEngine.Common.Services.Interfaces.Platform;
-using ZweigEngine.Common.Services.Interfaces.Platform.Messages;
 using ZweigEngine.Common.Services.Libraries;
-using ZweigEngine.Common.Services.Messages;
 using ZweigEngine.Native.Win32.Constants;
 using ZweigEngine.Native.Win32.Prototypes;
 using ZweigEngine.Native.Win32.Structures;
@@ -28,7 +26,6 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 
 	private readonly Dictionary<string, object?> m_cachedResults;
 	private readonly NativeLibraryLoader         m_libraryLoader;
-	private readonly MessageBus                  m_messageBus;
 	private readonly Win32Window                 m_window;
 
 	// ReSharper disable InconsistentNaming
@@ -50,11 +47,10 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	private int    m_width;
 	private int    m_height;
 
-	public Win32OpenGLDevice(NativeLibraryLoader libraryLoader, MessageBus messageBus, Win32Window window)
+	public Win32OpenGLDevice(NativeLibraryLoader libraryLoader, Win32Window window)
 	{
 		m_cachedResults = new Dictionary<string, object?>();
 		m_libraryLoader = libraryLoader;
-		m_messageBus    = messageBus;
 		m_window        = window;
 
 		libraryLoader.LoadFunction("user32", "GetDC", out GetDeviceContext);
@@ -86,7 +82,12 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 		ReleaseUnmanagedResources();
 	}
 
-	public string Name                => "Win32 OpenGL 3.3";
+	public event PlatformVideoDeviceDelegate? OnActivated;
+	public event PlatformVideoDeviceDelegate? OnDeactivating;
+	public event PlatformVideoDeviceDelegate? OnBeginFrame;
+	public event PlatformVideoDeviceDelegate? OnFinishFrame;
+
+	public string GetDeviceName()     => "Win32 OpenGL 3.3";
 	public int    GetViewportWidth()  => m_width;
 	public int    GetViewportHeight() => m_height;
 
@@ -160,7 +161,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 		m_cachedResults.Clear();
 		m_width  = m_window.GetViewportWidth();
 		m_height = m_window.GetViewportHeight();
-		m_messageBus.Broadcast<IVideoDeviceListener>(listener => listener.VideoDeviceActivated(this));
+		OnActivated?.Invoke(this);
 	}
 
 	void IWin32WindowComponent.OnDetach()
@@ -172,7 +173,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 
 		try
 		{
-			m_messageBus.Broadcast<IVideoDeviceListener>(listener => listener.VideoDeviceDeactivating(this));
+			OnDeactivating?.Invoke(this);
 		}
 		finally
 		{
@@ -202,7 +203,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 	{
 		m_width  = m_window.GetViewportWidth();
 		m_height = m_window.GetViewportHeight();
-		m_messageBus.Broadcast<IVideoDeviceListener>(listener => listener.VideoDeviceBeginFrame(this));
+		OnBeginFrame?.Invoke(this);
 	}
 
 	void IWin32WindowComponent.OnFinishUpdate()
@@ -214,7 +215,7 @@ public sealed class Win32OpenGLDevice : IPlatformVideo, IDisposable, IWin32Windo
 
 		try
 		{
-			m_messageBus.Broadcast<IVideoDeviceListener>(listener => listener.VideoDeviceFinishFrame(this));
+			OnFinishFrame?.Invoke(this);
 		}
 		finally
 		{
