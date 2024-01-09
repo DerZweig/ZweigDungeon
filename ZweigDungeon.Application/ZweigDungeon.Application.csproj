@@ -41,11 +41,11 @@
       </AdditionalFiles>
       <None Remove="Data\Menu\StartupMenu.xml" />
       <None Remove="Data\Gui\panels.tga" />
-      <AdditionalFiles Include="Data\Gui\panels.tga">
+      <AdditionalFiles Include="Data\Gui\menu.tga">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\Gui\panels.xml" />
-      <AdditionalFiles Include="Data\Gui\panels.xml">
+      <AdditionalFiles Include="Data\Gui\menu.xml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </AdditionalFiles>
     </ItemGroup>
