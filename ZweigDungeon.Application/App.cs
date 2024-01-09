@@ -29,7 +29,7 @@ public class App : IDisposable
 		ReleaseUnmanagedResources();
 	}
 
-	private async void HandleWindowCreated(IPlatformWindow window)
+	private void HandleWindowCreated(IPlatformWindow window)
 	{
 		window.SetTitle("ZweigDungeon");
 		window.SetStyle(true, true);

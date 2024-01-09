@@ -19,7 +19,7 @@ public class PanelRepository : IPanelRepository
 		m_panels          = new Dictionary<string, Entry>();
 	}
 
-	public Task<Panel> LoadPanel(string path, string name) => m_synchronization.Invoke(async () =>
+	public Task<Panel> LoadPanel(string path) => m_synchronization.Invoke(async () =>
 	{
 		var normalized = path.Trim().ToLower();
 		if (m_panels.TryGetValue(normalized, out var entry))
@@ -29,12 +29,7 @@ public class PanelRepository : IPanelRepository
 				await entry.Pending;
 			}
 
-			if (entry.Panels?.TryGetValue(name, out var panel) == true)
-			{
-				return panel;
-			}
-
-			throw new NullReferenceException();
+			return entry.Panel ?? throw new NullReferenceException();
 		}
 
 		entry = new Entry();
@@ -43,14 +38,8 @@ public class PanelRepository : IPanelRepository
 		{
 			var worker = LoadPanelDefinitions(path);
 			entry.Pending = worker;
-			entry.Panels  = await worker;
-
-			if (entry.Panels?.TryGetValue(name, out var panel) == true)
-			{
-				return panel;
-			}
-
-			throw new NullReferenceException();
+			entry.Panel   = await worker;
+			return entry.Panel ?? throw new NullReferenceException();
 		}
 		finally
 		{
@@ -58,7 +47,7 @@ public class PanelRepository : IPanelRepository
 		}
 	}, m_cancellation.Token);
 
-	private async Task<Dictionary<string, Panel>> LoadPanelDefinitions(string path)
+	private async Task<Panel> LoadPanelDefinitions(string path)
 	{
 		var dataPath    = Path.Combine("Data", path.Trim());
 		var xmlPath     = Path.ChangeExtension(dataPath, ".xml");
@@ -70,8 +59,8 @@ public class PanelRepository : IPanelRepository
 			throw new FileLoadException("Panel definition does not contain valid root node.");
 		}
 
-		var results = new Dictionary<string, Panel>();
-		var items   = root.Elements();
+		var tiles = new Dictionary<string, PanelTile>();
+		var items = root.Elements();
 		foreach (var node in items)
 		{
 			if (string.Equals(node.Name.LocalName, "panel", StringComparison.OrdinalIgnoreCase))
@@ -82,8 +71,8 @@ public class PanelRepository : IPanelRepository
 					continue;
 				}
 
-				var panel = new Panel();
-				results[name] = panel;
+				var panel = new PanelTile();
+				tiles[name] = panel;
 
 				var borderText = ParseStringProperty(node, "border");
 				var rectText   = ParseStringProperty(node, "rect");
@@ -166,7 +155,10 @@ public class PanelRepository : IPanelRepository
 			}
 		}
 
-		return results;
+		return new Panel
+		{
+			Tiles = tiles
+		};
 	}
 
 	private static string? ParseStringProperty(XElement node, string name)
@@ -205,7 +197,7 @@ public class PanelRepository : IPanelRepository
 
 	private class Entry
 	{
-		public Task?                      Pending { get; set; }
-		public Dictionary<string, Panel>? Panels  { get; set; }
+		public Task?  Pending { get; set; }
+		public Panel? Panel   { get; set; }
 	}
 }

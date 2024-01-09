@@ -5,5 +5,5 @@ namespace ZweigDungeon.Application.Services.Interfaces;
 
 public interface IPanelRepository
 {
-	Task<Panel> LoadPanel(string path, string name);
+	Task<Panel> LoadPanel(string path);
 }
