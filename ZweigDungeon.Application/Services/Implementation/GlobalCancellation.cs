@@ -1,4 +1,6 @@
-﻿using ZweigDungeon.Application.Services.Interfaces;
+﻿using System;
+using System.Threading;
+using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 
 namespace ZweigDungeon.Application.Services.Implementation;
@@ -17,8 +19,8 @@ public class GlobalCancellation : IDisposable, IGlobalCancellation
 
 	private void ReleaseUnmanagedResources()
 	{
-		m_cancellation.Cancel();
 		m_window.OnClosing -= HandleWindowClosing;
+		m_cancellation.Cancel();
 	}
 
 	public void Dispose()

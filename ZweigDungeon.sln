@@ -8,8 +8,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZweigEngine.Native.OpenGL",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZweigEngine.Native.Win32", "ZweigEngine.Native.Win32\ZweigEngine.Native.Win32.csproj", "{D1C22A6A-157D-447C-B3AD-989B6B466BC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZweigEngine.Image", "ZweigEngine.Image\ZweigEngine.Image.csproj", "{2DE2321F-BE9F-437F-BF07-1C10898812F1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,9 +30,5 @@ Global
 		{D1C22A6A-157D-447C-B3AD-989B6B466BC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1C22A6A-157D-447C-B3AD-989B6B466BC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1C22A6A-157D-447C-B3AD-989B6B466BC9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2DE2321F-BE9F-437F-BF07-1C10898812F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2DE2321F-BE9F-437F-BF07-1C10898812F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2DE2321F-BE9F-437F-BF07-1C10898812F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2DE2321F-BE9F-437F-BF07-1C10898812F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

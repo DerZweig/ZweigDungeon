@@ -1,12 +1,15 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ZweigDungeon.Application.Entities;
 using ZweigDungeon.Application.Services.Implementation;
 using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services;
+using ZweigEngine.Common.Services.Interfaces.Files;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Libraries;
+using ZweigEngine.Common.Services.Repositories;
 using ZweigEngine.Native.OpenGL;
 using ZweigEngine.Native.Win32;
 
@@ -35,14 +38,14 @@ internal static class Program
 			{
 				throw new NotSupportedException("Platform is not implemented");
 			}
-			
-			serviceConfig.AddSingleton<CurrentMenu>();
 
+			serviceConfig.AddSingleton<ImageRepository>();
+			serviceConfig.AddSingleton<FontRepository>();
+			serviceConfig.AddSingleton<TextureRepository>();
+
+			serviceConfig.AddSingleton<IFileSystem, FileSystemConfig>();
 			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
-			serviceConfig.AddSingleton<IImageRepository, ImageRepository>();
-			serviceConfig.AddSingleton<IFontRepository, FontRepository>();
-			serviceConfig.AddSingleton<IPanelRepository, PanelRepository>();
-			serviceConfig.AddSingleton<ITextureManager, TextureManager>();
+			serviceConfig.AddSingleton<CurrentScene>();
 			serviceConfig.AddSingleton<App>();
 
 			using (var services = serviceConfig.Build())

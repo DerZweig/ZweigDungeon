@@ -9,7 +9,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ZweigEngine.Common\ZweigEngine.Common.csproj" />
-      <ProjectReference Include="..\ZweigEngine.Image\ZweigEngine.Image.csproj" />
       <ProjectReference Include="..\ZweigEngine.Native.OpenGL\ZweigEngine.Native.OpenGL.csproj" />
       <ProjectReference Include="..\ZweigEngine.Native.Win32\ZweigEngine.Native.Win32.csproj" />
     </ItemGroup>
@@ -17,37 +16,35 @@
     <ItemGroup>
       <None Remove="Data\Gui\font_large.fnt" />
       <AdditionalFiles Include="Data\Gui\font_large.fnt">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\Gui\font_large.tga" />
       <AdditionalFiles Include="Data\Gui\font_large.tga">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\Gui\font_medium.fnt" />
       <AdditionalFiles Include="Data\Gui\font_medium.fnt">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\Gui\font_medium.tga" />
       <AdditionalFiles Include="Data\Gui\font_medium.tga">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\Gui\font_small.fnt" />
       <AdditionalFiles Include="Data\Gui\font_small.fnt">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\Gui\font_small.tga" />
       <AdditionalFiles Include="Data\Gui\font_small.tga">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </AdditionalFiles>
       <None Remove="Data\Menu\StartupMenu.xml" />
       <None Remove="Data\Gui\panels.tga" />
-      <AdditionalFiles Include="Data\Gui\menu.tga">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
       <None Remove="Data\Gui\panels.xml" />
-      <AdditionalFiles Include="Data\Gui\menu.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </AdditionalFiles>
+      <None Remove="Data\Gui\popup.tga" />
+      <None Remove="Data\Gui\popup.xml" />
+      <None Remove="Data\Gui\control.tga" />
+      <None Remove="Data\Gui\control.xml" />
     </ItemGroup>
 
 </Project>
