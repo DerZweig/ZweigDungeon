@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ZweigDungeon.Application.Entities;
 using ZweigDungeon.Application.Services.Implementation;
@@ -42,7 +41,13 @@ internal static class Program
 			serviceConfig.AddSingleton<ImageRepository>();
 			serviceConfig.AddSingleton<FontRepository>();
 			serviceConfig.AddSingleton<TextureRepository>();
+			serviceConfig.AddSingleton<TileSheetRepository>();
 
+			serviceConfig.AddSingleton<IMenuAssets, MenuAssets>();
+			serviceConfig.AddSingleton<ILayoutManager, LayoutManager>();
+			serviceConfig.AddSingleton<IMenuController, MenuController>();
+			serviceConfig.AddSingleton<IMenuRenderer, MenuRenderer>();
+			
 			serviceConfig.AddSingleton<IFileSystem, FileSystemConfig>();
 			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
 			serviceConfig.AddSingleton<CurrentScene>();

@@ -1,18 +1,23 @@
-﻿using System;
-using ZweigDungeon.Application.Services.Interfaces;
+﻿using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Video;
-using ZweigEngine.Common.Services.Repositories;
 
 namespace ZweigDungeon.Application;
 
 public class App : IDisposable
 {
-	private readonly IPlatformWindow     m_window;
+	private readonly IPlatformWindow m_window;
+	private readonly IMenuController m_menuController;
+	private readonly ILayoutManager  m_layout;
+	private readonly IMenuRenderer   m_menuRenderer;
 
-	public App(IPlatformWindow window)
+	public App(IPlatformWindow window, ILayoutManager layout,
+	           IMenuController menuController, IMenuRenderer menuRenderer)
 	{
 		m_window           =  window;
+		m_menuController   =  menuController;
+		m_layout           =  layout;
+		m_menuRenderer     =  menuRenderer;
 		m_window.OnCreated += HandleWindowCreated;
 		m_window.OnClosing += HandleWindowClosing;
 		m_window.OnUpdate  += HandleWindowUpdate;
@@ -42,6 +47,7 @@ public class App : IDisposable
 		window.SetStyle(true, true);
 		window.SetMinimumSize(640, 480);
 		window.Show();
+		m_menuController.DisplayStartupMenu();
 	}
 
 	private void HandleWindowClosing(IPlatformWindow window)
@@ -53,5 +59,8 @@ public class App : IDisposable
 		var width    = window.GetViewportWidth();
 		var height   = window.GetViewportHeight();
 		var viewport = new VideoRect { Left = 0, Top = 0, Width = width, Height = height };
+
+		m_layout.Update(viewport);
+		m_menuRenderer.Draw(viewport);
 	}
 }

@@ -1,11 +1,11 @@
-﻿using ZweigDungeon.Application.Entities.Menu.Panels;
+﻿using ZweigDungeon.Application.Entities.Menu;
 
 namespace ZweigDungeon.Application.Entities;
 
 public class CurrentScene
 {
-	public BasicPanels? MessagePanel { get; set; }
-	public BasicPanels? MenuPanel    { get; set; }
-	public BasicPanels? LeftPanel    { get; set; }
-	public BasicPanels? RightPanel   { get; set; }
+	public ControlPanel? MessagePanel { get; set; }
+	public ControlPanel? MenuPanel    { get; set; }
+	public ControlPanel? LeftPanel    { get; set; }
+	public ControlPanel? RightPanel   { get; set; }
 }

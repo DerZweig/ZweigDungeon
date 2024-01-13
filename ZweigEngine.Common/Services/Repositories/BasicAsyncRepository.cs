@@ -43,13 +43,13 @@ public abstract class BasicAsyncRepository<TAsset>
 		}
 	}, cancellationToken);
 
-	public Task LoadForGlobal(string path, CancellationToken cancellationToken) => LoadAsset(path, AssetScope.Global, cancellationToken);
+	public Task<TAsset> LoadForGlobal(string path, CancellationToken cancellationToken) => LoadAsset(path, AssetScope.Global, cancellationToken);
 
-	public Task LoadForSession(string path, CancellationToken cancellationToken) => LoadAsset(path, AssetScope.Session, cancellationToken);
+	public Task<TAsset> LoadForSession(string path, CancellationToken cancellationToken) => LoadAsset(path, AssetScope.Session, cancellationToken);
 
-	public Task LoadForScene(string path, CancellationToken cancellationToken) => LoadAsset(path, AssetScope.Scene, cancellationToken);
+	public Task<TAsset> LoadForScene(string path, CancellationToken cancellationToken) => LoadAsset(path, AssetScope.Scene, cancellationToken);
 
-	private Task LoadAsset(string path, AssetScope scope, CancellationToken cancellationToken) => m_synchronization.Invoke(async () =>
+	private Task<TAsset> LoadAsset(string path, AssetScope scope, CancellationToken cancellationToken) => m_synchronization.Invoke(async () =>
 	{
 		var normalizedName = path.Trim().ToLower();
 		if (m_entries.TryGetValue(normalizedName, out var entry))
