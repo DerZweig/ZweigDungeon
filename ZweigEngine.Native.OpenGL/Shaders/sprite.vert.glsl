@@ -5,9 +5,9 @@ layout (location = 2) in vec4  aParamSource;
 layout (location = 3) in vec4  aParamTint;
 layout (location = 4) in vec4  aParamFlags;
 
-uniform                  vec2  uViewport;
-out vec2                       sampleCoords;
-out vec4                       tintColor;
+uniform vec2  uViewport;
+out vec2 sampleCoords;
+out vec4 tintColor;
 
 void main()
 {

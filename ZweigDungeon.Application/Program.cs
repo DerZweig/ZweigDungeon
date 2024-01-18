@@ -48,6 +48,9 @@ internal static class Program
 			serviceConfig.AddSingleton<IMenuController, MenuController>();
 			serviceConfig.AddSingleton<IMenuRenderer, MenuRenderer>();
 			
+			serviceConfig.AddSingleton<IEntityAssets, EntityAssets>();
+			serviceConfig.AddSingleton<IEntityRenderer, EntityRenderer>();
+			
 			serviceConfig.AddSingleton<IFileSystem, FileSystemConfig>();
 			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
 			serviceConfig.AddSingleton<CurrentScene>();

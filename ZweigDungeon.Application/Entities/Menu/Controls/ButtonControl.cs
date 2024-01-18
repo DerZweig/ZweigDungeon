@@ -5,8 +5,9 @@ namespace ZweigDungeon.Application.Entities.Menu.Controls;
 
 public class ButtonControl : BasicControl
 {
-	public FontSize   LabelFont  { get; set; } = FontSize.Medium;
-	public string     Label      { get; set; } = string.Empty;
-	public VideoColor LabelColor { get; set; }
-	public Action?    OnClick    { get; set; }
+	public HorizontalAlignment LabelAlignment { get; set; } = HorizontalAlignment.Left;
+	public FontSize            LabelFont      { get; set; } = FontSize.Medium;
+	public string              Label          { get; set; } = string.Empty;
+	public VideoColor          LabelColor     { get; set; }
+	public Action?             OnClick        { get; set; }
 }

@@ -10,14 +10,19 @@ public class App : IDisposable
 	private readonly IMenuController m_menuController;
 	private readonly ILayoutManager  m_layout;
 	private readonly IMenuRenderer   m_menuRenderer;
+	private readonly IEntityAssets   m_entityAssets;
+	private readonly IEntityRenderer m_entityRenderer;
 
-	public App(IPlatformWindow window, ILayoutManager layout,
-	           IMenuController menuController, IMenuRenderer menuRenderer)
+	public App(IPlatformWindow window,
+	           ILayoutManager layout, IMenuController menuController, IMenuRenderer menuRenderer,
+	           IEntityAssets entityAssets, IEntityRenderer entityRenderer)
 	{
 		m_window           =  window;
 		m_menuController   =  menuController;
 		m_layout           =  layout;
 		m_menuRenderer     =  menuRenderer;
+		m_entityAssets     =  entityAssets;
+		m_entityRenderer   =  entityRenderer;
 		m_window.OnCreated += HandleWindowCreated;
 		m_window.OnClosing += HandleWindowClosing;
 		m_window.OnUpdate  += HandleWindowUpdate;
@@ -61,6 +66,7 @@ public class App : IDisposable
 		var viewport = new VideoRect { Left = 0, Top = 0, Width = width, Height = height };
 
 		m_layout.Update(viewport);
+		m_entityRenderer.Draw(viewport);
 		m_menuRenderer.Draw(viewport);
 	}
 }

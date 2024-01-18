@@ -4,10 +4,8 @@ using ZweigDungeon.Application.Entities.Menu.Constants;
 using ZweigDungeon.Application.Entities.Menu.Controls;
 using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Assets.Font;
-using ZweigEngine.Common.Assets.Image;
 using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Repositories;
-using ZweigEngine.Common.Utility.Exceptions;
 
 namespace ZweigDungeon.Application.Services.Implementation;
 
@@ -59,6 +57,11 @@ public class MenuRenderer : IMenuRenderer
 					break;
 			}
 		}
+	}
+
+	private int MeasureString(string text, FontSize font)
+	{
+		return 0;
 	}
 
 	private void DrawString(string text, FontSize font, int left, int top, VideoColor color, VideoRect clip)

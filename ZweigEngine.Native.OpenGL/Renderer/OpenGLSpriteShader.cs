@@ -39,9 +39,8 @@ internal class OpenGLSpriteShader : IDisposable
 	private uint m_program;
 	private uint m_fragmentShader;
 	private uint m_vertexShader;
-
-	private int m_viewportUniformLocation;
-	private int m_textureUniformLocation;
+	private int  m_viewportUniform;
+	private int  m_textureUniform;
 
 	public OpenGLSpriteShader(ICustomFunctionLoader loader)
 	{
@@ -119,8 +118,8 @@ internal class OpenGLSpriteShader : IDisposable
 			throw new Exception("Couldn't link sprite shader program");
 		}
 
-		m_viewportUniformLocation = glGetUniformLocation(m_program, "uViewport");
-		m_textureUniformLocation  = glGetUniformLocation(m_program, "uTextureSprite");
+		m_viewportUniform = glGetUniformLocation(m_program, "uViewport");
+		m_textureUniform  = glGetUniformLocation(m_program, "uTextureSprite");
 	}
 
 	private void ReleaseUnmanagedResources()
@@ -143,8 +142,8 @@ internal class OpenGLSpriteShader : IDisposable
 			m_vertexShader = 0u;
 		}
 
-		m_viewportUniformLocation = 0;
-		m_textureUniformLocation  = 0;
+		m_viewportUniform = 0;
+		m_textureUniform  = 0;
 	}
 
 	public void Dispose()
@@ -161,8 +160,8 @@ internal class OpenGLSpriteShader : IDisposable
 	public void Begin(int viewportWidth, int viewportHeight)
 	{
 		glUseProgram(m_program);
-		glUniform2f(m_viewportUniformLocation, viewportWidth, viewportHeight);
-		glUniform1i(m_textureUniformLocation, 0);
+		glUniform2f(m_viewportUniform, viewportWidth, viewportHeight);
+		glUniform1i(m_textureUniform, 0);
 	}
 
 	public void Finish()

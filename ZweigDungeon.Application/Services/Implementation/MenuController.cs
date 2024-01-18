@@ -61,12 +61,12 @@ public class MenuController : IDisposable, IMenuController
 			MarginTop           = 10,
 			MarginRight         = 10,
 			MarginBottom        = 10,
-			MinimumWidth        = 200,
-			MaximumWidth        = 200,
+			MinimumWidth        = 500,
+			MaximumWidth        = 500,
 			MinimumHeight       = 30,
 			MaximumHeight       = 30,
 			LabelColor          = new VideoColor { Red = 255, Green = 255, Blue = 255, Alpha = 255 },
-			Label               = "Hallo World"
+			Label               = "Look! It's moving. It's alive. It's alive..."
 		});
 
 		m_scene.MenuPanel = startupMenu;

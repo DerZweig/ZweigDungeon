@@ -24,8 +24,7 @@ public class MenuAssets : IDisposable, IMenuAssets
 	private          ImageAsset               m_mediumFontImage;
 	private          ImageAsset               m_largeFontImage;
 
-	public MenuAssets(IPlatformSynchronization synchronization, IGlobalCancellation cancellation,
-	                  IPlatformWindow window,
+	public MenuAssets(IPlatformSynchronization synchronization, IGlobalCancellation cancellation, IPlatformWindow window,
 	                  FontRepository fonts, TileSheetRepository tiles, ImageRepository images, TextureRepository textures)
 	{
 		m_synchronization = synchronization;
@@ -47,7 +46,7 @@ public class MenuAssets : IDisposable, IMenuAssets
 
 	private void ReleaseUnmanagedResources()
 	{
-		m_window.OnCreated += HandleWindowCreated;
+		m_window.OnCreated -= HandleWindowCreated;
 	}
 
 	public void Dispose()
