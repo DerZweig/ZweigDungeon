@@ -166,8 +166,8 @@ public sealed class D3D11VideoDevice : IPlatformVideo, IDisposable, IWin32Window
 		}
 
 		var description = new DXGISwapChainDescription();
-		description.BufferDescription.Width                   = 0;
-		description.BufferDescription.Height                  = 0;
+		description.BufferDescription.Width                   = (uint)m_window.GetViewportWidth();
+		description.BufferDescription.Height                  = (uint)m_window.GetViewportHeight();
 		description.BufferDescription.Format                  = DXGIFormat.R8G8B8A8Unorm;
 		description.BufferDescription.RefreshRate.Numerator   = 60;
 		description.BufferDescription.RefreshRate.Denominator = 1;

@@ -42,7 +42,7 @@ internal sealed class NativeLibraryInstance : IDisposable
 
 	public void LoadFunction<TDelegate>(string exportName, out TDelegate func) where TDelegate : Delegate
 	{
-		if (!TryLoadFunction<TDelegate>(exportName, out var temp) || temp == null)
+		if (!TryLoadFunction<TDelegate>(exportName, out var temp))
 		{
 			throw new Exception($"Couldn't load required function {exportName}.");
 		}
@@ -52,22 +52,28 @@ internal sealed class NativeLibraryInstance : IDisposable
 		}
 	}
 
-	public bool TryLoadFunction<TDelegate>(string exportName, out TDelegate? func) where TDelegate : Delegate
+	public bool TryLoadFunction<TDelegate>(string exportName, out TDelegate func) where TDelegate : Delegate
 	{
+		TDelegate? temp = null;
 		if (m_exported.TryGetValue(exportName, out var previous))
 		{
-			func = (TDelegate?)previous;
-		}
-		else if (!IsLoaded || !NativeLibrary.TryGetExport(m_nativeHandle, exportName, out var address) || address == IntPtr.Zero)
-		{
-			func = null;
+			temp = (TDelegate?)previous;
 		}
 		else
 		{
-			func = Marshal.GetDelegateForFunctionPointer<TDelegate>(address);
+			if (!IsLoaded || !NativeLibrary.TryGetExport(m_nativeHandle, exportName, out var address) || address == IntPtr.Zero)
+			{
+				temp = null;
+			}
+			else
+			{
+				temp = Marshal.GetDelegateForFunctionPointer<TDelegate>(address);
+			}
+
+			m_exported[exportName] = temp;
 		}
 
-		m_exported[exportName] = func;
-		return func != null;
+		func = temp!;
+		return temp != null;
 	}
 }

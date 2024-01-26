@@ -7,7 +7,6 @@ using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Libraries;
 using ZweigEngine.Common.Services.Repositories;
-using ZweigEngine.Native.OpenGL;
 using ZweigEngine.Native.Win32;
 
 namespace ZweigDungeon.Application;

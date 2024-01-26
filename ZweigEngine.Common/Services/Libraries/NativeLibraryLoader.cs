@@ -37,10 +37,16 @@ public sealed class NativeLibraryLoader : IDisposable
 		instance.LoadFunction(exportName, out func);
 	}
 
-	public bool TryLoadFunction<TDelegate>(string libraryPath, string exportName, out TDelegate? func) where TDelegate : Delegate
+	public bool TryLoadFunction<TDelegate>(string libraryPath, string exportName, out TDelegate func) where TDelegate : Delegate
 	{
 		var instance = GetOrAddLibraryInstance(libraryPath);
-		return instance.TryLoadFunction(exportName, out func);
+		if (instance.TryLoadFunction(exportName, out func))
+		{
+			return true;
+		}
+
+		func = null!;
+		return false;
 	}
 
 	private NativeLibraryInstance GetOrAddLibraryInstance(string libraryPath)
