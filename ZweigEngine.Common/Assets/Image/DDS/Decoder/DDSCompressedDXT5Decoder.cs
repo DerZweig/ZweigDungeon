@@ -29,11 +29,10 @@ internal class DDSCompressedDXT5Decoder : DDSCompressedDecoder
                 colors[2].blue  = (byte)((2 * colors[0].blue + colors[1].blue + 1) / 3);
                 colors[2].green = (byte)((2 * colors[0].green + colors[1].green + 1) / 3);
                 colors[2].red   = (byte)((2 * colors[0].red + colors[1].red + 1) / 3);
-
+                
                 colors[3].blue  = (byte)((colors[0].blue + 2 * colors[1].blue + 1) / 3);
                 colors[3].green = (byte)((colors[0].green + 2 * colors[1].green + 1) / 3);
                 colors[3].red   = (byte)((colors[0].red + 2 * colors[1].red + 1) / 3);
-
 
                 if (alphas[0] > alphas[1])
                 {

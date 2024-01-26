@@ -17,9 +17,10 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	private const Win32WindowStyles         WINDOW_BORDERLESS_STYLE           = WINDOW_BASE_STYLE | Win32WindowStyles.Popup;
 	private const Win32WindowStyles         WINDOW_RESIZABLE_BORDERLESS_STYLE = WINDOW_BORDERLESS_STYLE | Win32WindowStyles.ThickFrame;
 	private const Win32WindowExtendedStyles WINDOW_BORDER_STYLE_EX            = Win32WindowExtendedStyles.ClientEdge | Win32WindowExtendedStyles.AppWindow;
-	private const Win32WindowExtendedStyles WINDOW_BORDERLESS_STYLE_EX        = Win32WindowExtendedStyles.ModalFrame;
+	private const Win32WindowExtendedStyles WINDOW_BORDERLESS_STYLE_EX        = Win32WindowExtendedStyles.AppWindow;
+	private const Win32WindowExtendedStyles WINDOW_BORDERLESS_RESIZE_STYLE_EX = Win32WindowExtendedStyles.ModalFrame;
 	private const Win32WindowStyles         WINDOW_STYLE_MASK                 = WINDOW_BASE_STYLE | WINDOW_RESIZABLE_BORDER_STYLE | WINDOW_RESIZABLE_BORDERLESS_STYLE;
-	private const Win32WindowExtendedStyles WINDOW_STYLE_MASK_EX              = WINDOW_BORDER_STYLE_EX | WINDOW_BORDERLESS_STYLE_EX;
+	private const Win32WindowExtendedStyles WINDOW_STYLE_MASK_EX              = WINDOW_BORDER_STYLE_EX | WINDOW_BORDERLESS_STYLE_EX | WINDOW_BORDERLESS_RESIZE_STYLE_EX;
 	private const string                    WINDOW_DEFAULT_TITLE              = "Untitled";
 	private const string                    WINDOW_CLASS_NAME                 = "ZweigEngine::WindowClass";
 	private const Win32ClassStyles          WINDOW_CLASS_STYLE                = Win32ClassStyles.HorizontalRedraw | Win32ClassStyles.VerticalRedraw | Win32ClassStyles.OwnDeviceContext;
@@ -320,7 +321,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			else if (resizable)
 			{
 				style   |= (int)WINDOW_RESIZABLE_BORDERLESS_STYLE;
-				styleEx |= (int)WINDOW_BORDERLESS_STYLE_EX;
+				styleEx |= (int)WINDOW_BORDERLESS_RESIZE_STYLE_EX;
 			}
 			else
 			{

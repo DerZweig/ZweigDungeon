@@ -28,12 +28,7 @@ public sealed class ServiceProvider : IServiceProvider, IDisposable
 			return this;
 		}
 
-		if (m_singletons.TryGetValue(serviceType, out var service))
-		{
-			return service;
-		}
-
-		return null;
+		return m_singletons.GetValueOrDefault(serviceType);
 	}
 
 	private void ReleaseUnmanagedResources()

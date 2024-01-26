@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using ZweigDungeon.Application.Entities;
-using ZweigDungeon.Application.Services.Implementation;
-using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services;
 using ZweigEngine.Common.Services.Interfaces.Files;
 using ZweigEngine.Common.Services.Interfaces.Platform;
@@ -16,13 +14,18 @@ namespace ZweigDungeon.Application;
 
 internal static class Program
 {
+	[STAThread]
 	private static void Main(string[] args)
 	{
 		try
 		{
 			var serviceConfig = new ServiceConfiguration();
 			serviceConfig.AddSingleton<NativeLibraryLoader>();
-			serviceConfig.AddSingleton<IVideoContext, OpenGLContext>();
+			serviceConfig.AddSingleton<IFileConfig, FileConfig>();
+			serviceConfig.AddSingleton<ImageRepository>();
+			serviceConfig.AddSingleton<FontRepository>();
+			serviceConfig.AddSingleton<TextureRepository>();
+			serviceConfig.AddSingleton<TileSheetRepository>();
 
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
@@ -31,30 +34,38 @@ internal static class Program
 				serviceConfig.AddSingleton<IPlatformKeyboard, Win32Keyboard>();
 				serviceConfig.AddSingleton<IPlatformMouse, Win32Mouse>();
 				serviceConfig.AddSingleton<IPlatformAudio, Win32AudioDevice>();
-				serviceConfig.AddSingleton<IPlatformVideo, Win32OpenGLDevice>();
+				serviceConfig.AddSingleton<IPlatformVideo, D3D11VideoDevice>();
+				serviceConfig.AddSingleton<IVideoContext, D3D11VideoContext>();
+				//serviceConfig.AddSingleton<IPlatformVideo, Win32DirectXDevice>();
+				//serviceConfig.AddSingleton<IVideoContext, Win32DirectXContext>();
+				//serviceConfig.AddSingleton<IPlatformVideo, Win32OpenGL>();
+				//serviceConfig.AddSingleton<IVideoContext, OpenGLContext>();
 			}
 			else
 			{
 				throw new NotSupportedException("Platform is not implemented");
 			}
 
-			serviceConfig.AddSingleton<ImageRepository>();
-			serviceConfig.AddSingleton<FontRepository>();
-			serviceConfig.AddSingleton<TextureRepository>();
-			serviceConfig.AddSingleton<TileSheetRepository>();
+			var assembly = Assembly.GetExecutingAssembly();
+			var types    = assembly.GetTypes();
 
-			serviceConfig.AddSingleton<IMenuAssets, MenuAssets>();
-			serviceConfig.AddSingleton<ILayoutManager, LayoutManager>();
-			serviceConfig.AddSingleton<IMenuController, MenuController>();
-			serviceConfig.AddSingleton<IMenuRenderer, MenuRenderer>();
-			
-			serviceConfig.AddSingleton<IEntityAssets, EntityAssets>();
-			serviceConfig.AddSingleton<IEntityRenderer, EntityRenderer>();
-			
-			serviceConfig.AddSingleton<IFileSystem, FileSystemConfig>();
-			serviceConfig.AddSingleton<IGlobalCancellation, GlobalCancellation>();
-			serviceConfig.AddSingleton<CurrentScene>();
-			serviceConfig.AddSingleton<App>();
+			foreach (var type in types)
+			{
+				if (type.IsInterface || type.Namespace?.Contains("Application.Services.") == false)
+				{
+					continue;
+				}
+
+				var interfaceType = type.GetInterfaces().SingleOrDefault(x => x.Name.EndsWith(type.Name));
+				if (interfaceType == null)
+				{
+					serviceConfig.AddSingleton(type);
+				}
+				else
+				{
+					serviceConfig.AddSingleton(interfaceType, type);
+				}
+			}
 
 			using (var services = serviceConfig.Build())
 			{

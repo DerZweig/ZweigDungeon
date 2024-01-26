@@ -1,16 +1,18 @@
-﻿namespace ZweigEngine.Common.Assets.Tiles;
+﻿using ZweigEngine.Common.Services.Interfaces.Video;
+
+namespace ZweigEngine.Common.Assets.Tiles;
 
 public class TileSheetAsset
 {
-	private static readonly IReadOnlyDictionary<string, TileSheetTile> g_emptyTiles;
+	private static readonly IReadOnlyDictionary<string, VideoRect> g_emptyTiles;
 
 	static TileSheetAsset()
 	{
-		g_emptyTiles = new Dictionary<string, TileSheetTile>();
+		g_emptyTiles = new Dictionary<string, VideoRect>();
 		Empty        = new TileSheetAsset();
 	}
 
 	public static TileSheetAsset Empty { get; }
 
-	public IReadOnlyDictionary<string, TileSheetTile> Tiles { get; init; } = g_emptyTiles;
+	public IReadOnlyDictionary<string, VideoRect> Tiles { get; init; } = g_emptyTiles;
 }

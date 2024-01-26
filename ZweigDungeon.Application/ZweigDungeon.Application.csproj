@@ -46,9 +46,9 @@
       <None Remove="Data\Gui\control.tga" />
       <None Remove="Data\Gui\control.xml" />
       <None Remove="Data\Char\character.tga" />
-      <AdditionalFiles Include="Data\Char\character.tga">
+      <Content Include="Data\Char\character.tga">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AdditionalFiles>
+      </Content>
     </ItemGroup>
 
 </Project>

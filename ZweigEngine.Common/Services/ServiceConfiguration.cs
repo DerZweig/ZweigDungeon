@@ -11,12 +11,30 @@ public sealed class ServiceConfiguration
 		m_entries = new List<Entry>();
 	}
 
+	public void AddSingleton(Type interfaceType, Type implementationType)
+	{
+		m_entries.Add(new Entry
+		{
+			InterfaceType      = interfaceType,
+			ImplementationType = implementationType
+		});
+	}
+
 	public void AddSingleton<TInterface, TImplementation>() where TImplementation : TInterface
 	{
 		m_entries.Add(new Entry
 		{
 			InterfaceType      = typeof(TInterface),
 			ImplementationType = typeof(TImplementation)
+		});
+	}
+
+	public void AddSingleton(Type implementationType)
+	{
+		m_entries.Add(new Entry
+		{
+			InterfaceType      = implementationType,
+			ImplementationType = implementationType
 		});
 	}
 
@@ -38,12 +56,12 @@ public sealed class ServiceConfiguration
 		{
 			typeof(IServiceProvider)
 		};
-		
+
 		foreach (var entry in m_entries)
 		{
 			if (!interfaces.Add(entry.InterfaceType))
 			{
-				throw new InvalidOperationException($"Duplicate service registration of type {entry.InterfaceType}");	
+				throw new InvalidOperationException($"Duplicate service registration of type {entry.InterfaceType}");
 			}
 
 			if (entry.InterfaceType != entry.ImplementationType)
@@ -90,7 +108,7 @@ public sealed class ServiceConfiguration
 				{
 					var instance = descriptor.Constructor.Invoke(parameters);
 					serviceProvider.AddSingleton(descriptor.InterfaceType, instance);
-					
+
 					if (descriptor.InterfaceType != descriptor.ImplementationType)
 					{
 						serviceProvider.AddSingleton(descriptor.ImplementationType, instance);

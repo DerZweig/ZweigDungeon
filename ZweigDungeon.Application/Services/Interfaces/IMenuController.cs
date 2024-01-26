@@ -2,5 +2,4 @@
 
 public interface IMenuController
 {
-	void DisplayStartupMenu();
 }

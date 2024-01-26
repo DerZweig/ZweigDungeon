@@ -6,9 +6,9 @@ namespace ZweigEngine.Common.Services.Repositories;
 
 public class FontRepository : BasicAsyncRepository<FontAsset>
 {
-	private readonly IFileSystem m_config;
+	private readonly IFileConfig m_config;
 
-	public FontRepository(IFileSystem config)
+	public FontRepository(IFileConfig config)
 	{
 		m_config = config;
 	}

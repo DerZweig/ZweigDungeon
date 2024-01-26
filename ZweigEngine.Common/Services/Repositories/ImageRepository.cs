@@ -8,10 +8,10 @@ namespace ZweigEngine.Common.Services.Repositories;
 
 public class ImageRepository : BasicAsyncRepository<ImageAsset>
 {
-	private readonly IFileSystem                      m_config;
+	private readonly IFileConfig                      m_config;
 	private readonly Dictionary<string, IImageReader> m_readers;
 
-	public ImageRepository(IFileSystem config)
+	public ImageRepository(IFileConfig config)
 	{
 		m_config = config;
 		m_readers = new Dictionary<string, IImageReader>
