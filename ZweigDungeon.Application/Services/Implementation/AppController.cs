@@ -1,5 +1,6 @@
 ﻿using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services.Interfaces.Platform;
+using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
 using ZweigEngine.Common.Services.Interfaces.Video;
 
 namespace ZweigDungeon.Application.Services.Implementation;
@@ -45,10 +46,9 @@ public class AppController : IDisposable, IAppController
 
 	private void HandleWindowCreated(IPlatformWindow window)
 	{
-		window.SetStyle(true, true);
+		window.SetStyle(WindowStyle.Windowed);
 		window.SetTitle("My Application");
 		window.SetMinimumSize(640, 480);
-		window.Show();
 		m_timers.Reset();
 	}
 

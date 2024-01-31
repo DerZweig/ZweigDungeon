@@ -6,7 +6,7 @@ using ZweigEngine.Native.Win32.Prototypes;
 
 namespace ZweigEngine.Native.Win32.DirectX.D3D11;
 
-internal sealed class D3D11Device : DirectXObject
+internal sealed class D3D11Device : DXObject
 {
 	public Direct3DFeatureLevel FeatureLevel { get; }
 

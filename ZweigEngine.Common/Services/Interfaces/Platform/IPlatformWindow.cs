@@ -1,4 +1,6 @@
-﻿namespace ZweigEngine.Common.Services.Interfaces.Platform;
+﻿using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
+
+namespace ZweigEngine.Common.Services.Interfaces.Platform;
 
 public delegate void PlatformWindowDelegate(IPlatformWindow window);
 
@@ -17,13 +19,12 @@ public interface IPlatformWindow
 	int  GetViewportWidth();
 	int  GetViewportHeight();
 
-	void Show();
 	void Close();
 	void Create();
 	void Update();
 	
 	void SetTitle(string text);
-	void SetStyle(bool bordered, bool resizable);
+	void SetStyle(WindowStyle style);
 	void SetPosition(int left, int top);
 	void SetSize(int width, int height);
 	void SetMinimumSize(int width, int height);

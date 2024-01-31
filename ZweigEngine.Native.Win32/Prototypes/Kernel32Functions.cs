@@ -2,4 +2,4 @@
 
 internal delegate long PfnGetLastErrorDelegate();
 
-internal delegate nint PfnGetModuleHandleDelegate(nint modulePointer);
+internal delegate IntPtr PfnGetModuleHandleDelegate(IntPtr modulePointer);

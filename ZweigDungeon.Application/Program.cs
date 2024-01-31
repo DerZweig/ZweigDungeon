@@ -7,6 +7,7 @@ using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Libraries;
 using ZweigEngine.Common.Services.Repositories;
+using ZweigEngine.Native.OpenGL;
 using ZweigEngine.Native.Win32;
 
 namespace ZweigDungeon.Application;
@@ -33,12 +34,10 @@ internal static class Program
 				serviceConfig.AddSingleton<IPlatformKeyboard, Win32Keyboard>();
 				serviceConfig.AddSingleton<IPlatformMouse, Win32Mouse>();
 				serviceConfig.AddSingleton<IPlatformAudio, Win32AudioDevice>();
-				serviceConfig.AddSingleton<IPlatformVideo, D3D11VideoDevice>();
-				serviceConfig.AddSingleton<IVideoContext, D3D11VideoContext>();
 				//serviceConfig.AddSingleton<IPlatformVideo, Win32DirectXDevice>();
 				//serviceConfig.AddSingleton<IVideoContext, Win32DirectXContext>();
-				//serviceConfig.AddSingleton<IPlatformVideo, Win32OpenGL>();
-				//serviceConfig.AddSingleton<IVideoContext, OpenGLContext>();
+				serviceConfig.AddSingleton<IPlatformVideo, Win32OpenGL>();
+				serviceConfig.AddSingleton<IVideoContext, OpenGLContext>();
 			}
 			else
 			{

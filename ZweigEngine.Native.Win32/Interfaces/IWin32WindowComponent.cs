@@ -1,6 +1,6 @@
 ﻿using ZweigEngine.Native.Win32.Constants;
 
-namespace ZweigEngine.Native.Win32;
+namespace ZweigEngine.Native.Win32.Interfaces;
 
 internal interface IWin32WindowComponent
 {

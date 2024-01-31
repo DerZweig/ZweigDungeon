@@ -1,8 +1,10 @@
 ﻿using System.Runtime.InteropServices;
 using ZweigEngine.Common.Services.Interfaces.Platform;
+using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
 using ZweigEngine.Common.Services.Libraries;
 using ZweigEngine.Common.Utility.Interop;
 using ZweigEngine.Native.Win32.Constants;
+using ZweigEngine.Native.Win32.Interfaces;
 using ZweigEngine.Native.Win32.Prototypes;
 using ZweigEngine.Native.Win32.Structures;
 
@@ -12,15 +14,12 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 {
 	private const  ushort                    INVALID_ATOM                      = 0;
 	private const  Win32WindowStyles         WINDOW_BASE_STYLE                 = Win32WindowStyles.ClipChildren | Win32WindowStyles.ClipSiblings;
-	private const  Win32WindowStyles         WINDOW_BORDER_STYLE               = WINDOW_BASE_STYLE | Win32WindowStyles.Overlapped | Win32WindowStyles.Caption | Win32WindowStyles.SystemMenu | Win32WindowStyles.MinimizeBox;
-	private const  Win32WindowStyles         WINDOW_RESIZABLE_BORDER_STYLE     = WINDOW_BORDER_STYLE | Win32WindowStyles.ThickFrame | Win32WindowStyles.MaximizeBox;
+	private const  Win32WindowStyles         WINDOW_BORDER_STYLE               = WINDOW_BASE_STYLE | Win32WindowStyles.Overlapped | Win32WindowStyles.Caption | Win32WindowStyles.SystemMenu | Win32WindowStyles.MinimizeBox | Win32WindowStyles.ThickFrame | Win32WindowStyles.MaximizeBox;
 	private const  Win32WindowStyles         WINDOW_BORDERLESS_STYLE           = WINDOW_BASE_STYLE | Win32WindowStyles.Popup;
-	private const  Win32WindowStyles         WINDOW_RESIZABLE_BORDERLESS_STYLE = WINDOW_BORDERLESS_STYLE | Win32WindowStyles.ThickFrame;
 	private const  Win32WindowExtendedStyles WINDOW_BORDER_STYLE_EX            = Win32WindowExtendedStyles.ClientEdge | Win32WindowExtendedStyles.AppWindow;
 	private const  Win32WindowExtendedStyles WINDOW_BORDERLESS_STYLE_EX        = Win32WindowExtendedStyles.AppWindow;
-	private const  Win32WindowExtendedStyles WINDOW_BORDERLESS_RESIZE_STYLE_EX = Win32WindowExtendedStyles.ModalFrame;
-	private const  Win32WindowStyles         WINDOW_STYLE_MASK                 = WINDOW_BASE_STYLE | WINDOW_RESIZABLE_BORDER_STYLE | WINDOW_RESIZABLE_BORDERLESS_STYLE;
-	private const  Win32WindowExtendedStyles WINDOW_STYLE_MASK_EX              = WINDOW_BORDER_STYLE_EX | WINDOW_BORDERLESS_STYLE_EX | WINDOW_BORDERLESS_RESIZE_STYLE_EX;
+	private const  Win32WindowStyles         WINDOW_STYLE_MASK                 = WINDOW_BORDER_STYLE | WINDOW_BORDERLESS_STYLE;
+	private const  Win32WindowExtendedStyles WINDOW_STYLE_MASK_EX              = WINDOW_BORDER_STYLE_EX | WINDOW_BORDERLESS_STYLE_EX;
 	private const  string                    WINDOW_DEFAULT_TITLE              = "Untitled";
 	private const  string                    WINDOW_CLASS_NAME                 = "ZweigEngine::WindowClass";
 	private const  Win32ClassStyles          WINDOW_CLASS_STYLE                = Win32ClassStyles.HorizontalRedraw | Win32ClassStyles.VerticalRedraw | Win32ClassStyles.OwnDeviceContext;
@@ -181,24 +180,13 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 		}
 	}
 
-	public void Show()
-	{
-		if (IsAvailable())
-		{
-			ShowWindow(m_handle, Win32ShowWindowCommands.ShowDefault);
-			SetForegroundWindow(m_handle);
-			SetFocus(m_handle);
-			RethrowError();
-		}
-	}
-
 	public void Create()
 	{
 		if (m_owner == IntPtr.Zero)
 		{
 			m_owner  = GetModuleHandle(IntPtr.Zero);
-			m_icon   = LoadIcon(m_owner, new IntPtr((int)Win32SystemIcon.Application));
-			m_cursor = LoadCursor(m_owner, new IntPtr((int)Win32SystemCursor.Arrow));
+			m_icon   = LoadIcon(IntPtr.Zero, new IntPtr((int)Win32SystemIcon.Application));
+			m_cursor = LoadCursor(IntPtr.Zero, new IntPtr((int)Win32SystemCursor.Arrow));
 		}
 
 		if (m_class == INVALID_ATOM)
@@ -223,7 +211,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			m_handle = CreateWindowEx(WINDOW_BORDER_STYLE_EX,
 			                          WINDOW_CLASS_NAME,
 			                          WINDOW_DEFAULT_TITLE,
-			                          WINDOW_RESIZABLE_BORDER_STYLE,
+			                          WINDOW_BORDER_STYLE,
 			                          (int)Win32CreateWindowFlags.Usedefault,
 			                          (int)Win32CreateWindowFlags.Usedefault,
 			                          (int)Win32CreateWindowFlags.Usedefault,
@@ -233,13 +221,23 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 			                          m_owner,
 			                          IntPtr.Zero);
 
-			RethrowError();
 			if (IsAvailable())
 			{
 				HandleResizeMessage();
 			}
 
-			NotifyWindowCreated();
+			if (IsAvailable())
+			{
+				NotifyWindowCreated();
+			}
+
+			if (IsAvailable())
+			{
+				ShowWindow(m_handle, Win32ShowWindowCommands.ShowDefault);
+				SetForegroundWindow(m_handle);
+				SetFocus(m_handle);
+			}
+
 			RethrowError();
 		}
 	}
@@ -310,39 +308,32 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 		}
 	}
 
-	public void SetStyle(bool bordered, bool resizable)
+	public void SetStyle(WindowStyle style)
 	{
 		if (IsAvailable())
 		{
-			var style   = GetWindowLong(m_handle, Win32WindowLongIndex.Style);
-			var styleEx = GetWindowLong(m_handle, Win32WindowLongIndex.ExtendedStyle);
+			var windowStyle   = GetWindowLong(m_handle, Win32WindowLongIndex.Style);
+			var windowStyleEx = GetWindowLong(m_handle, Win32WindowLongIndex.ExtendedStyle);
 
-			style   &= ~(int)WINDOW_STYLE_MASK;
-			styleEx &= ~(int)WINDOW_STYLE_MASK_EX;
+			windowStyle   &= ~(int)WINDOW_STYLE_MASK;
+			windowStyleEx &= ~(int)WINDOW_STYLE_MASK_EX;
 
-			if (bordered && resizable)
+			switch (style)
 			{
-				style   |= (int)WINDOW_RESIZABLE_BORDER_STYLE;
-				styleEx |= (int)WINDOW_BORDER_STYLE_EX;
-			}
-			else if (bordered)
-			{
-				style   |= (int)WINDOW_BORDER_STYLE;
-				styleEx |= (int)WINDOW_BORDER_STYLE_EX;
-			}
-			else if (resizable)
-			{
-				style   |= (int)WINDOW_RESIZABLE_BORDERLESS_STYLE;
-				styleEx |= (int)WINDOW_BORDERLESS_RESIZE_STYLE_EX;
-			}
-			else
-			{
-				style   |= (int)WINDOW_BORDERLESS_STYLE;
-				styleEx |= (int)WINDOW_BORDERLESS_STYLE_EX;
+				case WindowStyle.Borderless:
+					windowStyle   |= (int)WINDOW_BORDERLESS_STYLE;
+					windowStyleEx |= (int)WINDOW_BORDERLESS_STYLE_EX;
+					break;
+				case WindowStyle.Windowed:
+					windowStyle   |= (int)WINDOW_BORDER_STYLE;
+					windowStyleEx |= (int)WINDOW_BORDER_STYLE_EX;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(style), style, null);
 			}
 
-			SetWindowLong(m_handle, Win32WindowLongIndex.Style, style);
-			SetWindowLong(m_handle, Win32WindowLongIndex.ExtendedStyle, styleEx);
+			SetWindowLong(m_handle, Win32WindowLongIndex.Style, windowStyle);
+			SetWindowLong(m_handle, Win32WindowLongIndex.ExtendedStyle, windowStyleEx);
 			SetWindowPos(m_handle, IntPtr.Zero, 0, 0, 0, 0,
 			             Win32SetWindowPositionCommands.FrameChanged |
 			             Win32SetWindowPositionCommands.NoCopyBits |

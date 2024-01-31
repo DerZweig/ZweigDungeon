@@ -3,6 +3,7 @@ using ZweigEngine.Common.Services.Interfaces.Libraries;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Libraries;
 using ZweigEngine.Native.Win32.Constants;
+using ZweigEngine.Native.Win32.Interfaces;
 using ZweigEngine.Native.Win32.Prototypes;
 using ZweigEngine.Native.Win32.Structures;
 
@@ -13,7 +14,7 @@ public sealed class Win32OpenGL : IPlatformVideo, IDisposable, IWin32WindowCompo
 	private const byte                                PIXEL_FORMAT_COLOR_BITS             = 32;
 	private const byte                                PIXEL_FORMAT_DEPTH_BITS             = 24;
 	private const byte                                PIXEL_FORMAT_STENCIL_BITS           = 8;
-	private const Win32PixelFormatDescriptorFlags     PIXEl_FORMAT_FLAGS                  = Win32PixelFormatDescriptorFlags.DrawToWindow | Win32PixelFormatDescriptorFlags.SupportOpenGL | Win32PixelFormatDescriptorFlags.Doublebuffer;
+	private const Win32PixelFormatDescriptorFlags     PIXEL_FORMAT_FLAGS                  = Win32PixelFormatDescriptorFlags.DrawToWindow | Win32PixelFormatDescriptorFlags.SupportOpenGL | Win32PixelFormatDescriptorFlags.Doublebuffer;
 	private const Win32PixelFormatDescriptorPixelType PIXEL_FORMAT_TYPE                   = Win32PixelFormatDescriptorPixelType.TypeRgba;
 	private const int                                 WGL_CONTEXT_ATTRIBUTE_FLAGS         = 0x2094;
 	private const int                                 WGL_CONTEXT_ATTRIBUTE_MAJOR_VERSION = 0x2091;
@@ -109,7 +110,7 @@ public sealed class Win32OpenGL : IPlatformVideo, IDisposable, IWin32WindowCompo
 		{
 			nSize        = (ushort)Marshal.SizeOf(typeof(Win32PixelFormatDescriptor)),
 			nVersion     = 1,
-			dwFlags      = PIXEl_FORMAT_FLAGS,
+			dwFlags      = PIXEL_FORMAT_FLAGS,
 			iPixelType   = PIXEL_FORMAT_TYPE,
 			cColorBits   = PIXEL_FORMAT_COLOR_BITS,
 			cDepthBits   = PIXEL_FORMAT_DEPTH_BITS,

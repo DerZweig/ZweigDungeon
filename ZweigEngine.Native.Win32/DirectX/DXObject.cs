@@ -2,11 +2,11 @@
 
 namespace ZweigEngine.Native.Win32.DirectX;
 
-internal abstract class DirectXObject : IDisposable
+internal abstract class DXObject : IDisposable
 {
 	private IntPtr m_pointer;
 
-	protected DirectXObject(IntPtr pointer)
+	protected DXObject(IntPtr pointer)
 	{
 		m_pointer = pointer;
 	}
@@ -26,7 +26,7 @@ internal abstract class DirectXObject : IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	~DirectXObject()
+	~DXObject()
 	{
 		ReleaseUnmanagedResources();
 	}
@@ -35,9 +35,16 @@ internal abstract class DirectXObject : IDisposable
 
 	protected void LoadMethod<TDelegate>(uint index, out TDelegate method) where TDelegate : Delegate
 	{
-		var offset  = Marshal.SizeOf<IntPtr>() * new IntPtr(index);
-		var slot    = Marshal.PtrToStructure<IntPtr>(m_pointer) + offset;
-		var address = Marshal.PtrToStructure<IntPtr>(slot);
-		method = Marshal.GetDelegateForFunctionPointer<TDelegate>(address);
+		if (m_pointer == IntPtr.Zero)
+		{
+			method = null!;
+		}
+		else
+		{
+			var offset  = Marshal.SizeOf<IntPtr>() * new IntPtr(index);
+			var slot    = Marshal.PtrToStructure<IntPtr>(m_pointer) + offset;
+			var address = Marshal.PtrToStructure<IntPtr>(slot);
+			method = Marshal.GetDelegateForFunctionPointer<TDelegate>(address);
+		}
 	}
 }

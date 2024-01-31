@@ -5,10 +5,10 @@ namespace ZweigEngine.Native.Win32.Structures;
 [StructLayout(LayoutKind.Sequential)]
 internal struct Win32Message
 {
-    public nint       Hwnd;
+    public IntPtr       Hwnd;
     public uint       Value;
-    public nint       WParam;
-    public nint       LParam;
+    public IntPtr       WParam;
+    public IntPtr       LParam;
     public uint       Time;
     public Win32Point Point;
 }

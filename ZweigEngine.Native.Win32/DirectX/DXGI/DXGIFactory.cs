@@ -8,7 +8,7 @@ using ZweigEngine.Native.Win32.Structures;
 
 namespace ZweigEngine.Native.Win32.DirectX.DXGI;
 
-internal sealed class DXGIFactory : DirectXObject
+internal sealed class DXGIFactory : DXObject
 {
 	private delegate Win32HResult PfnEnumAdaptersDelegate(IntPtr self, uint index, out IntPtr adapter);
 	private delegate Win32HResult PfnMakeWindowAssociationDelegate(IntPtr self, IntPtr window, DXGIMakeWindowAssociationFlags flags);
@@ -42,9 +42,10 @@ internal sealed class DXGIFactory : DirectXObject
 		return false;
 	}
 
-	public bool TryEnumAdapters(uint index, out DXGIAdapter adapter)
+	public bool TryEnumAdapters(uint index, ref DXGIAdapter? adapter)
 	{
-		adapter = null!;
+		adapter?.Dispose();
+		adapter = null;
 		if (m_enumAdapters(Self, index, out var result).Success)
 		{
 			adapter = new DXGIAdapter(result);

@@ -1,6 +1,7 @@
 ﻿using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
 using ZweigEngine.Native.Win32.Constants;
+using ZweigEngine.Native.Win32.Interfaces;
 
 namespace ZweigEngine.Native.Win32;
 

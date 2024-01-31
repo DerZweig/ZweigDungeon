@@ -1,6 +1,6 @@
 namespace ZweigEngine.Native.Win32.DirectX.D3D11;
 
-internal sealed class D3D11DeviceContext : DirectXObject
+internal sealed class D3D11DeviceContext : DXObject
 {
 	private delegate void PfnClearStateDelegate(IntPtr self);
 	private delegate void PfnFlushDelegate(IntPtr self);
