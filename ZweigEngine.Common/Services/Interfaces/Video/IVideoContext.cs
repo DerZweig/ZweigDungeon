@@ -1,4 +1,6 @@
-﻿namespace ZweigEngine.Common.Services.Interfaces.Video;
+﻿using ZweigEngine.Common.Services.Interfaces.Video.Constant;
+
+namespace ZweigEngine.Common.Services.Interfaces.Video;
 
 public interface IVideoContext
 {

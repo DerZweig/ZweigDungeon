@@ -1,5 +1,6 @@
 ﻿using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services.Interfaces.Video;
+using ZweigEngine.Common.Services.Interfaces.Video.Structures;
 using ZweigEngine.Common.Services.Repositories;
 
 namespace ZweigDungeon.Application.Services.Implementation;

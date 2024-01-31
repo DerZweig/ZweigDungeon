@@ -2,6 +2,7 @@
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
 using ZweigEngine.Common.Services.Interfaces.Video;
+using ZweigEngine.Common.Services.Interfaces.Video.Structures;
 
 namespace ZweigDungeon.Application.Services.Implementation;
 

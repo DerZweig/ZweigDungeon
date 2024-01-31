@@ -1,4 +1,4 @@
-﻿namespace ZweigEngine.Common.Services.Interfaces.Video;
+﻿namespace ZweigEngine.Common.Services.Interfaces.Video.Constant;
 
 public enum VideoBlendMode : uint
 {

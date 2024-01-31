@@ -1,6 +1,7 @@
 ﻿using ZweigEngine.Common.Services.Libraries;
 using ZweigEngine.Native.Win32.DirectX.Constants;
 using ZweigEngine.Native.Win32.DirectX.D3D11.Constants;
+using ZweigEngine.Native.Win32.DirectX.D3D11.Structures;
 using ZweigEngine.Native.Win32.DirectX.DXGI;
 using ZweigEngine.Native.Win32.Prototypes;
 
@@ -38,5 +39,10 @@ internal sealed class D3D11Device : DXObject
 		}
 
 		return false;
+	}
+
+	public bool CreateRenderTargetView(D3D11Texture2D? d3d11SwapchainTexture, D3D11RenderTargetDescription? description, ref D3D11RenderTargetView? d3d11SwapchainTarget)
+	{
+		throw new NotImplementedException();
 	}
 }

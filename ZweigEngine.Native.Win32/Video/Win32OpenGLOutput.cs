@@ -7,9 +7,9 @@ using ZweigEngine.Native.Win32.Interfaces;
 using ZweigEngine.Native.Win32.Prototypes;
 using ZweigEngine.Native.Win32.Structures;
 
-namespace ZweigEngine.Native.Win32;
+namespace ZweigEngine.Native.Win32.Video;
 
-public sealed class Win32OpenGL : IPlatformVideo, IDisposable, IWin32WindowComponent, ICustomFunctionLoader
+public sealed class Win32OpenGLOutput : IDisposable, IPlatformVideoOutput, IWin32WindowComponent, ICustomFunctionLoader
 {
 	private const byte                                PIXEL_FORMAT_COLOR_BITS             = 32;
 	private const byte                                PIXEL_FORMAT_DEPTH_BITS             = 24;
@@ -48,7 +48,7 @@ public sealed class Win32OpenGL : IPlatformVideo, IDisposable, IWin32WindowCompo
 	private int    m_width;
 	private int    m_height;
 
-	public Win32OpenGL(NativeLibraryLoader libraryLoader, Win32Window window)
+	public Win32OpenGLOutput(NativeLibraryLoader libraryLoader, Win32Window window)
 	{
 		m_cachedResults = new Dictionary<string, object?>();
 		m_libraryLoader = libraryLoader;
@@ -78,7 +78,7 @@ public sealed class Win32OpenGL : IPlatformVideo, IDisposable, IWin32WindowCompo
 		GC.SuppressFinalize(this);
 	}
 
-	~Win32OpenGL()
+	~Win32OpenGLOutput()
 	{
 		ReleaseUnmanagedResources();
 	}
@@ -88,9 +88,8 @@ public sealed class Win32OpenGL : IPlatformVideo, IDisposable, IWin32WindowCompo
 	public event PlatformVideoDeviceDelegate? OnBeginFrame;
 	public event PlatformVideoDeviceDelegate? OnFinishFrame;
 
-	public string GetDeviceName()     => "Win32 OpenGL 3.3";
-	public int    GetViewportWidth()  => m_width;
-	public int    GetViewportHeight() => m_height;
+	public int GetViewportWidth()  => m_width;
+	public int GetViewportHeight() => m_height;
 
 	void IWin32WindowComponent.OnAttach()
 	{

@@ -1,5 +1,6 @@
 ﻿using ZweigDungeon.Application.Gui.Constants;
 using ZweigEngine.Common.Services.Interfaces.Video;
+using ZweigEngine.Common.Services.Interfaces.Video.Structures;
 using ZweigEngine.Common.Utility.Exceptions;
 
 namespace ZweigDungeon.Application.Gui.Controls;

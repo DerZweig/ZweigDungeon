@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using ZweigEngine.Common.Utility.Interop;
+using ZweigEngine.Native.Win32.DirectX.D3D11;
 using ZweigEngine.Native.Win32.DirectX.DXGI.Constants;
 using ZweigEngine.Native.Win32.Structures;
 
@@ -33,16 +34,16 @@ internal sealed class DXGISwapChain : DXObject
 		return m_resizeBuffers(Self, 0, width, height, newFormat, 0u).Success;
 	}
 
-	public bool TryGetBuffer(int buffer, ref DXGISurface? surface)
+	public bool TryGetBuffer(int buffer, ref D3D11Texture2D? texture)
 	{
-		surface?.Dispose();
-		surface = null;
+		texture?.Dispose();
+		texture = null;
 		
-		var       uuid   = new Guid("cafcb56c-6ac3-4889-bf47-9e23bbd260ec");
+		var       uuid   = new Guid("6f15aaf2-d208-4e89-9ab4-489535d34f9c");
 		using var pinned = new PinnedObject<Guid>(uuid, GCHandleType.Pinned);
 		if (m_getBuffer(Self, buffer, pinned.GetAddress(), out var pointer).Success)
 		{
-			surface = new DXGISurface(pointer);
+			texture = new D3D11Texture2D(pointer);
 			return true;
 		}
 

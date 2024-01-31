@@ -9,6 +9,7 @@ using ZweigEngine.Common.Services.Libraries;
 using ZweigEngine.Common.Services.Repositories;
 using ZweigEngine.Native.OpenGL;
 using ZweigEngine.Native.Win32;
+using ZweigEngine.Native.Win32.Video;
 
 namespace ZweigDungeon.Application;
 
@@ -36,7 +37,7 @@ internal static class Program
 				serviceConfig.AddSingleton<IPlatformAudio, Win32AudioDevice>();
 				//serviceConfig.AddSingleton<IPlatformVideo, Win32DirectXDevice>();
 				//serviceConfig.AddSingleton<IVideoContext, Win32DirectXContext>();
-				serviceConfig.AddSingleton<IPlatformVideo, Win32OpenGL>();
+				serviceConfig.AddSingleton<IPlatformVideoOutput, Win32OpenGLOutput>();
 				serviceConfig.AddSingleton<IVideoContext, OpenGLContext>();
 			}
 			else

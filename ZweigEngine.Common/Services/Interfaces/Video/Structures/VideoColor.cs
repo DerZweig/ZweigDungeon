@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ZweigEngine.Common.Services.Interfaces.Video;
+namespace ZweigEngine.Common.Services.Interfaces.Video.Structures;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct VideoColor

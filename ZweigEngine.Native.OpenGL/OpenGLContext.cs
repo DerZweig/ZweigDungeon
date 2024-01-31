@@ -1,6 +1,8 @@
 ﻿using ZweigEngine.Common.Services.Interfaces.Libraries;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Video;
+using ZweigEngine.Common.Services.Interfaces.Video.Constant;
+using ZweigEngine.Common.Services.Interfaces.Video.Structures;
 using ZweigEngine.Common.Utility.Exceptions;
 using ZweigEngine.Native.OpenGL.Constants;
 using ZweigEngine.Native.OpenGL.Prototypes;
@@ -10,7 +12,7 @@ namespace ZweigEngine.Native.OpenGL;
 
 public sealed class OpenGLContext : IDisposable, IVideoContext
 {
-	private readonly IPlatformVideo m_video;
+	private readonly IPlatformVideoOutput m_video;
 
 	// ReSharper disable InconsistentNaming
 	// ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
@@ -38,7 +40,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext
 	private OpenGLSpriteModel?    m_spriteModel;
 	private OpenGLSpriteTextures? m_spriteTextures;
 
-	public OpenGLContext(IPlatformVideo video)
+	public OpenGLContext(IPlatformVideoOutput video)
 	{
 		m_video                =  video;
 		m_video.OnActivated    += HandleVideoActivated;
@@ -69,7 +71,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext
 		ReleaseUnmanagedResources();
 	}
 
-	private void HandleVideoActivated(IPlatformVideo video)
+	private void HandleVideoActivated(IPlatformVideoOutput video)
 	{
 		if (m_video != video)
 		{
@@ -98,7 +100,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext
 		m_spriteTextures = new OpenGLSpriteTextures(loader);
 	}
 
-	private void HandleVideoDeactivating(IPlatformVideo video)
+	private void HandleVideoDeactivating(IPlatformVideoOutput video)
 	{
 		if (m_video != video)
 		{
@@ -130,7 +132,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext
 		m_spriteTextures = null;
 	}
 
-	private void HandleVideoBeginFrame(IPlatformVideo video)
+	private void HandleVideoBeginFrame(IPlatformVideoOutput video)
 	{
 		var width  = video.GetViewportWidth();
 		var height = video.GetViewportHeight();
@@ -147,7 +149,7 @@ public sealed class OpenGLContext : IDisposable, IVideoContext
 		m_spriteModel!.Begin();
 	}
 
-	private void HandleVideoFinishFrame(IPlatformVideo video)
+	private void HandleVideoFinishFrame(IPlatformVideoOutput video)
 	{
 		m_spriteModel?.Finish();
 		m_spriteShader?.Finish();
