@@ -1,15 +1,16 @@
 ﻿using ZweigEngine.Common.Assets.Image;
 using ZweigEngine.Common.Assets.Image.Constants;
 using ZweigEngine.Common.Services.Interfaces.Platform;
-using ZweigEngine.Common.Services.Interfaces.Video;
+using ZweigEngine.Common.Services.Video;
+using ZweigEngine.Common.Services.Video.Interfaces;
 
 namespace ZweigEngine.Common.Services.Repositories;
 
 public class TextureRepository : BasicVideoRepository<ImageAsset, IVideoImage>
 {
-	private readonly IVideoContext m_video;
+	private readonly VideoContext m_video;
 
-	public TextureRepository(IPlatformSynchronization synchronization, IVideoContext video) : base(synchronization)
+	public TextureRepository(IPlatformSynchronization synchronization, VideoContext video) : base(synchronization)
 	{
 		m_video = video;
 	}

@@ -1,5 +1,4 @@
-﻿using ZweigEngine.Common.Services.Interfaces.Video;
-using ZweigEngine.Common.Services.Interfaces.Video.Structures;
+﻿using ZweigEngine.Common.Services.Video.Structures;
 
 namespace ZweigEngine.Common.Assets.Font;
 

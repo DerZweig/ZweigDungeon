@@ -4,12 +4,11 @@ using System.Runtime.InteropServices;
 using ZweigEngine.Common.Services;
 using ZweigEngine.Common.Services.Interfaces.Files;
 using ZweigEngine.Common.Services.Interfaces.Platform;
-using ZweigEngine.Common.Services.Interfaces.Video;
 using ZweigEngine.Common.Services.Libraries;
 using ZweigEngine.Common.Services.Repositories;
+using ZweigEngine.Common.Services.Video;
 using ZweigEngine.Native.OpenGL;
 using ZweigEngine.Native.Win32;
-using ZweigEngine.Native.Win32.Video;
 
 namespace ZweigDungeon.Application;
 
@@ -27,6 +26,7 @@ internal static class Program
 			serviceConfig.AddSingleton<FontRepository>();
 			serviceConfig.AddSingleton<TextureRepository>();
 			serviceConfig.AddSingleton<TileSheetRepository>();
+			serviceConfig.AddSingleton<VideoContext>();
 
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
@@ -35,10 +35,7 @@ internal static class Program
 				serviceConfig.AddSingleton<IPlatformKeyboard, Win32Keyboard>();
 				serviceConfig.AddSingleton<IPlatformMouse, Win32Mouse>();
 				serviceConfig.AddSingleton<IPlatformAudio, Win32AudioDevice>();
-				//serviceConfig.AddSingleton<IPlatformVideo, Win32DirectXDevice>();
-				//serviceConfig.AddSingleton<IVideoContext, Win32DirectXContext>();
-				serviceConfig.AddSingleton<IPlatformVideoOutput, Win32OpenGLOutput>();
-				serviceConfig.AddSingleton<IVideoContext, OpenGLContext>();
+				serviceConfig.AddSingleton<IPlatformVideo, Win32Video>();
 			}
 			else
 			{

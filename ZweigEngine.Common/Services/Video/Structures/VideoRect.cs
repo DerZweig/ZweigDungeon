@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ZweigEngine.Common.Services.Interfaces.Video.Structures;
+namespace ZweigEngine.Common.Services.Video.Structures;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct VideoRect

@@ -90,10 +90,10 @@ public class GlobalAssets : IDisposable, IGlobalAssets
 			m_largeFontImage  = await m_images.LoadForGlobal("Gui/font_large", cancellationToken);
 			m_characterImage  = await m_images.LoadForGlobal("Char/character", cancellationToken);
 
-			//await m_textures.LoadForGlobal(m_solidColorImage, cancellationToken);
-			//await m_textures.LoadForGlobal(m_smallFontImage, cancellationToken);
-			//await m_textures.LoadForGlobal(m_mediumFontImage, cancellationToken);
-			//await m_textures.LoadForGlobal(m_largeFontImage, cancellationToken);
+			await m_textures.LoadForGlobal(m_solidColorImage, cancellationToken);
+			await m_textures.LoadForGlobal(m_smallFontImage, cancellationToken);
+			await m_textures.LoadForGlobal(m_mediumFontImage, cancellationToken);
+			await m_textures.LoadForGlobal(m_largeFontImage, cancellationToken);
 			
 			m_isLoaded.Exchange(true);
 		}, cancellationToken);

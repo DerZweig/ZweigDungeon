@@ -1,4 +1,4 @@
-﻿namespace ZweigEngine.Common.Services.Interfaces.Video.Constant;
+﻿namespace ZweigEngine.Common.Services.Video.Constant;
 
 [Flags]
 public enum VideoBlitFlags

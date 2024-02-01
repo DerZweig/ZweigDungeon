@@ -20,9 +20,8 @@ internal class OpenGLSpriteTextures : IDisposable
 	// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 	// ReSharper restore InconsistentNaming
 
-	private readonly List<uint>                      m_allocated;
-	private readonly Stack<uint>                     m_freelist;
-	private readonly Dictionary<OpenGLImage, uint> m_mappings;
+	private readonly List<uint>  m_allocated;
+	private readonly Stack<uint> m_freelist;
 
 	public OpenGLSpriteTextures(ICustomFunctionLoader loader)
 	{
@@ -36,19 +35,17 @@ internal class OpenGLSpriteTextures : IDisposable
 
 		m_allocated = new List<uint>();
 		m_freelist  = new Stack<uint>();
-		m_mappings  = new Dictionary<OpenGLImage, uint>();
 	}
 
 	private void ReleaseUnmanagedResources()
 	{
-		if (m_mappings.Any())
+		if (m_allocated.Any())
 		{
 			glDeleteTextures(m_allocated.Count, m_allocated.ToArray());
 		}
-		
+
 		m_allocated.Clear();
 		m_freelist.Clear();
-		m_mappings.Clear();
 	}
 
 	public void Dispose()
@@ -61,67 +58,42 @@ internal class OpenGLSpriteTextures : IDisposable
 	{
 		ReleaseUnmanagedResources();
 	}
-	
-	public OpenGLImage? ActiveSurface { get; private set; }
 
-	public void Bind(OpenGLImage? surface)
+	public void Bind(uint? name)
 	{
-		if (surface == null)
-		{
-			glActiveTexture(OpenGLTextureUnit.Texture0);
-			glBindTexture(OpenGLTextureTarget.Texture2D, 0u);
-			ActiveSurface = null;
-		}
-		else if (!m_mappings.TryGetValue(surface, out var texture))
-		{
-			Upload(surface);
-			ActiveSurface = surface;
-		}
-		else
-		{
-			glActiveTexture(OpenGLTextureUnit.Texture0);
-			glBindTexture(OpenGLTextureTarget.Texture2D, texture);
-			ActiveSurface = surface;
-		}
-	}
-
-	public void Release(OpenGLImage image)
-	{
-		if (m_mappings.Remove(image, out var texture))
-		{
-			m_freelist.Push(texture);
-		}
-	}
-
-	public void Upload(OpenGLImage image)
-	{
-		if (!m_mappings.TryGetValue(image, out var texture))
-		{
-			if (!m_freelist.TryPop(out texture))
-			{
-				var temp = new uint[1];
-				glGenTextures(1, temp);
-				texture = temp[0];
-				
-				if (texture == 0u)
-				{
-					throw new OutOfMemoryException("Couldn't allocate additional texture resources.");
-				}
-				
-				m_allocated.Add(texture);
-			}
-			
-			m_mappings[image] = texture;
-		}
-		
-		ActiveSurface = image;
 		glActiveTexture(OpenGLTextureUnit.Texture0);
-		glBindTexture(OpenGLTextureTarget.Texture2D, texture);
-		UploadInternal(image.Width, image.Height, image.Address);
+		glBindTexture(OpenGLTextureTarget.Texture2D, name ?? 0u);
 	}
 
-	private void UploadInternal(ushort width, ushort height, IntPtr data)
+	public void Release(uint name)
 	{
+		m_freelist.Push(name);
+	}
+
+	public uint Create(ushort width, ushort height, IntPtr data)
+	{
+		if (!m_freelist.TryPop(out var name))
+		{
+			var temp = new uint[1];
+			glGenTextures(1, temp);
+			name = temp[0];
+
+			if (name == 0u)
+			{
+				throw new OutOfMemoryException("Couldn't allocate additional texture resources.");
+			}
+
+			m_allocated.Add(name);
+		}
+
+		Upload(name, width, height, data);
+		return name;
+	}
+
+	public void Upload(uint name, ushort width, ushort height, IntPtr data)
+	{
+		glActiveTexture(OpenGLTextureUnit.Texture0);
+		glBindTexture(OpenGLTextureTarget.Texture2D, name);
 		glTexImage2D(OpenGLTextureUploadTarget.Texture2D, 0, OpenGLTextureInternalFormat.RGBA8, width, height, 0, OpenGLTextureComponentFormat.RGBA, OpenGLTextureDataType.UnsignedByte, data);
 		glTexParameteri(OpenGLTextureTarget.Texture2D, OpenGLTextureParameterName.TextureMinFilter, OpenGLTextureParameter.Nearest);
 		glTexParameteri(OpenGLTextureTarget.Texture2D, OpenGLTextureParameterName.TextureMagFilter, OpenGLTextureParameter.Nearest);

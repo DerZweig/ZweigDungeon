@@ -1,26 +1,28 @@
 ﻿using ZweigDungeon.Application.Services.Interfaces;
 using ZweigEngine.Common.Services.Interfaces.Platform;
 using ZweigEngine.Common.Services.Interfaces.Platform.Constants;
-using ZweigEngine.Common.Services.Interfaces.Video;
-using ZweigEngine.Common.Services.Interfaces.Video.Structures;
+using ZweigEngine.Common.Services.Video.Structures;
+using ZweigEngine.Native.OpenGL;
 
 namespace ZweigDungeon.Application.Services.Implementation;
 
 public class AppController : IDisposable, IAppController
 {
 	private readonly IPlatformWindow m_window;
+	private readonly IPlatformVideo  m_video;
 	private readonly IGlobalAssets   m_assets;
 	private readonly MenuController  m_menu;
 	private readonly MapController   m_map;
 	private readonly GlobalTimers    m_timers;
 
-	public AppController(IPlatformWindow window, IGlobalAssets assets, MenuController menu, MapController map, GlobalTimers timers)
+	public AppController(IPlatformWindow window, IPlatformVideo video, IGlobalAssets assets, MenuController menu, MapController map, GlobalTimers timers)
 	{
-		m_window = window;
-		m_assets = assets;
-		m_menu   = menu;
-		m_map    = map;
-		m_timers = timers;
+		m_window     = window;
+		m_video = video;
+		m_assets     = assets;
+		m_menu       = menu;
+		m_map        = map;
+		m_timers     = timers;
 
 		m_window.OnCreated += HandleWindowCreated;
 		m_window.OnClosing += HandleWindowClosing;
@@ -47,6 +49,10 @@ public class AppController : IDisposable, IAppController
 
 	private void HandleWindowCreated(IPlatformWindow window)
 	{
+		var driver = m_video.EnumerateDrivers().First(x => x.Name.Contains("OpenGL", StringComparison.OrdinalIgnoreCase));
+		var device = driver.EnumerateDevices().First();
+		m_video.ConfigureSurface(driver, device, surface => new OpenGLBackend(surface));
+		
 		window.SetStyle(WindowStyle.Windowed);
 		window.SetTitle("My Application");
 		window.SetMinimumSize(640, 480);
