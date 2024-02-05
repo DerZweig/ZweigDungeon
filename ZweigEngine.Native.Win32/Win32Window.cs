@@ -12,18 +12,17 @@ namespace ZweigEngine.Native.Win32;
 
 public sealed class Win32Window : IDisposable, IPlatformWindow
 {
-	private const  ushort                    INVALID_ATOM                      = 0;
-	private const  Win32WindowStyles         WINDOW_BASE_STYLE                 = Win32WindowStyles.ClipChildren | Win32WindowStyles.ClipSiblings;
-	private const  Win32WindowStyles         WINDOW_BORDER_STYLE               = WINDOW_BASE_STYLE | Win32WindowStyles.Overlapped | Win32WindowStyles.Caption | Win32WindowStyles.SystemMenu | Win32WindowStyles.MinimizeBox | Win32WindowStyles.ThickFrame | Win32WindowStyles.MaximizeBox;
-	private const  Win32WindowStyles         WINDOW_BORDERLESS_STYLE           = WINDOW_BASE_STYLE | Win32WindowStyles.Popup;
-	private const  Win32WindowExtendedStyles WINDOW_BORDER_STYLE_EX            = Win32WindowExtendedStyles.ClientEdge | Win32WindowExtendedStyles.AppWindow;
-	private const  Win32WindowExtendedStyles WINDOW_BORDERLESS_STYLE_EX        = Win32WindowExtendedStyles.AppWindow;
-	private const  Win32WindowStyles         WINDOW_STYLE_MASK                 = WINDOW_BORDER_STYLE | WINDOW_BORDERLESS_STYLE;
-	private const  Win32WindowExtendedStyles WINDOW_STYLE_MASK_EX              = WINDOW_BORDER_STYLE_EX | WINDOW_BORDERLESS_STYLE_EX;
-	private const  string                    WINDOW_DEFAULT_TITLE              = "Untitled";
-	private const  string                    WINDOW_CLASS_NAME                 = "ZweigEngine::WindowClass";
-	private const  Win32ClassStyles          WINDOW_CLASS_STYLE                = Win32ClassStyles.HorizontalRedraw | Win32ClassStyles.VerticalRedraw | Win32ClassStyles.OwnDeviceContext;
-	private static bool                      g_isDpiConfigured;
+	private const ushort                    INVALID_ATOM               = 0;
+	private const Win32WindowStyles         WINDOW_BASE_STYLE          = Win32WindowStyles.ClipChildren | Win32WindowStyles.ClipSiblings;
+	private const Win32WindowStyles         WINDOW_BORDER_STYLE        = WINDOW_BASE_STYLE | Win32WindowStyles.Overlapped | Win32WindowStyles.Caption | Win32WindowStyles.SystemMenu | Win32WindowStyles.MinimizeBox | Win32WindowStyles.ThickFrame | Win32WindowStyles.MaximizeBox;
+	private const Win32WindowStyles         WINDOW_BORDERLESS_STYLE    = WINDOW_BASE_STYLE | Win32WindowStyles.Popup;
+	private const Win32WindowExtendedStyles WINDOW_BORDER_STYLE_EX     = Win32WindowExtendedStyles.ClientEdge | Win32WindowExtendedStyles.AppWindow;
+	private const Win32WindowExtendedStyles WINDOW_BORDERLESS_STYLE_EX = Win32WindowExtendedStyles.AppWindow;
+	private const Win32WindowStyles         WINDOW_STYLE_MASK          = WINDOW_BORDER_STYLE | WINDOW_BORDERLESS_STYLE;
+	private const Win32WindowExtendedStyles WINDOW_STYLE_MASK_EX       = WINDOW_BORDER_STYLE_EX | WINDOW_BORDERLESS_STYLE_EX;
+	private const string                    WINDOW_DEFAULT_TITLE       = "Untitled";
+	private const string                    WINDOW_CLASS_NAME          = "ZweigEngine::WindowClass";
+	private const Win32ClassStyles          WINDOW_CLASS_STYLE         = Win32ClassStyles.HorizontalRedraw | Win32ClassStyles.VerticalRedraw | Win32ClassStyles.OwnDeviceContext;
 
 	// ReSharper disable InconsistentNaming
 	private readonly PfnBeginPaintDelegate                BeginPaint;
@@ -54,6 +53,7 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	// ReSharper restore InconsistentNaming
 
 	private readonly Win32Synchronization          m_synchronization;
+	private readonly IWin32ProcessDpiScalingConfig m_dpiScaling;
 	private readonly PinnedDelegate<PfnWindowProc> m_proc;
 	private readonly List<IWin32WindowComponent>   m_components;
 	private          IntPtr                        m_owner;
@@ -77,9 +77,10 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	private          Win32Message                  m_message;
 	private          Exception?                    m_error;
 
-	public Win32Window(NativeLibraryLoader libraryLoader, Win32Synchronization synchronization)
+	public Win32Window(NativeLibraryLoader libraryLoader, Win32Synchronization synchronization, IWin32ProcessDpiScalingConfig dpiScaling)
 	{
 		m_synchronization = synchronization;
+		m_dpiScaling      = dpiScaling;
 		m_proc            = new PinnedDelegate<PfnWindowProc>(Process, GCHandleType.Normal);
 		m_components      = new List<IWin32WindowComponent>(16);
 		m_maximum_width   = int.MaxValue;
@@ -110,16 +111,6 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 		libraryLoader.LoadFunction("user32", "EndPaint", out EndPaint);
 		libraryLoader.LoadFunction("user32", "InvalidateRect", out InvalidateRect);
 		libraryLoader.LoadFunction("user32", "GetMessageTime", out GetMessageTime);
-
-		if (!g_isDpiConfigured)
-		{
-			g_isDpiConfigured = true;
-
-			if (libraryLoader.TryLoadFunction<SetProcessDpiAwarenessDelegate>("Shcore", "SetProcessDpiAwareness", out var func))
-			{
-				func(Win32ProcessDpiAwareness.PerMonitorDpiAware);
-			}
-		}
 	}
 
 	private void ReleaseUnmanagedResources()
@@ -149,15 +140,15 @@ public sealed class Win32Window : IDisposable, IPlatformWindow
 	public event PlatformWindowDelegate? OnClosing;
 	public event PlatformWindowDelegate? OnUpdate;
 
-	internal IntPtr GetHandle()         => m_handle;
-	public   bool   IsAvailable()       => m_handle != IntPtr.Zero && !m_closing;
-	public   bool   IsFocused()         => m_handle != IntPtr.Zero && m_focused;
-	public   int    GetPositionLeft()   => m_position_left;
-	public   int    GetPositionTop()    => m_position_top;
-	public   int    GetSizeWidth()      => m_size_width;
-	public   int    GetSizeHeight()     => m_size_height;
-	public   int    GetViewportWidth()  => m_viewport_width;
-	public   int    GetViewportHeight() => m_viewport_height;
+	public IntPtr GetNativePointer()  => m_handle;
+	public bool   IsAvailable()       => m_handle != IntPtr.Zero && !m_closing;
+	public bool   IsFocused()         => m_handle != IntPtr.Zero && m_focused;
+	public int    GetPositionLeft()   => m_position_left;
+	public int    GetPositionTop()    => m_position_top;
+	public int    GetSizeWidth()      => m_size_width;
+	public int    GetSizeHeight()     => m_size_height;
+	public int    GetViewportWidth()  => m_viewport_width;
+	public int    GetViewportHeight() => m_viewport_height;
 
 	internal void AddComponent(IWin32WindowComponent component)
 	{

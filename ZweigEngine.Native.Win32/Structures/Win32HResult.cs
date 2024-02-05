@@ -3,7 +3,7 @@
 namespace ZweigEngine.Native.Win32.Structures;
 
 [StructLayout(LayoutKind.Sequential)]
-public struct Win32HResult
+internal struct Win32HResult
 {
 	private int code;
 

@@ -4,6 +4,7 @@ using ZweigEngine.Common.Services.Video.Interfaces;
 using ZweigEngine.Common.Services.Video.Structures;
 using ZweigEngine.Common.Utility.Exceptions;
 using ZweigEngine.Native.OpenGL.Constants;
+using ZweigEngine.Native.OpenGL.Interfaces;
 using ZweigEngine.Native.OpenGL.Prototypes;
 using ZweigEngine.Native.OpenGL.Renderer;
 
@@ -37,27 +38,26 @@ public class OpenGLBackend : IDisposable, IVideoBackend
 	private readonly OpenGLSpriteModel    m_spriteModel;
 	private readonly OpenGLSpriteTextures m_spriteTextures;
 
-	public OpenGLBackend(IVideoSurface surface)
+	public OpenGLBackend(IOpenGLSurface surface)
 	{
-		var loader = (ICustomFunctionLoader)surface;
-		loader.LoadFunction(nameof(glEnable), out glEnable);
-		loader.LoadFunction(nameof(glDisable), out glDisable);
-		loader.LoadFunction(nameof(glClearColor), out glClearColor);
-		loader.LoadFunction(nameof(glClearDepth), out glClearDepth);
-		loader.LoadFunction(nameof(glClear), out glClear);
-		loader.LoadFunction(nameof(glBlendColor), out glBlendColor);
-		loader.LoadFunction(nameof(glBlendFunc), out glBlendFunc);
-		loader.LoadFunction(nameof(glDepthMask), out glDepthMask);
-		loader.LoadFunction(nameof(glDepthFunc), out glDepthFunc);
-		loader.LoadFunction(nameof(glCullFace), out glCullFace);
-		loader.LoadFunction(nameof(glFrontFace), out glFrontFace);
-		loader.LoadFunction(nameof(glGetError), out glGetError);
-		loader.LoadFunction(nameof(glColorMask), out glColorMask);
-		loader.LoadFunction(nameof(glViewport), out glViewport);
-		loader.LoadFunction(nameof(glScissor), out glScissor);
-		m_spriteShader   = new OpenGLSpriteShader(loader);
-		m_spriteModel    = new OpenGLSpriteModel(loader);
-		m_spriteTextures = new OpenGLSpriteTextures(loader);
+		surface.LoadFunction(nameof(glEnable), out glEnable);
+		surface.LoadFunction(nameof(glDisable), out glDisable);
+		surface.LoadFunction(nameof(glClearColor), out glClearColor);
+		surface.LoadFunction(nameof(glClearDepth), out glClearDepth);
+		surface.LoadFunction(nameof(glClear), out glClear);
+		surface.LoadFunction(nameof(glBlendColor), out glBlendColor);
+		surface.LoadFunction(nameof(glBlendFunc), out glBlendFunc);
+		surface.LoadFunction(nameof(glDepthMask), out glDepthMask);
+		surface.LoadFunction(nameof(glDepthFunc), out glDepthFunc);
+		surface.LoadFunction(nameof(glCullFace), out glCullFace);
+		surface.LoadFunction(nameof(glFrontFace), out glFrontFace);
+		surface.LoadFunction(nameof(glGetError), out glGetError);
+		surface.LoadFunction(nameof(glColorMask), out glColorMask);
+		surface.LoadFunction(nameof(glViewport), out glViewport);
+		surface.LoadFunction(nameof(glScissor), out glScissor);
+		m_spriteShader   = new OpenGLSpriteShader(surface);
+		m_spriteModel    = new OpenGLSpriteModel(surface);
+		m_spriteTextures = new OpenGLSpriteTextures(surface);
 	}
 
 	private void ReleaseUnmanagedResources()

@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZweigEngine.Native.OpenGL",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZweigEngine.Native.Win32", "ZweigEngine.Native.Win32\ZweigEngine.Native.Win32.csproj", "{D1C22A6A-157D-447C-B3AD-989B6B466BC9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZweigEngine.Native.OpenGL.Win32", "ZweigEngine.Native.OpenGL.Win32\ZweigEngine.Native.OpenGL.Win32.csproj", "{09FBCDAE-A4F6-4D9E-9F57-C6EED55A7D7A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZweigEngine.Native.DirectX", "ZweigEngine.Native.DirectX\ZweigEngine.Native.DirectX.csproj", "{855C9F9F-20D4-4CFF-BECA-4685552FF7DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +34,14 @@ Global
 		{D1C22A6A-157D-447C-B3AD-989B6B466BC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1C22A6A-157D-447C-B3AD-989B6B466BC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1C22A6A-157D-447C-B3AD-989B6B466BC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09FBCDAE-A4F6-4D9E-9F57-C6EED55A7D7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09FBCDAE-A4F6-4D9E-9F57-C6EED55A7D7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09FBCDAE-A4F6-4D9E-9F57-C6EED55A7D7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09FBCDAE-A4F6-4D9E-9F57-C6EED55A7D7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{855C9F9F-20D4-4CFF-BECA-4685552FF7DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{855C9F9F-20D4-4CFF-BECA-4685552FF7DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{855C9F9F-20D4-4CFF-BECA-4685552FF7DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{855C9F9F-20D4-4CFF-BECA-4685552FF7DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

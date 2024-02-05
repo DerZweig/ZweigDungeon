@@ -14,7 +14,5 @@ public interface IPlatformVideo
 	event PlatformVideoDelegate         OnBeginFrame;
 	event PlatformVideoDelegate         OnFinishFrame;
 
-	IEnumerable<IVideoDriver> EnumerateDrivers();
-
-	void ConfigureSurface(IVideoDriver driver, in VideoDeviceDescription deviceDescription, Func<IVideoSurface, IVideoBackend> backendFactory);
+	void Configure(Func<IVideoSurface> surfaceFactory, Func<IVideoSurface, IVideoBackend> backendFactory);
 }

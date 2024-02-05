@@ -8,17 +8,17 @@ public sealed class PinnedObject<TObject> : IDisposable
     private GCHandle m_handle;
     private IntPtr   m_pointer;
 
-    public PinnedObject(TObject value)
+    public PinnedObject(in TObject value)
     {
         m_value   = value;
         m_handle  = GCHandle.Alloc(value);
         m_pointer = m_handle.AddrOfPinnedObject();
     }
 
-    public PinnedObject(TObject value, GCHandleType type)
+    public PinnedObject(in TObject value, GCHandleType type)
     {
         m_value   = value;
-        m_handle  = GCHandle.Alloc(value, type);
+        m_handle  = GCHandle.Alloc(m_value, type);
         m_pointer = m_handle.AddrOfPinnedObject();
     }
 
