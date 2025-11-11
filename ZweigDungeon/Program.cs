@@ -58,12 +58,6 @@ internal static class Program
         try
         {
             logger.Info(nameof(SDL), "Creating window");
-            if (renderer != IntPtr.Zero || window != IntPtr.Zero)
-            {
-                logger.Error(nameof(SDL), "Window already created");
-                return;
-            }
-
             if (!SDL.CreateWindowAndRenderer(meta.Title,
                                              DefaultWindowWidth,
                                              DefaultWindowHeight,
