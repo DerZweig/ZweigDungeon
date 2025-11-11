@@ -1,81 +1,202 @@
 ﻿using SDL3;
-using ZweigDungeon.Video;
+using System.Reflection;
+using ZweigDungeon.Services;
+using ZweigDungeon.Services.Video;
 using ZweigEngine.Common.Services;
+using ZweigEngine.Common.Services.Video;
 
 namespace ZweigDungeon;
 
 internal static class Program
 {
-    private const string AppTitle         = "ZweigDungeon";
-    private const string AppVersion       = "0.1.0";
-    private const string AppName          = "com.zweig.dungeon";
-    private const int    AppDefaultWidth  = 800;
-    private const int    AppDefaultHeight = 600;
-    private const int    VideoBufferPitch = 640;
+    private const int DefaultWindowWidth  = 800;
+    private const int DefaultWindowHeight = 600;
+    private const int MinimumOutputWidth  = 640;
+    private const int MinimumOutputHeight = 480;
+
+    private const string AppTitle      = "ZweigDungeon";
+    private const string AppIdentifier = "com.zweig.dungeon";
+
 
     [STAThread]
-    private static void Main()
+    private static void Main(string[] args)
     {
-        if (!SDL.Init(SDL.InitFlags.Video | SDL.InitFlags.Audio))
+        using var host = ServiceProviderHost.Create(config =>
         {
+            config.AddFactory<ILogger>(() => new FileLogger("current.log", TimeSpan.FromMilliseconds(1500)));
+            config.AddFactory<IApplicationMetaData>(() =>
+            {
+                var version = Assembly.GetAssembly(typeof(Program))!.GetName().Version!;
+                return new ApplicationMetaData(AppTitle, version, args);
+            });
+            config.AddSingleton<IGlobalCancellation, GlobalCancellation>();
+            config.AddSingleton<PixelScreen>();
+            config.AddSingleton<IVideoScreen, VideoScreen>();
+            config.AddSingleton<SDLPlatform>();
+        });
+
+        var logger       = host.GetRequiredService<ILogger>();
+        var meta         = host.GetRequiredService<IApplicationMetaData>();
+        var cancellation = host.GetRequiredService<IGlobalCancellation>().Token;
+        var screen       = host.GetRequiredService<PixelScreen>();
+
+        var window     = IntPtr.Zero;
+        var renderer   = IntPtr.Zero;
+        var background = IntPtr.Zero;
+        var foreground = IntPtr.Zero;
+        var menu       = IntPtr.Zero;
+
+        logger.Info(nameof(SDL), $"Version {meta.Version}");
+        logger.Info(nameof(SDL), "Initialize SDL");
+        if (!SDL.SetAppMetadata(nameof(SDL), meta.Version, AppIdentifier) ||
+            !SDL.Init(SDL.InitFlags.Video | SDL.InitFlags.Audio))
+        {
+            logger.Error(nameof(SDL), $"Failed to initialize SDL {SDL.GetError()}");
             return;
         }
 
-        SDL.SetAppMetadata(AppTitle, AppVersion, AppName);
+
         try
         {
-            using (var surface = new VideoSurface(VideoBufferPitch, VideoBufferPitch))
-            using (var window = new SDLWindow(AppTitle, AppDefaultWidth, AppDefaultHeight))
-            using (var renderer = new SDLRenderer(window, null))
-            using (var texture = new SDLTexture(renderer, VideoBufferPitch, VideoBufferPitch))
-            using (var host = ServiceProviderHost.Create(ConfigureServices))
+            logger.Info(nameof(SDL), "Creating window");
+            if (renderer != IntPtr.Zero || window != IntPtr.Zero)
             {
-                while (true)
+                logger.Error(nameof(SDL), "Window already created");
+                return;
+            }
+
+            if (!SDL.CreateWindowAndRenderer(meta.Title,
+                                             DefaultWindowWidth,
+                                             DefaultWindowHeight,
+                                             SDL.WindowFlags.Hidden,
+                                             out window,
+                                             out renderer))
+            {
+                logger.Error(nameof(SDL), "Failed to create window");
+                return;
+            }
+
+            if (!SDL.SetWindowBordered(window, true) ||
+                !SDL.SetWindowResizable(window, true))
+            {
+                logger.Error(nameof(SDL), "Failed to configure window");
+                return;
+            }
+
+            if (!SDL.SetRenderVSync(renderer, 1) ||
+                !SDL.SetRenderTextureAddressMode(renderer, SDL.TextureAddressMode.Wrap, SDL.TextureAddressMode.Wrap) ||
+                !SDL.SetDefaultTextureScaleMode(renderer, SDL.ScaleMode.Nearest))
+            {
+                logger.Error(nameof(SDL), "Failed to configure renderer");
+                return;
+            }
+
+            if (!TryCreateScreenTexture(renderer, PixelScreen.Width, PixelScreen.Height, out menu) ||
+                !TryCreateScreenTexture(renderer, PixelScreen.Width, PixelScreen.Height, out foreground) ||
+                !TryCreateScreenTexture(renderer, PixelScreen.Width, PixelScreen.Height, out background))
+            {
+                logger.Error(nameof(SDL), "Failed to create render targets");
+                return;
+            }
+
+            if (!SDL.ShowWindow(window))
+            {
+                logger.Error(nameof(SDL), "Failed to show window");
+                return;
+            }
+
+
+            using (var client = ServiceProviderHost.Create(host, Application.Configure))
+            {
+                var app = client.GetRequiredService<Application>();
+                while (!cancellation.IsCancellationRequested)
                 {
-                    while (SDL.PollEvent(out var e))
+                    if (SDL.PollEvent(out var e))
                     {
-                        switch (e.Type)
+                        if (e.Type == (uint)SDL.EventType.Quit)
                         {
-                            case (uint)SDL.EventType.Quit:
-                                return;
+                            return;
                         }
                     }
 
-                    var w = VideoBufferPitch;
-                    var h = VideoBufferPitch;
-
-                    if (renderer.GetOutputSize(out var vw, out var vh))
+                    if (!SDL.GetRenderOutputSize(renderer, out var videoWidth, out var videoHeight))
                     {
-                        if (vw >= vh)
-                        {
-                            h = (ushort)(h * ((float)vh / vw));
-                        }
-                        else
-                        {
-                            w = (ushort)(w * ((float)vw / vh));
-                        }
+                        logger.Error(nameof(SDL), $"Failed to query renderer size {SDL.GetError()}");
                     }
 
-                    texture.Upload(surface);
+                    videoWidth  = Math.Max(videoWidth, MinimumOutputWidth);
+                    videoHeight = Math.Max(videoHeight, MinimumOutputHeight);
 
-                    //do the actual rendering 
-                    renderer.Clear(0, 0, 0, 0);
-                    renderer.DrawScreen(texture, w, h);
-                    renderer.Present();
+                    var scaleWidth  = 1.0f;
+                    var scaleHeight = 1.0f;
+                    if (videoWidth >= videoHeight)
+                    {
+                        scaleHeight = (float)videoHeight / videoWidth;
+                    }
+                    else
+                    {
+                        scaleWidth = (float)videoWidth / videoHeight;
+                    }
+
+                    var clientWidth  = (int)(scaleWidth * PixelScreen.Width);
+                    var clientHeight = (int)(scaleHeight * PixelScreen.Height);
+
+                    var srcRect = new SDL.FRect { X = 0.0f, Y = 0.0f, W = clientWidth, H = clientHeight };
+                    var dstRect = new SDL.FRect { X = 0.0f, Y = 0.0f, W = videoWidth, H  = videoHeight };
+
+                    app.Update(clientWidth, clientHeight);
+
+                    if (!SDL.SetRenderDrawColor(renderer, 0, 0, 0, 0) ||
+                        !SDL.RenderClear(renderer) ||
+                        !SDL.UpdateTexture(background, IntPtr.Zero, screen.Background.Address, PixelScreen.Pitch) ||
+                        !SDL.UpdateTexture(foreground, IntPtr.Zero, screen.Foreground.Address, PixelScreen.Pitch) ||
+                        !SDL.UpdateTexture(menu, IntPtr.Zero, screen.Menu.Address, PixelScreen.Pitch) ||
+                        !SDL.RenderTexture(renderer, background, srcRect, dstRect) ||
+                        !SDL.RenderTexture(renderer, foreground, srcRect, dstRect) ||
+                        !SDL.RenderTexture(renderer, menu, srcRect, dstRect) ||
+                        !SDL.RenderPresent(renderer))
+                    {
+                        logger.Error(nameof(SDL), $"Failed to present screen {SDL.GetError()}");
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
-            SDL.ShowSimpleMessageBox(SDL.MessageBoxFlags.Error, "Fatal Error", ex.Message, IntPtr.Zero);
+            logger.Error(AppTitle, $"Unhandled error {ex}");
         }
         finally
         {
+            logger.Info(nameof(SDL), "Shutdown");
+            ReleaseResource(ref menu, SDL.DestroyTexture);
+            ReleaseResource(ref foreground, SDL.DestroyTexture);
+            ReleaseResource(ref background, SDL.DestroyTexture);
+            ReleaseResource(ref renderer, SDL.DestroyRenderer);
+            ReleaseResource(ref window, SDL.DestroyWindow);
             SDL.Quit();
         }
     }
 
-    private static void ConfigureServices(IServiceConfiguration config)
+    private static void ReleaseResource(ref IntPtr ptr, Action<IntPtr> destroy)
     {
+        if (ptr == IntPtr.Zero)
+        {
+            return;
+        }
+
+        destroy(ptr);
+        ptr = IntPtr.Zero;
+    }
+
+    private static bool TryCreateScreenTexture(IntPtr renderer, int width, int height, out IntPtr texture)
+    {
+        var format = SDL.PixelFormat.ABGR8888;
+        if (!BitConverter.IsLittleEndian)
+        {
+            format = SDL.PixelFormat.RGBA8888;
+        }
+
+        texture = SDL.CreateTexture(renderer, format, SDL.TextureAccess.Streaming, width, height);
+        return texture != IntPtr.Zero;
     }
 }

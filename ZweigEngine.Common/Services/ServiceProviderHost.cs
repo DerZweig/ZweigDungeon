@@ -48,12 +48,12 @@ public class ServiceProviderHost : DisposableObject, IServiceProvider
     {
         return CreateInternal(parent, configuration);
     }
-    
+
     public static ServiceProviderHost Create(Action<IServiceConfiguration> configuration)
     {
         return CreateInternal(null, configuration);
     }
-    
+
     private static ServiceProviderHost CreateInternal(ServiceProviderHost? parent, Action<IServiceConfiguration> configuration)
     {
         var result = new ServiceProviderHost();
@@ -64,7 +64,7 @@ public class ServiceProviderHost : DisposableObject, IServiceProvider
                 result.m_instances[kv.Key] = kv.Value;
             }
         }
-        
+
         try
         {
             var config = new ServiceConfiguration();
@@ -113,7 +113,21 @@ public class ServiceProviderHost : DisposableObject, IServiceProvider
 
         foreach (var step in config.EnumerateSteps())
         {
-            if (types.Add(step.type))
+            if (step.factory != null)
+            {
+                result.Enqueue(host =>
+                {
+                    var instance = step.factory()!;
+                    if (instance is IDisposable disposable)
+                    {
+                        host.m_disposables.Push(disposable);
+                    }
+
+                    host.m_instances.Add(step.type, instance);
+                    return true;
+                });
+            }
+            else if (types.Add(step.type))
             {
                 result.Enqueue(host =>
                 {

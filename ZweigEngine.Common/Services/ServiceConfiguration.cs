@@ -13,13 +13,24 @@ internal class ServiceConfiguration : IServiceConfiguration
     {
         return m_steps;
     }
-    
+
+    public void AddFactory<TImplementation>(Func<TImplementation> value)
+    {
+        m_steps.Add(new Step
+        {
+            type    = typeof(TImplementation),
+            alias   = null,
+            factory = () => value()!
+        });
+    }
+
     public void AddSingleton<TImplementation>()
     {
         m_steps.Add(new Step
         {
-            type  = typeof(TImplementation),
-            alias = null
+            type    = typeof(TImplementation),
+            alias   = null,
+            factory = null
         });
     }
 
@@ -27,14 +38,16 @@ internal class ServiceConfiguration : IServiceConfiguration
     {
         m_steps.Add(new Step
         {
-            type  = typeof(TImplementation),
-            alias = typeof(TInterface)
+            type    = typeof(TImplementation),
+            alias   = typeof(TInterface),
+            factory = null
         });
     }
 
     public struct Step
     {
-        public Type  type;
-        public Type? alias;
+        public Type          type;
+        public Type?         alias;
+        public Func<object>? factory;
     }
 }
