@@ -32,7 +32,6 @@ internal static class Program
             config.AddSingleton<IGlobalCancellation, GlobalCancellation>();
             config.AddSingleton<PixelScreen>();
             config.AddSingleton<IVideoScreen, VideoScreen>();
-            config.AddSingleton<SDLPlatform>();
         });
 
         var logger       = host.GetRequiredService<ILogger>();
