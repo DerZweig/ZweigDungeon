@@ -1,4 +1,4 @@
-﻿using ZweigEngine.Common.Services.Video;
+﻿using ZweigEngine.Common.Video;
 
 namespace ZweigDungeon.Services.Video;
 
@@ -6,17 +6,17 @@ internal sealed class VideoLayer : IVideoLayer
 {
     private readonly VideoColor[] m_pixels;
 
-    public VideoLayer(PixelTarget target)
+    public VideoLayer(PixelLayer layer)
     {
-        m_pixels = target.Pixels;
+        m_pixels = layer.Pixels;
     }
 
-    public void Clear()
+    public void Fill(in VideoColor color)
     {
-        Array.Fill(m_pixels, new VideoColor());
+        Array.Fill(m_pixels, color);
     }
 
-    public void PutPixel(ushort x, ushort y, in VideoColor color)
+    public void PutPixel(int x, int y, in VideoColor color)
     {
         var ny = y % PixelScreen.Height;
         var nx = x % PixelScreen.Width;

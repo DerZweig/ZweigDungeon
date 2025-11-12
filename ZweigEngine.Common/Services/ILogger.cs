@@ -1,4 +1,6 @@
-﻿namespace ZweigEngine.Common.Services;
+﻿using System.Text;
+
+namespace ZweigEngine.Common.Services;
 
 public interface ILogger
 {
@@ -17,5 +19,13 @@ public interface ILogger
     void Error(string location, string message)
     {
         Log(LogLevel.Error, location, message);
+    }
+
+    void Error(string location, string message, Exception ex)
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine(message);
+        builder.AppendLine(ex.ToString());
+        Log(LogLevel.Error, location, builder.ToString());
     }
 }

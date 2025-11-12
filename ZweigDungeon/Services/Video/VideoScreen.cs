@@ -1,4 +1,4 @@
-﻿using ZweigEngine.Common.Services.Video;
+﻿using ZweigEngine.Common.Video;
 
 namespace ZweigDungeon.Services.Video;
 
@@ -8,10 +8,8 @@ internal sealed class VideoScreen : IVideoScreen
     {
         Background = new VideoLayer(screen.Background);
         Foreground = new VideoLayer(screen.Foreground);
-        Menu       = new VideoLayer(screen.Menu);
     }
-    
+
     public IVideoLayer Background { get; }
     public IVideoLayer Foreground { get; }
-    public IVideoLayer Menu       { get; }
 }

@@ -1,6 +1,8 @@
-﻿namespace ZweigDungeon.Services.Video;
+﻿using ZweigEngine.Common.Utility;
 
-internal sealed class PixelScreen
+namespace ZweigDungeon.Services.Video;
+
+internal sealed class PixelScreen : DisposableObject
 {
     public const int Pitch  = 4 * 256;
     public const int Width  = 256;
@@ -8,12 +10,16 @@ internal sealed class PixelScreen
 
     public PixelScreen()
     {
-        Background = new PixelTarget(Width * Height);
-        Foreground = new PixelTarget(Width * Height);
-        Menu       = new PixelTarget(Width * Height);
+        Background = new PixelLayer(Width * Height);
+        Foreground = new PixelLayer(Width * Height);
     }
 
-    public PixelTarget Background { get; }
-    public PixelTarget Foreground { get; }
-    public PixelTarget Menu       { get; }
+    protected override void ReleaseUnmanagedResources()
+    {
+        Background.Dispose();
+        Foreground.Dispose();
+    }
+
+    public PixelLayer Background { get; }
+    public PixelLayer Foreground { get; }
 }

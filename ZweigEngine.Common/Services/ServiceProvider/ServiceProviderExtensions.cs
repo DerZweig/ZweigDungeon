@@ -1,4 +1,4 @@
-﻿namespace ZweigEngine.Common.Services;
+﻿namespace ZweigEngine.Common.Services.ServiceProvider;
 
 public static class ServiceProviderExtensions
 {
@@ -19,7 +19,7 @@ public static class ServiceProviderExtensions
     
     public static TService GetRequiredService<TService>(this IServiceProvider services)
     {
-        var service = services.GetService(typeof(TService)) ?? throw new NullReferenceException();
-        return (TService)service;
+        var service = services.GetService(typeof(TService));
+        return (TService?)service ?? throw new NullReferenceException(typeof(TService).Name);
     }
 }

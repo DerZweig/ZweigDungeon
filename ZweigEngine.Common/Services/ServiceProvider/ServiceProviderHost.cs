@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using ZweigEngine.Common.Utility;
 
-namespace ZweigEngine.Common.Services;
+namespace ZweigEngine.Common.Services.ServiceProvider;
 
 public class ServiceProviderHost : DisposableObject, IServiceProvider
 {
@@ -115,6 +115,7 @@ public class ServiceProviderHost : DisposableObject, IServiceProvider
         {
             if (step.factory != null)
             {
+                types.Add(step.type);
                 result.Enqueue(host =>
                 {
                     var instance = step.factory()!;

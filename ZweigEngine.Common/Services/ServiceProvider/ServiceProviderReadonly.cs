@@ -1,4 +1,4 @@
-﻿namespace ZweigEngine.Common.Services;
+﻿namespace ZweigEngine.Common.Services.ServiceProvider;
 
 internal class ServiceProviderReadonly : IServiceProvider
 {
