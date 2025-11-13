@@ -1,4 +1,4 @@
-﻿using ZweigEngine.Common.Video;
+﻿using ZweigEngine.Common.Services.Video;
 
 namespace ZweigDungeon.Services.Video;
 

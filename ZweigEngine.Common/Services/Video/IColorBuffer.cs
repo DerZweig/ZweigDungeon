@@ -1,4 +1,4 @@
-﻿namespace ZweigEngine.Common.Video;
+﻿namespace ZweigEngine.Common.Services.Video;
 
 public interface IColorBuffer
 {

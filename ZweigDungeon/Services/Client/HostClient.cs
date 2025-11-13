@@ -1,5 +1,5 @@
 ﻿using ZweigEngine.Common.Services;
-using ZweigEngine.Common.Video;
+using ZweigEngine.Common.Services.Video;
 
 namespace ZweigDungeon.Services.Client;
 

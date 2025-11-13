@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
+using ZweigEngine.Common.Services.Video;
 using ZweigEngine.Common.Utility;
-using ZweigEngine.Common.Video;
 
 namespace ZweigDungeon.Services.Video;
 

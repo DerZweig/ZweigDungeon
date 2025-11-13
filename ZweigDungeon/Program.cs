@@ -5,7 +5,7 @@ using ZweigDungeon.Services.Platform;
 using ZweigDungeon.Services.Video;
 using ZweigEngine.Common.Services;
 using ZweigEngine.Common.Services.ServiceProvider;
-using ZweigEngine.Common.Video;
+using ZweigEngine.Common.Services.Video;
 
 namespace ZweigDungeon;
 
