@@ -47,11 +47,11 @@ internal static class Program
             {
                 config.AddSingleton<PixelBuffer>();
                 config.AddSingleton<IColorBuffer, ColorBuffer>();
-                config.AddSingleton<IPlatform, SDLDesktop>();
+                config.AddSingleton<SDLDesktop>();
                 config.AddSingleton<HostClient>();
             });
 
-            var platform    = client.GetRequiredService<IPlatform>();
+            var platform    = client.GetRequiredService<SDLDesktop>();
             var user        = client.GetRequiredService<HostClient>();
             var colorPixels = client.GetRequiredService<PixelBuffer>();
             var colorBuffer = client.GetRequiredService<IColorBuffer>();

@@ -5,7 +5,7 @@ using ZweigEngine.Common.Utility;
 
 namespace ZweigDungeon.Services.Platform;
 
-internal sealed class SDLDesktop : DisposableObject, IPlatform
+internal sealed class SDLDesktop : DisposableObject
 {
     private const int DefaultWindowWidth  = 800;
     private const int DefaultWindowHeight = 600;
