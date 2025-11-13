@@ -15,23 +15,21 @@ internal sealed class SDLDesktop : DisposableObject, IPlatform
     private readonly ILogger             m_logger;
     private readonly GlobalVariables     m_globals;
     private readonly IGlobalCancellation m_cancellation;
-    private readonly PixelScreen         m_buffers;
-    private          bool                m_init;
-    private          IntPtr              m_window;
-    private          IntPtr              m_renderer;
-    private          IntPtr              m_background;
-    private          IntPtr              m_foreground;
-    private          int                 m_videoWidth;
-    private          int                 m_videoHeight;
-    private          int                 m_clientWidth;
-    private          int                 m_clientHeight;
 
-    public SDLDesktop(ILogger logger, GlobalVariables globals, IGlobalCancellation cancellation, PixelScreen buffers)
+    private bool   m_init;
+    private IntPtr m_window;
+    private IntPtr m_renderer;
+    private IntPtr m_screen;
+    private int    m_videoWidth;
+    private int    m_videoHeight;
+    private int    m_clientWidth;
+    private int    m_clientHeight;
+
+    public SDLDesktop(ILogger logger, GlobalVariables globals, IGlobalCancellation cancellation)
     {
         m_logger       = logger;
         m_globals      = globals;
         m_cancellation = cancellation;
-        m_buffers      = buffers;
     }
 
     protected override void ReleaseUnmanagedResources()
@@ -42,8 +40,7 @@ internal sealed class SDLDesktop : DisposableObject, IPlatform
         }
 
         m_logger.Info(nameof(SDL), "Shutdown");
-        ReleaseResource(ref m_foreground, SDL.DestroyTexture);
-        ReleaseResource(ref m_background, SDL.DestroyTexture);
+        ReleaseResource(ref m_screen, SDL.DestroyTexture);
         ReleaseResource(ref m_renderer, SDL.DestroyRenderer);
         ReleaseResource(ref m_window, SDL.DestroyWindow);
         SDL.Quit();
@@ -92,17 +89,15 @@ internal sealed class SDLDesktop : DisposableObject, IPlatform
             return false;
         }
 
-        if (!TryCreateLayerTexture(m_renderer, out m_foreground) ||
-            !TryCreateLayerTexture(m_renderer, out m_background))
+        if (!TryCreateLayerTexture(m_renderer, out m_screen))
         {
-            m_logger.Error(nameof(SDL), "Failed to create render targets");
+            m_logger.Error(nameof(SDL), "Failed to create render target");
             return false;
         }
 
-        if (!SDL.SetTextureBlendMode(m_foreground, SDL.BlendMode.Blend) ||
-            !SDL.SetTextureBlendMode(m_background, SDL.BlendMode.Blend))
+        if (!SDL.SetTextureBlendMode(m_screen, SDL.BlendMode.None))
         {
-            m_logger.Error(nameof(SDL), "Failed to configure render targets");
+            m_logger.Error(nameof(SDL), "Failed to configure render target");
             return false;
         }
 
@@ -156,24 +151,22 @@ internal sealed class SDLDesktop : DisposableObject, IPlatform
             scaleWidth = (float)m_videoWidth / m_videoHeight;
         }
 
-        m_clientWidth        = (int)(scaleWidth * PixelScreen.Width);
-        m_clientHeight       = (int)(scaleHeight * PixelScreen.Height);
+        m_clientWidth         = (int)(scaleWidth * PixelBuffer.Width);
+        m_clientHeight        = (int)(scaleHeight * PixelBuffer.Height);
         m_globals.VideoWidth  = m_clientWidth;
         m_globals.VideoHeight = m_clientHeight;
         return true;
     }
 
-    public void DisplayScreen()
+    public void SwapBuffers(in PixelBuffer buffer)
     {
         var srcRect = new SDL.FRect { X = 0.0f, Y = 0.0f, W = m_clientWidth, H = m_clientHeight };
         var dstRect = new SDL.FRect { X = 0.0f, Y = 0.0f, W = m_videoWidth, H  = m_videoHeight };
-        
+
         if (!SDL.SetRenderDrawColor(m_renderer, 0, 0, 0, 0) ||
             !SDL.RenderClear(m_renderer) ||
-            !UploadLayerToTexture(m_background, m_buffers.Background) ||
-            !UploadLayerToTexture(m_foreground, m_buffers.Foreground) ||
-            !SDL.RenderTexture(m_renderer, m_background, srcRect, dstRect) ||
-            !SDL.RenderTexture(m_renderer, m_foreground, srcRect, dstRect) ||
+            !SDL.UpdateTexture(m_screen, IntPtr.Zero, buffer.Address, PixelBuffer.Pitch) ||
+            !SDL.RenderTexture(m_renderer, m_screen, srcRect, dstRect) ||
             !SDL.RenderPresent(m_renderer))
         {
             m_logger.Error(nameof(SDL), $"Failed to present screen {SDL.GetError()}");
@@ -191,16 +184,11 @@ internal sealed class SDLDesktop : DisposableObject, IPlatform
         ptr = IntPtr.Zero;
     }
 
-    private static bool UploadLayerToTexture(IntPtr texture, PixelLayer layer)
-    {
-        return SDL.UpdateTexture(texture, IntPtr.Zero, layer.Address, PixelScreen.Pitch);
-    }
-
     private static bool TryCreateLayerTexture(IntPtr renderer, out IntPtr texture)
     {
         const SDL.TextureAccess access = SDL.TextureAccess.Streaming;
-        const int               width  = PixelScreen.Width;
-        const int               height = PixelScreen.Height;
+        const int               width  = PixelBuffer.Width;
+        const int               height = PixelBuffer.Height;
 
         var format = BitConverter.IsLittleEndian ? SDL.PixelFormat.ABGR8888 : SDL.PixelFormat.RGBA8888;
 

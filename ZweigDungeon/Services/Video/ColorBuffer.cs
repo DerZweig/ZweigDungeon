@@ -2,13 +2,13 @@
 
 namespace ZweigDungeon.Services.Video;
 
-internal sealed class VideoLayer : IVideoLayer
+internal sealed class ColorBuffer : IColorBuffer
 {
     private readonly VideoColor[] m_pixels;
 
-    public VideoLayer(PixelLayer layer)
+    public ColorBuffer(PixelBuffer buffer)
     {
-        m_pixels = layer.Pixels;
+        m_pixels = buffer.Pixels;
     }
 
     public void Fill(in VideoColor color)
@@ -18,8 +18,8 @@ internal sealed class VideoLayer : IVideoLayer
 
     public void PutPixel(int x, int y, in VideoColor color)
     {
-        var ny = y % PixelScreen.Height;
-        var nx = x % PixelScreen.Width;
-        m_pixels[ny * PixelScreen.Width + nx] = color;
+        var ny = y % PixelBuffer.Height;
+        var nx = x % PixelBuffer.Width;
+        m_pixels[ny * PixelBuffer.Width + nx] = color;
     }
 }

@@ -4,13 +4,17 @@ using ZweigEngine.Common.Video;
 
 namespace ZweigDungeon.Services.Video;
 
-internal sealed class PixelLayer : DisposableObject
+internal sealed class PixelBuffer : DisposableObject
 {
+    public const int Pitch  = 4 * 256;
+    public const int Width  = 256;
+    public const int Height = 256;
+
     private GCHandle m_handle;
 
-    public PixelLayer(int size)
+    public PixelBuffer()
     {
-        var buffer = new VideoColor[size];
+        var buffer = new VideoColor[Width * Height];
         m_handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
         Address  = m_handle.AddrOfPinnedObject();
         Pixels   = buffer;

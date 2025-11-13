@@ -15,13 +15,11 @@ internal static class Program
     private const string AppIdentifier  = "com.zweig.dungeon";
     private const string AppLogLocation = "App";
 
-    [STAThread]
     private static void Main()
     {
         using var host = ServiceProviderHost.Create(config =>
         {
             config.AddFactory(() => new FileLogger("current.log", TimeSpan.FromMilliseconds(1500)));
-
             config.AddFactory(() =>
             {
                 var version = Assembly.GetAssembly(typeof(Program))!.GetName().Version!;
@@ -47,14 +45,16 @@ internal static class Program
         {
             using var client = ServiceProviderHost.Create(host, config =>
             {
-                config.AddSingleton<PixelScreen>();
-                config.AddSingleton<IVideoScreen, VideoScreen>();
+                config.AddSingleton<PixelBuffer>();
+                config.AddSingleton<IColorBuffer, ColorBuffer>();
                 config.AddSingleton<IPlatform, SDLDesktop>();
                 config.AddSingleton<HostClient>();
             });
 
-            var platform = client.GetRequiredService<IPlatform>();
-            var user     = client.GetRequiredService<HostClient>();
+            var platform    = client.GetRequiredService<IPlatform>();
+            var user        = client.GetRequiredService<HostClient>();
+            var colorPixels = client.GetRequiredService<PixelBuffer>();
+            var colorBuffer = client.GetRequiredService<IColorBuffer>();
 
             if (!platform.Initialize())
             {
@@ -67,8 +67,8 @@ internal static class Program
                 globals.FrameClockUtc   = now;
                 globals.FrameClockLocal = now.ToLocalTime();
 
-                user.UpdateScreen();
-                platform.DisplayScreen();
+                user.UpdateScreen(colorBuffer);
+                platform.SwapBuffers(colorPixels);
             }
         }
         catch (Exception ex)

@@ -1,6 +1,6 @@
 ﻿namespace ZweigEngine.Common.Video;
 
-public interface IVideoLayer
+public interface IColorBuffer
 {
     void Fill(in VideoColor color);
     void PutPixel(int x, int y, in VideoColor color);
