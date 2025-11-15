@@ -4,11 +4,14 @@ namespace ZweigDungeon.Services;
 
 internal sealed class GlobalVariables : IGlobalVariables
 {
-    public string   AppTitle        { get; init; } = string.Empty;
-    public string   AppIdentifier   { get; init; } = string.Empty;
-    public string   AppVersion      { get; init; } = string.Empty;
-    public int      VideoWidth      { get; internal set; }
-    public int      VideoHeight     { get; internal set; }
-    public DateTime FrameClockLocal { get; internal set; }
-    public DateTime FrameClockUtc   { get; internal set; }
+    public string   AppTitle          { get; init; } = string.Empty;
+    public string   AppIdentifier     { get; init; } = string.Empty;
+    public string   AppVersion        { get; init; } = string.Empty;
+    public DateTime FrameClockLocal   { get; internal set; }
+    public DateTime FrameClockUtc     { get; internal set; }
+    public TimeSpan FrameDeltaTime    { get; internal set; }
+    public int      VideoWidth        { get; internal set; }
+    public int      VideoHeight       { get; internal set; }
+    public int      MousePositionLeft { get; internal set; }
+    public int      MousePositionTop  { get; internal set; }
 }

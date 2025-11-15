@@ -17,7 +17,7 @@ internal static class Program
 
     private static void Main()
     {
-        using var host = ServiceProviderHost.Create(config =>
+        using var host = ScopedServiceProvider.Create(config =>
         {
             config.AddFactory(() => new FileLogger("current.log", TimeSpan.FromMilliseconds(1500)));
             config.AddFactory(() =>
@@ -30,7 +30,7 @@ internal static class Program
                     AppVersion    = version.ToString()
                 };
             });
-            
+
             config.AddSingleton<ILogger, FileLogger>();
             config.AddSingleton<IGlobalVariables, GlobalVariables>();
             config.AddSingleton<IGlobalCancellation, GlobalCancellation>();
@@ -43,7 +43,7 @@ internal static class Program
         logger.Info(AppLogLocation, "Starting ...");
         try
         {
-            using var client = ServiceProviderHost.Create(host, config =>
+            using var client = ScopedServiceProvider.Create(host, config =>
             {
                 config.AddSingleton<PixelBuffer>();
                 config.AddSingleton<IColorBuffer, ColorBuffer>();
@@ -61,9 +61,19 @@ internal static class Program
                 return;
             }
 
+            globals.FrameClockLocal = DateTime.MinValue;
+            globals.FrameClockUtc   = DateTime.MinValue;
+            globals.FrameDeltaTime  = TimeSpan.Zero;
+
             while (platform.ProcessInput())
             {
                 var now = DateTime.UtcNow;
+                if (globals.FrameClockUtc > DateTime.MinValue)
+                {
+                    var tmp = now - globals.FrameClockUtc;
+                    globals.FrameDeltaTime = tmp;
+                }
+
                 globals.FrameClockUtc   = now;
                 globals.FrameClockLocal = now.ToLocalTime();
 
@@ -73,7 +83,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            logger.Error(AppLogLocation, "Unhandled error ", ex);
+            logger.Error(AppLogLocation, ex.ToString());
         }
     }
 }

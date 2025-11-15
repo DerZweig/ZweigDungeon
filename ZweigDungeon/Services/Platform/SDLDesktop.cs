@@ -12,20 +12,20 @@ internal sealed class SDLDesktop : DisposableObject
     private const int MinimumOutputWidth  = 640;
     private const int MinimumOutputHeight = 480;
 
-    private readonly ILogger             m_logger;
-    private readonly GlobalVariables     m_globals;
-    private readonly IGlobalCancellation m_cancellation;
+    private readonly ILogger            m_logger;
+    private readonly GlobalVariables    m_globals;
+    private readonly GlobalCancellation m_cancellation;
 
     private bool   m_init;
     private IntPtr m_window;
     private IntPtr m_renderer;
     private IntPtr m_screen;
+    private int    m_outputWidth;
+    private int    m_outputHeight;
     private int    m_videoWidth;
     private int    m_videoHeight;
-    private int    m_clientWidth;
-    private int    m_clientHeight;
 
-    public SDLDesktop(ILogger logger, GlobalVariables globals, IGlobalCancellation cancellation)
+    public SDLDesktop(ILogger logger, GlobalVariables globals, GlobalCancellation cancellation)
     {
         m_logger       = logger;
         m_globals      = globals;
@@ -124,44 +124,67 @@ internal sealed class SDLDesktop : DisposableObject
             {
                 break;
             }
-
+            
             if (e.Type == (uint)SDL.EventType.Quit)
             {
-                m_cancellation.Cancel();
                 return false;
             }
         }
 
-        if (!SDL.GetRenderOutputSize(m_renderer, out m_videoWidth, out m_videoHeight))
+        if (!SDL.GetRenderOutputSize(m_renderer, out m_outputWidth, out m_outputHeight))
         {
             m_logger.Error(nameof(SDL), $"Failed to query renderer size {SDL.GetError()}");
         }
 
-        m_videoWidth  = Math.Max(m_videoWidth, MinimumOutputWidth);
-        m_videoHeight = Math.Max(m_videoHeight, MinimumOutputHeight);
+        m_outputWidth  = Math.Max(m_outputWidth, MinimumOutputWidth);
+        m_outputHeight = Math.Max(m_outputHeight, MinimumOutputHeight);
 
         var scaleWidth  = 1.0f;
         var scaleHeight = 1.0f;
-        if (m_videoWidth >= m_videoHeight)
+        if (m_outputWidth >= m_outputHeight)
         {
-            scaleHeight = (float)m_videoHeight / m_videoWidth;
+            scaleHeight = (float)m_outputHeight / m_outputWidth;
         }
         else
         {
-            scaleWidth = (float)m_videoWidth / m_videoHeight;
+            scaleWidth = (float)m_outputWidth / m_outputHeight;
         }
 
-        m_clientWidth         = (int)(scaleWidth * PixelBuffer.Width);
-        m_clientHeight        = (int)(scaleHeight * PixelBuffer.Height);
-        m_globals.VideoWidth  = m_clientWidth;
-        m_globals.VideoHeight = m_clientHeight;
+        m_videoWidth          = (int)(scaleWidth * PixelBuffer.Width);
+        m_videoHeight         = (int)(scaleHeight * PixelBuffer.Height);
+        m_globals.VideoWidth  = m_videoWidth;
+        m_globals.VideoHeight = m_videoHeight;
+
+        if (SDL.HasMouse())
+        {
+            m_globals.MousePositionLeft = int.MinValue;
+            m_globals.MousePositionTop  = int.MinValue;
+
+            if (SDL.GetWindowPosition(m_window, out var windowLeft, out var windowTop) &&
+                SDL.GetWindowSize(m_window, out var windowWidth, out var windowHeight))
+            {
+                SDL.GetGlobalMouseState(out var mouseLeft, out var mouseTop);
+                mouseLeft -= windowLeft;
+                mouseTop  -= windowTop;
+                if (mouseLeft > 0 && mouseLeft < windowWidth &&
+                    mouseTop > 0 && mouseTop < windowHeight)
+                {
+                    mouseLeft /= m_outputWidth;
+                    mouseTop  /= m_outputHeight;
+
+                    m_globals.MousePositionLeft = (int)(mouseLeft * m_videoWidth);
+                    m_globals.MousePositionTop  = (int)(mouseTop * m_videoHeight);
+                }
+            }
+        }
+
         return true;
     }
 
     public void SwapBuffers(in PixelBuffer buffer)
     {
-        var srcRect = new SDL.FRect { X = 0.0f, Y = 0.0f, W = m_clientWidth, H = m_clientHeight };
-        var dstRect = new SDL.FRect { X = 0.0f, Y = 0.0f, W = m_videoWidth, H  = m_videoHeight };
+        var srcRect = new SDL.FRect { X = 0.0f, Y = 0.0f, W = m_videoWidth, H  = m_videoHeight };
+        var dstRect = new SDL.FRect { X = 0.0f, Y = 0.0f, W = m_outputWidth, H = m_outputHeight };
 
         if (!SDL.SetRenderDrawColor(m_renderer, 0, 0, 0, 0) ||
             !SDL.RenderClear(m_renderer) ||

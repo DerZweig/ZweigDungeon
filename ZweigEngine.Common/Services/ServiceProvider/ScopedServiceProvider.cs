@@ -3,14 +3,14 @@ using ZweigEngine.Common.Utility;
 
 namespace ZweigEngine.Common.Services.ServiceProvider;
 
-public class ServiceProviderHost : DisposableObject, IServiceProvider
+public class ScopedServiceProvider : DisposableObject, IServiceProvider
 {
-    private delegate bool InitializerDelegate(ServiceProviderHost providerHost);
+    private delegate bool InitializerDelegate(ScopedServiceProvider provider);
 
     private readonly Dictionary<Type, object> m_instances;
     private readonly Stack<IDisposable>       m_disposables;
 
-    private ServiceProviderHost()
+    private ScopedServiceProvider()
     {
         m_instances   = new Dictionary<Type, object>();
         m_disposables = new Stack<IDisposable>();
@@ -44,19 +44,19 @@ public class ServiceProviderHost : DisposableObject, IServiceProvider
         return m_instances.ContainsKey(serviceType);
     }
 
-    public static ServiceProviderHost Create(ServiceProviderHost parent, Action<IServiceConfiguration> configuration)
+    public static ScopedServiceProvider Create(ScopedServiceProvider parent, Action<IServiceConfiguration> configuration)
     {
         return CreateInternal(parent, configuration);
     }
 
-    public static ServiceProviderHost Create(Action<IServiceConfiguration> configuration)
+    public static ScopedServiceProvider Create(Action<IServiceConfiguration> configuration)
     {
         return CreateInternal(null, configuration);
     }
 
-    private static ServiceProviderHost CreateInternal(ServiceProviderHost? parent, Action<IServiceConfiguration> configuration)
+    private static ScopedServiceProvider CreateInternal(ScopedServiceProvider? parent, Action<IServiceConfiguration> configuration)
     {
-        var result = new ServiceProviderHost();
+        var result = new ScopedServiceProvider();
         if (parent != null)
         {
             foreach (var kv in parent.m_instances.Where(kv => !result.IsKnownType(kv.Key)))
@@ -193,7 +193,7 @@ public class ServiceProviderHost : DisposableObject, IServiceProvider
         return true;
     };
 
-    private static ConstructorInfo GenerateConstructor(ServiceProviderHost host, Type type)
+    private static ConstructorInfo GenerateConstructor(ScopedServiceProvider host, Type type)
     {
         var constructor        = (ConstructorInfo?)null;
         var selectedParameters = Array.Empty<Type>();

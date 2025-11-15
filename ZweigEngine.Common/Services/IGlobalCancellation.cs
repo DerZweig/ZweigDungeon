@@ -2,7 +2,5 @@
 
 public interface IGlobalCancellation
 {
-    CancellationToken     Token { get; }
-
-    void Cancel();
+    CancellationToken Token { get; }
 }
