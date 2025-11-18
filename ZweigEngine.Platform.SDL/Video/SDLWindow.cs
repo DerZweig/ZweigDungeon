@@ -147,41 +147,9 @@ internal sealed class SDLWindow : DisposableObject, ISDLEventListener
         var srcRect = new SDL3.SDL.FRect { X = 0.0f, Y = 0.0f, W = m_videoWidth, H  = m_videoHeight };
         var dstRect = new SDL3.SDL.FRect { X = 0.0f, Y = 0.0f, W = m_clientWidth, H = m_clientHeight };
 
-        if (!SDL3.SDL.LockTexture(m_screen, IntPtr.Zero, out var dstAddress, out var dstPitch))
-        {
-            m_logger.Error(nameof(SDL3.SDL), $"Failed to lock screen buffer {SDL3.SDL.GetError()}");
-            throw new Exception("Failed to lock screen buffer");
-        }
-
-        try
-        {
-            unsafe
-            {
-                var srcAddress = buffer.Address;
-                if (SDLPixelBuffer.Pitch == dstPitch)
-                {
-                    var size = dstPitch * SDLPixelBuffer.Height;
-                    Buffer.MemoryCopy((void*)srcAddress, (void*)dstAddress, size, size);
-                }
-                else
-                {
-                    for (var row = 0; row < SDLPixelBuffer.Height; ++row)
-                    {
-                        Buffer.MemoryCopy((void*)srcAddress, (void*)dstAddress, dstPitch, SDLPixelBuffer.Pitch);
-                        srcAddress += SDLPixelBuffer.Pitch;
-                        dstAddress += dstPitch;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            SDL3.SDL.UnlockTexture(m_screen);
-        }
-
         if (!SDL3.SDL.SetRenderDrawColor(m_renderer, 0, 0, 0, 0) ||
             !SDL3.SDL.RenderClear(m_renderer) ||
-            //!SDL3.SDL.UpdateTexture(m_screen, IntPtr.Zero, buffer.Address, SDLPixelBuffer.Pitch) ||
+            !SDL3.SDL.UpdateTexture(m_screen, IntPtr.Zero, buffer.Address, SDLPixelBuffer.Pitch) ||
             !SDL3.SDL.RenderTexture(m_renderer, m_screen, srcRect, dstRect) ||
             !SDL3.SDL.RenderPresent(m_renderer))
         {
