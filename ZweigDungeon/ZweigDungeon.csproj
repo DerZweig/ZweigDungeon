@@ -12,8 +12,4 @@
       <ProjectReference Include="..\ZweigEngine.Platform.SDL\ZweigEngine.Platform.SDL.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Services\Client\" />
-    </ItemGroup>
-
 </Project>

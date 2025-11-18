@@ -18,8 +18,9 @@ public sealed class SDLColorBuffer : IColorBuffer
 
     public void PutPixel(int x, int y, in VideoColor color)
     {
-        var ny = y % SDLPixelBuffer.Height;
-        var nx = x % SDLPixelBuffer.Width;
-        m_pixels[ny * SDLPixelBuffer.Width + nx] = color;
+        if (x >= 0 && x < SDLPixelBuffer.Width && y >= 0 && y < SDLPixelBuffer.Height)
+        {
+            m_pixels[y * SDLPixelBuffer.Width + x] = color;
+        }
     }
 }

@@ -22,6 +22,8 @@ internal sealed class Application
         if (m_globals.Mouse is { IsInsideScreen: true })
         {
             colorBuffer.PutPixel(m_globals.Mouse.PositionLeft, m_globals.Mouse.PositionTop, white);
+            colorBuffer.PutPixel(m_globals.Mouse.PositionLeft + 1, m_globals.Mouse.PositionTop, white);
+            colorBuffer.PutPixel(m_globals.Mouse.PositionLeft, m_globals.Mouse.PositionTop + 1, white);
         }
     }
 }
