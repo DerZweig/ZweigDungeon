@@ -1,11 +1,10 @@
 ﻿using System.Reflection;
 using ZweigDungeon.Services;
-using ZweigDungeon.Services.Client;
-using ZweigDungeon.Services.Platform;
-using ZweigDungeon.Services.Video;
 using ZweigEngine.Common.Services;
+using ZweigEngine.Common.Services.Platform;
 using ZweigEngine.Common.Services.ServiceProvider;
 using ZweigEngine.Common.Services.Video;
+using ZweigEngine.Platform.SDL;
 
 namespace ZweigDungeon;
 
@@ -36,8 +35,9 @@ internal static class Program
             config.AddSingleton<IGlobalCancellation, GlobalCancellation>();
         });
 
-        var logger  = host.GetRequiredService<ILogger>();
-        var globals = host.GetRequiredService<GlobalVariables>();
+        var logger       = host.GetRequiredService<ILogger>();
+        var globals      = host.GetRequiredService<GlobalVariables>();
+        var cancellation = host.GetRequiredService<GlobalCancellation>();
 
         logger.Info(AppLogLocation, $"Version {globals.AppVersion}");
         logger.Info(AppLogLocation, "Starting ...");
@@ -45,18 +45,14 @@ internal static class Program
         {
             using var client = ScopedServiceProvider.Create(host, config =>
             {
-                config.AddSingleton<PixelBuffer>();
-                config.AddSingleton<IColorBuffer, ColorBuffer>();
-                config.AddSingleton<SDLDesktop>();
-                config.AddSingleton<HostClient>();
+                config.AddSingleton<IPlatformProvider, SDLDesktop>();
+                config.AddSingleton<Application>();
             });
 
-            var platform    = client.GetRequiredService<SDLDesktop>();
-            var user        = client.GetRequiredService<HostClient>();
-            var colorPixels = client.GetRequiredService<PixelBuffer>();
-            var colorBuffer = client.GetRequiredService<IColorBuffer>();
+            var platform = client.GetRequiredService<IPlatformProvider>();
+            var user     = client.GetRequiredService<Application>();
 
-            if (!platform.Initialize())
+            if (!platform.Start(globals.AppTitle, globals.AppVersion, globals.AppVersion))
             {
                 return;
             }
@@ -65,20 +61,30 @@ internal static class Program
             globals.FrameClockUtc   = DateTime.MinValue;
             globals.FrameDeltaTime  = TimeSpan.Zero;
 
-            while (platform.ProcessInput())
+            try
             {
-                var now = DateTime.UtcNow;
-                if (globals.FrameClockUtc > DateTime.MinValue)
+                while (platform.ProcessInput(cancellation.Token))
                 {
-                    var tmp = now - globals.FrameClockUtc;
-                    globals.FrameDeltaTime = tmp;
+                    var now = DateTime.UtcNow;
+                    globals.Keyboard        = platform.Keyboard;
+                    globals.Mouse           = platform.Mouse;
+                    globals.ScreenWidth     = platform.VideoWidth;
+                    globals.ScreenHeight    = platform.VideoHeight;
+                    globals.FrameClockUtc   = now;
+                    globals.FrameClockLocal = now.ToLocalTime();
+                    if (globals.FrameClockUtc > DateTime.MinValue)
+                    {
+                        var tmp = now - globals.FrameClockUtc;
+                        globals.FrameDeltaTime = tmp;
+                    }
+
+                    user.UpdateScreen(platform.VideoBuffer);
+                    platform.SwapBuffers();
                 }
-
-                globals.FrameClockUtc   = now;
-                globals.FrameClockLocal = now.ToLocalTime();
-
-                user.UpdateScreen(colorBuffer);
-                platform.SwapBuffers(colorPixels);
+            }
+            finally
+            {
+                cancellation.Cancel();
             }
         }
         catch (Exception ex)

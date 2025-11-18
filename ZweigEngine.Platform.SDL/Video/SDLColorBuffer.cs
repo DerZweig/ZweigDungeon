@@ -1,12 +1,12 @@
 ﻿using ZweigEngine.Common.Services.Video;
 
-namespace ZweigDungeon.Services.Video;
+namespace ZweigEngine.Platform.SDL.Video;
 
-internal sealed class ColorBuffer : IColorBuffer
+public sealed class SDLColorBuffer : IColorBuffer
 {
     private readonly VideoColor[] m_pixels;
 
-    public ColorBuffer(PixelBuffer buffer)
+    public SDLColorBuffer(SDLPixelBuffer buffer)
     {
         m_pixels = buffer.Pixels;
     }
@@ -18,8 +18,8 @@ internal sealed class ColorBuffer : IColorBuffer
 
     public void PutPixel(int x, int y, in VideoColor color)
     {
-        var ny = y % PixelBuffer.Height;
-        var nx = x % PixelBuffer.Width;
-        m_pixels[ny * PixelBuffer.Width + nx] = color;
+        var ny = y % SDLPixelBuffer.Height;
+        var nx = x % SDLPixelBuffer.Width;
+        m_pixels[ny * SDLPixelBuffer.Width + nx] = color;
     }
 }

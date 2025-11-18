@@ -2,9 +2,9 @@
 using ZweigEngine.Common.Services.Video;
 using ZweigEngine.Common.Utility;
 
-namespace ZweigDungeon.Services.Video;
+namespace ZweigEngine.Platform.SDL.Video;
 
-internal sealed class PixelBuffer : DisposableObject
+public sealed class SDLPixelBuffer : DisposableObject
 {
     public const int Pitch  = 4 * 256;
     public const int Width  = 256;
@@ -12,13 +12,12 @@ internal sealed class PixelBuffer : DisposableObject
 
     private GCHandle m_handle;
 
-    public PixelBuffer()
+    public SDLPixelBuffer()
     {
         var buffer = new VideoColor[Width * Height];
         m_handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
         Address  = m_handle.AddrOfPinnedObject();
         Pixels   = buffer;
-       
     }
 
     protected override void ReleaseUnmanagedResources()

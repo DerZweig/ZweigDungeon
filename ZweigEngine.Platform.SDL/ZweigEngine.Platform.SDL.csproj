@@ -4,16 +4,16 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <OutputType>WinExe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\ZweigEngine.Common\ZweigEngine.Common.csproj" />
-      <ProjectReference Include="..\ZweigEngine.Platform.SDL\ZweigEngine.Platform.SDL.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Services\Client\" />
+      <PackageReference Include="SDL3-CS" Version="3.3.3-preview.20251108-095121" />
+      <PackageReference Include="SDL3-CS.Native" Version="3.3.3-preview.20251109-092020" />
+      <PackageReference Include="SDL3-CS.Native.Mixer" Version="3.1.0-preview.20251108-093645" />
     </ItemGroup>
 
 </Project>
