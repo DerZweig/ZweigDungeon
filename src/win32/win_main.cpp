@@ -10,6 +10,8 @@
 
 #include <cstdlib>
 #include <Windows.h>
+
+#include "../common.h"
 #include "../application.h"
 
 /*****************************************************
@@ -22,9 +24,5 @@ int WINAPI WinMain(_In_ HINSTANCE /*hInstance*/,
                    _In_ LPSTR /*lpCmdLine*/,
                    _In_ int /*nCmdShow*/)
 {
-        if (app.init(__argc, __argv))
-        {
-                app.run();
-        }
         return 0;
 }

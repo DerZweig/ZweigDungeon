@@ -2,7 +2,7 @@
 #define ZE_COMMON_H
 
 #include <cinttypes>
-
+#include <string_view>
 
 
 
