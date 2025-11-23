@@ -49,6 +49,7 @@ static std::optional<Application> g_current;
  **************************************************/
 void Application::Start(int argc, char** argv)
 {
+        CreateWindow();
 }
 
 /**************************************************
@@ -56,10 +57,10 @@ void Application::Start(int argc, char** argv)
  **************************************************/
 void Application::SetupFrame()
 {
-        VideoScreen::SetupFrame();
+        Platform::SetupFrame();
 }
 
 void Application::UpdateFrame()
 {
-        VideoScreen::UpdateFrame();
+        Platform::UpdateFrame();
 }
