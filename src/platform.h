@@ -17,12 +17,12 @@ public:
         Platform& operator=(Platform&&) = delete;
         Platform& operator=(const Platform&) = delete;
 
-        void CreateWindow();
+        void InitializeComponents() override;
 
         void SetupFrame() override;
         void UpdateFrame() override;
-        void SetScreenResolution(uint32_t width, uint32_t height) override;
 private:
+        void AllocateBuffers(uint32_t width, uint32_t height) override;
         void BlitBuffers(const void* ptr, uint32_t pitch, uint32_t rows) override;
         struct Variables;
 

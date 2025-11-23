@@ -10,13 +10,20 @@ VideoScreen::~VideoScreen() noexcept
         delete[] m_screen;
 }
 
+/**************************************************
+ * VideoScreen Initialize Components
+ **************************************************/
+void VideoScreen::InitializeComponents()
+{
+        Common::InitializeComponents();
+        ResizeScreen(256, 256);
+}
 
 /**************************************************
  * VideoScreen Frame
  **************************************************/
 void VideoScreen::SetupFrame()
 {
-        SetScreenResolution(256, 256);
         Common::SetupFrame();
 }
 
@@ -38,25 +45,25 @@ void VideoScreen::UpdateFrame()
 /**************************************************
  * VideoScreen Set Screen Resolution
  **************************************************/
-void VideoScreen::SetScreenResolution(uint32_t width, uint32_t height)
+void VideoScreen::ResizeScreen(uint32_t width, uint32_t height)
 {
         if (m_width == width || m_height == height)
         {
                 return;
         }
 
-        m_width  = width;
+        m_width = width;
         m_height = height;
 
         const auto capacity = width * height;
-        if (capacity <= m_capacity)
+        if (capacity > m_capacity)
         {
-                return;
+                auto* ptr = new VideoPixel[capacity];
+                std::swap(m_screen, ptr);
+                delete[] ptr;
+
+                m_capacity = capacity;
         }
 
-        auto* ptr = new VideoPixel[capacity];
-        std::swap(m_screen, ptr);
-        delete[] ptr;
-
-        m_capacity = capacity;
+        AllocateBuffers(width, height);
 }

@@ -19,6 +19,7 @@ public:
         Common& operator=(Common&&)      = delete;
         Common& operator=(const Common&) = delete;
 
+        virtual void InitializeComponents();
         virtual void SetupFrame();
         virtual void UpdateFrame();
 

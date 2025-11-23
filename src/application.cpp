@@ -17,8 +17,6 @@ struct Application final : Platform
         Application& operator=(const Application&) = delete;
 
         void Start(int argc, char** argv);
-        void SetupFrame() override;
-        void UpdateFrame() override;
 };
 
 /**************************************************
@@ -49,18 +47,5 @@ static std::optional<Application> g_current;
  **************************************************/
 void Application::Start(int argc, char** argv)
 {
-        CreateWindow();
-}
-
-/**************************************************
- * App Frame
- **************************************************/
-void Application::SetupFrame()
-{
-        Platform::SetupFrame();
-}
-
-void Application::UpdateFrame()
-{
-        Platform::UpdateFrame();
+        Platform::InitializeComponents();
 }

@@ -60,7 +60,7 @@ Platform::~Platform() noexcept
 /**************************************************
  * SDL Init
  **************************************************/
-void Platform::CreateWindow()
+void Platform::InitializeComponents()
 {
         if (SDL_WasInit(SDL_INIT_VIDEO))
         {
@@ -101,11 +101,13 @@ void Platform::CreateWindow()
                 Fatal_Error("SDL", "Failed to create window & renderer");
         }
 
+        VideoScreen::InitializeComponents();
         if (!SDL_ShowWindow(m_vars->window))
         {
                 Fatal_Error("SDL", "Failed to show window");
         }
 }
+
 
 /**************************************************
  * SDL Setup Frame
@@ -217,9 +219,8 @@ void Platform::UpdateFrame()
 /**************************************************
  * SDL Set Screen Resolution
  **************************************************/
-void Platform::SetScreenResolution(uint32_t width, uint32_t height)
+void Platform::AllocateBuffers(uint32_t width, uint32_t height)
 {
-        VideoScreen::SetScreenResolution(width, height);
         if (m_vars->screen_width == width && m_vars->screen_width == height)
         {
                 return;

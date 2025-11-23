@@ -26,11 +26,13 @@ public:
         VideoScreen& operator=(VideoScreen&&)      = delete;
         VideoScreen& operator=(const VideoScreen&) = delete;
 
+        void InitializeComponents() override;
+
         void SetupFrame() override;
         void UpdateFrame() override;
-
-        virtual void SetScreenResolution(uint32_t width, uint32_t height);
 private:
+        void ResizeScreen(uint32_t width, uint32_t height);
+        virtual void AllocateBuffers(uint32_t width, uint32_t height) = 0;
         virtual void BlitBuffers(const void* ptr, uint32_t pitch, uint32_t rows) = 0;
 
         uint32_t    m_width    = 0;

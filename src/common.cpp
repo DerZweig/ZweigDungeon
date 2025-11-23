@@ -28,6 +28,13 @@ Common::~Common() noexcept
 }
 
 /**************************************************
+ * Common Initialize Components
+ **************************************************/
+void Common::InitializeComponents()
+{
+}
+
+/**************************************************
  * Common Frame
  **************************************************/
 void Common::SetupFrame()
