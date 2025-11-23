@@ -1,105 +1,69 @@
 #include "common.h"
 #include "application.h"
+#include <optional>
+
 #include "platform.h"
-#include <fstream>
-
-#include "video.h"
 
 /**************************************************
- * Application Globals
+ * Application Class
  **************************************************/
-
-static std::optional<std::ofstream> g_log_file;
-
-/**************************************************
- * Application Quit & Shutdown
- **************************************************/
-struct AppExitException final : std::exception
+struct Application final : Platform
 {
-        [[nodiscard]] char const* what() const override
-        {
-                return "Application Exit";
-        }
+        Application()                              = default;
+        ~Application()                             = default;
+        Application(Application&&)                 = delete;
+        Application(const Application&)            = delete;
+        Application& operator=(Application&&)      = delete;
+        Application& operator=(const Application&) = delete;
+
+        void Start(int argc, char** argv);
+        void Quit() override;
+        void SetupFrame() override;
+        void UpdateFrame() override;
 };
 
-[[noreturn]] void App_Quit()
-{
-        throw AppExitException();
-}
+static std::optional<Application> g_current;
 
-void App_Shutdown()
+/**************************************************
+ * App Start
+ **************************************************/
+void Application::Start(int argc, char** argv)
 {
-        Platform_Shutdown();
-        g_log_file.reset();
+        CreateWindow();
 }
 
 /**************************************************
- * Application Init
+ * App Quit
  **************************************************/
-bool App_Init(int argc, char** argv)
+void Application::Quit()
 {
-        try
-        {
-                g_log_file.emplace();
-                g_log_file->open("current.log");
-                if (!g_log_file->is_open())
-                {
-                        return false;
-                }
-
-                if (!Platform_Init())
-                {
-                        return false;
-                }
-
-                return true;
-        }
-        catch (const std::exception& /*ignored*/)
-        {
-                App_Shutdown();
-                return false;
-        }
+        g_current.reset();
+        std::exit(EXIT_SUCCESS); // NOLINT(concurrency-mt-unsafe)
 }
 
 /**************************************************
- * Application Run
+ * App Frame
  **************************************************/
-void App_Run()
+void Application::SetupFrame()
 {
-        try
-        {
-                while (Platform_BeginFrame())
-                {
-                        Video_DrawScreen();
-                        Platform_FinishFrame();
-                }
-        }
-        catch (const std::exception& ex)
-        {
-                App_Print(ex.what());
-        }
+        Platform::SetupFrame();
+}
 
-        App_Shutdown();
+void Application::UpdateFrame()
+{
+        Platform::UpdateFrame();
 }
 
 /**************************************************
- * Application Print
+ * App Run
  **************************************************/
-void App_Print(std::string_view text)
+[[noreturn]] void App_Run(int argc, char** argv)
 {
-        if (!g_log_file)
+        g_current.emplace();
+        g_current->Start(argc, argv);
+        while (true)
         {
-                return;
+                g_current->SetupFrame();
+                g_current->UpdateFrame();
         }
-
-        g_log_file.value() << text << "\n";
-}
-
-/**************************************************
- * Application Error
- **************************************************/
-void App_Error(std::string_view reason)
-{
-        App_Print(reason);
-        App_Quit();
 }

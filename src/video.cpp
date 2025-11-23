@@ -1,58 +1,62 @@
 #include "common.h"
 #include "video.h"
 
-#include "platform.h"
 
 /**************************************************
- * Video Interface
+ * VideoScreen Shutdown
  **************************************************/
-struct VideoPixel final
+VideoScreen::~VideoScreen() noexcept
 {
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-        uint8_t a;
-};
+        delete[] m_screen;
+}
 
-constexpr auto VIDEO_MAX_RESOLUTION_X = 256;
-constexpr auto VIDEO_MAX_RESOLUTION_Y = 256;
-
-static VideoPixel Video_Buffer[VIDEO_MAX_RESOLUTION_X * VIDEO_MAX_RESOLUTION_Y] = {};
 
 /**************************************************
- * Video Properties
+ * VideoScreen Frame
  **************************************************/
-int Video_GetBufferPitch()
+void VideoScreen::SetupFrame()
 {
-        return VIDEO_MAX_RESOLUTION_X * sizeof(VideoPixel);
+        SetScreenResolution(256, 256);
+        Common::SetupFrame();
 }
 
-int Video_GetMaxHorizontalResolution()
+void VideoScreen::UpdateFrame()
 {
-        return VIDEO_MAX_RESOLUTION_X;
-}
-
-int Video_GetMaxVerticalResolution()
-{
-        return VIDEO_MAX_RESOLUTION_Y;
-}
-
-void* Video_GetBufferAddress()
-{
-        return Video_Buffer;
+        if (m_screen == nullptr)
+        {
+                Common::UpdateFrame();
+        }
+        else
+        {
+                std::memset(m_screen, 0, sizeof(VideoPixel) * m_capacity);
+                m_screen[0] = {.r = 255, .g = 255, .b = 255, .a = 255};
+                Common::UpdateFrame();
+                BlitBuffers(m_screen, sizeof(VideoPixel) * m_width, m_height);
+        }
 }
 
 /**************************************************
- * Video Draw Screen
+ * VideoScreen Set Screen Resolution
  **************************************************/
-void Video_DrawScreen()
+void VideoScreen::SetScreenResolution(uint32_t width, uint32_t height)
 {
-        std::memset(Video_Buffer, 0, sizeof(Video_Buffer));
+        if (m_width == width || m_height == height)
+        {
+                return;
+        }
 
+        m_width  = width;
+        m_height = height;
 
-        auto const mx = Platform_GetMousePositionLeft() & 0xFF;
-        auto const my = Platform_GetMousePositionTop() & 0xFF;
-        auto const ma = (my << 8) + mx;
+        const auto capacity = width * height;
+        if (capacity <= m_capacity)
+        {
+                return;
+        }
 
-        Video_Buffer[ma] = {.r = 255, .g = 255, .b = 255, .a = 255};
+        auto* ptr = new VideoPixel[capacity];
+        std::swap(m_screen, ptr);
+        delete[] ptr;
+
+        m_capacity = capacity;
 }

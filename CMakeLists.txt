@@ -6,10 +6,9 @@ set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
 set(SOURCES_FILES
         "${SOURCE_DIR}/common.cpp"
+        "${SOURCE_DIR}/video.cpp"
         "${SOURCE_DIR}/application.cpp" 
-        "${SOURCE_DIR}/video.cpp" 
-        "${SOURCE_DIR}/platform_sdl.cpp" 
-        )
+        "${SOURCE_DIR}/platform.cpp")
 
 
 IF (WIN32)

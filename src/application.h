@@ -4,12 +4,6 @@
 /**************************************************
  * Application System Interface
  **************************************************/
-[[noreturn]] void App_Quit();
-
-bool App_Init(int argc, char** argv);
-void App_Run();
-void App_Print(std::string_view text);
-void App_Error(std::string_view reason);
-
+[[noreturn]] void App_Run(int argc, char** argv);
 
 #endif //ZE_APPLICATION_H
