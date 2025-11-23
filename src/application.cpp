@@ -1,8 +1,8 @@
 #include "common.h"
 #include "application.h"
+#include "platform.h"
 #include <optional>
 
-#include "platform.h"
 
 /**************************************************
  * Application Class
@@ -17,46 +17,22 @@ struct Application final : Platform
         Application& operator=(const Application&) = delete;
 
         void Start(int argc, char** argv);
-        void Quit() override;
         void SetupFrame() override;
         void UpdateFrame() override;
 };
 
+/**************************************************
+ * App Run
+ **************************************************/
 static std::optional<Application> g_current;
 
-/**************************************************
- * App Start
- **************************************************/
-void Application::Start(int argc, char** argv)
-{
-        CreateWindow();
-}
-
-/**************************************************
- * App Quit
- **************************************************/
-void Application::Quit()
+[[noreturn]] void App_Quit()
 {
         g_current.reset();
         std::exit(EXIT_SUCCESS); // NOLINT(concurrency-mt-unsafe)
 }
 
-/**************************************************
- * App Frame
- **************************************************/
-void Application::SetupFrame()
-{
-        Platform::SetupFrame();
-}
 
-void Application::UpdateFrame()
-{
-        Platform::UpdateFrame();
-}
-
-/**************************************************
- * App Run
- **************************************************/
 [[noreturn]] void App_Run(int argc, char** argv)
 {
         g_current.emplace();
@@ -66,4 +42,24 @@ void Application::UpdateFrame()
                 g_current->SetupFrame();
                 g_current->UpdateFrame();
         }
+}
+
+/**************************************************
+ * App Start
+ **************************************************/
+void Application::Start(int argc, char** argv)
+{
+}
+
+/**************************************************
+ * App Frame
+ **************************************************/
+void Application::SetupFrame()
+{
+        VideoScreen::SetupFrame();
+}
+
+void Application::UpdateFrame()
+{
+        VideoScreen::UpdateFrame();
 }

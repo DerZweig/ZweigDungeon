@@ -19,10 +19,10 @@ public:
         Common& operator=(Common&&)      = delete;
         Common& operator=(const Common&) = delete;
 
-        virtual void Quit() = 0;
-
         virtual void SetupFrame();
         virtual void UpdateFrame();
+
+        [[noreturn]] void Fatal_Error(std::string_view where, std::string_view text) const;
 
         void Log_Info(std::string_view where, std::string_view text) const;
         void Log_Warning(std::string_view where, std::string_view text) const;

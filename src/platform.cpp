@@ -1,4 +1,5 @@
 #include "platform.h"
+#include "application.h"
 #include <SDL3/SDL.h>
 
 /**************************************************
@@ -69,21 +70,18 @@ void Platform::CreateWindow()
         Log_Info("SDL", "Initializing Platform...");
         if (!SDL_SetAppMetadata(APP_TITLE, APP_VERSION, APP_IDENTIFIER))
         {
-                Log_Error("SDL", "Failed to register app metadata");
-                Quit();
+                Fatal_Error("SDL", "Failed to register app metadata");
         }
 
 
         if (!SDL_Init(SDL_INIT_VIDEO))
         {
-                Log_Error("SDL", "Failed to init video sub system");
-                Quit();
+                Fatal_Error("SDL", "Failed to init video sub system");
         }
 
         if (!SDL_Init(SDL_INIT_AUDIO))
         {
-                Log_Error("SDL", "Failed to init audio sub system");
-                Quit();
+                Fatal_Error("SDL", "Failed to init audio sub system");
         }
 
 
@@ -95,20 +93,17 @@ void Platform::CreateWindow()
                                          &m_vars->window,
                                          &m_vars->renderer))
         {
-                Log_Error("SDL", "Failed to create window & renderer");
-                Quit();
+                Fatal_Error("SDL", "Failed to create window & renderer");
         }
 
         if (!SDL_SetRenderVSync(m_vars->renderer, 1))
         {
-                Log_Error("SDL", "Failed to create window & renderer");
-                Quit();
+                Fatal_Error("SDL", "Failed to create window & renderer");
         }
 
         if (!SDL_ShowWindow(m_vars->window))
         {
-                Log_Error("SDL", "Failed to show window");
-                Quit();
+                Fatal_Error("SDL", "Failed to show window");
         }
 }
 
@@ -123,8 +118,7 @@ void Platform::SetupFrame()
                 switch (event.type)
                 {
                 case SDL_EVENT_QUIT:
-                        Quit();
-                        return;
+                        App_Quit();
                 default:
                         break;
                 }
@@ -139,8 +133,7 @@ void Platform::SetupFrame()
             !SDL_GetWindowSize(m_vars->window, &m_vars->window_position.w, &m_vars->window_position.h) ||
             !SDL_GetRenderViewport(m_vars->renderer, &m_vars->window_viewport))
         {
-                Log_Error("SDL", "Failed to read window properties");
-                Quit();
+                Fatal_Error("SDL", "Failed to read window properties");
         }
 
         m_vars->window_viewport.w = std::max(m_vars->window_viewport.w, APP_VIEWPORT_MIN_WIDTH);
@@ -207,8 +200,7 @@ void Platform::UpdateFrame()
                     !SDL_RenderTexture(m_vars->renderer, m_vars->screen, &src_rect, &dst_rect) ||
                     !SDL_RenderPresent(m_vars->renderer))
                 {
-                        Log_Error("SDL", "Failed to present screen.");
-                        Quit();
+                        Fatal_Error("SDL", "Failed to present screen.");
                 }
         }
         else
@@ -217,8 +209,7 @@ void Platform::UpdateFrame()
                     !SDL_RenderClear(m_vars->renderer) ||
                     !SDL_RenderPresent(m_vars->renderer))
                 {
-                        Log_Error("SDL", "Failed to present screen.");
-                        Quit();
+                        Fatal_Error("SDL", "Failed to present screen.");
                 }
         }
 }
@@ -249,15 +240,13 @@ void Platform::SetScreenResolution(uint32_t width, uint32_t height)
 
         if (m_vars->screen == nullptr)
         {
-                Log_Error("SDL", "Failed to create screen texture");
-                Quit();
+                Fatal_Error("SDL", "Failed to create screen texture");
         }
 
         if (!SDL_SetTextureBlendMode(m_vars->screen, SDL_BLENDMODE_NONE) ||
             !SDL_SetTextureScaleMode(m_vars->screen, SDL_SCALEMODE_NEAREST))
         {
-                Log_Error("SDL", "Failed to configure screen texture");
-                Quit();
+                Fatal_Error("SDL", "Failed to configure screen texture");
         }
 
         m_vars->screen_width  = width;
@@ -278,8 +267,7 @@ void Platform::BlitBuffers(const void* ptr, uint32_t pitch, uint32_t rows)
         int   screen_pitch;
         if (!SDL_LockTexture(m_vars->screen, nullptr, &screen_pix, &screen_pitch))
         {
-                Log_Error("SDL", "Failed to lock screen texture");
-                Quit();
+                Fatal_Error("SDL", "Failed to lock screen texture");
         }
 
         if (std::cmp_equal(screen_pitch, pitch))

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "application.h"
 #include <string>
 #include <chrono>
 #include <fstream>
@@ -39,6 +40,15 @@ void Common::UpdateFrame()
 }
 
 /**************************************************
+ * Errors & Crashes
+ **************************************************/
+[[noreturn]] void Common::Fatal_Error(std::string_view where, std::string_view text) const
+{
+        Print("fatal", where, text);
+        App_Quit();
+}
+
+/**************************************************
  * Logger Functions
  **************************************************/
 void Common::Log_Info(std::string_view where, std::string_view text) const
@@ -55,6 +65,7 @@ void Common::Log_Error(std::string_view where, std::string_view text) const
 {
         Print("error", where, text);
 }
+
 
 void Common::Print(std::string_view level, std::string_view where, std::string_view text) const
 {
