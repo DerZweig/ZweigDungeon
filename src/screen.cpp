@@ -1,5 +1,5 @@
 #include "common.h"
-#include "video.h"
+#include "screen.h"
 
 
 /**************************************************
