@@ -1,13 +1,16 @@
 #include "common.h"
 #include "application.h"
 #include "platform.h"
+#include "entities.h"
 #include <optional>
+
 
 
 /**************************************************
  * Application Class
  **************************************************/
-struct Application final : virtual Platform
+struct Application final : virtual Platform,
+                           virtual EntityManager
 {
         Application()                              = default;
         ~Application() override                    = default;
@@ -26,7 +29,6 @@ void Application::Start(int argc, char** argv)
 {
         Platform::MakeDisplay(320, 240);
 }
-
 
 /**************************************************
  * App Run
@@ -47,6 +49,7 @@ static std::optional<Application> g_current;
         while (true)
         {
                 g_current->SetupFrame();
+                g_current->UpdateEntities();
                 g_current->RenderFrame();
         }
 }

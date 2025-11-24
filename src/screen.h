@@ -4,7 +4,7 @@
 #include "common.h"
 
 /**************************************************
- * VideoScreen Class
+ * Screen Class
  **************************************************/
 struct VideoPixel final
 {
