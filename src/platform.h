@@ -1,26 +1,24 @@
 #ifndef ZE_PLATFORM_H
 #define ZE_PLATFORM_H
 
-#include "video.h"
+#include "screen.h"
 
 /**************************************************
  * Platform Class
  **************************************************/
-struct Platform : VideoScreen
+struct Platform : virtual ScreenBuffer
 {
-protected:
         Platform();
-        ~Platform() noexcept;
-public:
-        Platform(Platform&&) = delete;
-        Platform(const Platform&) = delete;
-        Platform& operator=(Platform&&) = delete;
+        Platform(Platform&&)                 = delete;
+        Platform(const Platform&)            = delete;
+        Platform& operator=(Platform&&)      = delete;
         Platform& operator=(const Platform&) = delete;
+        ~Platform() noexcept override;
 
-        void InitializeComponents() override;
-
+        void InitializeDisplay() override;
         void SetupFrame() override;
-        void UpdateFrame() override;
+        void RenderFrame() override;
+
 private:
         void AllocateBuffers(uint32_t width, uint32_t height) override;
         void BlitBuffers(const void* ptr, uint32_t pitch, uint32_t rows) override;

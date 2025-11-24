@@ -5,7 +5,7 @@
 /**************************************************
  * VideoScreen Shutdown
  **************************************************/
-VideoScreen::~VideoScreen() noexcept
+ScreenBuffer::~ScreenBuffer() noexcept
 {
         delete[] m_screen;
 }
@@ -13,39 +13,29 @@ VideoScreen::~VideoScreen() noexcept
 /**************************************************
  * VideoScreen Initialize Components
  **************************************************/
-void VideoScreen::InitializeComponents()
+void ScreenBuffer::InitializeDisplay()
 {
-        Common::InitializeComponents();
         ResizeScreen(256, 256);
 }
 
 /**************************************************
  * VideoScreen Frame
  **************************************************/
-void VideoScreen::SetupFrame()
+void ScreenBuffer::SetupFrame()
 {
-        Common::SetupFrame();
+        std::memset(m_screen, 0, sizeof(VideoPixel) * m_capacity);
 }
 
-void VideoScreen::UpdateFrame()
+void ScreenBuffer::RenderFrame()
 {
-        if (m_screen == nullptr)
-        {
-                Common::UpdateFrame();
-        }
-        else
-        {
-                std::memset(m_screen, 0, sizeof(VideoPixel) * m_capacity);
-                m_screen[0] = {.r = 255, .g = 255, .b = 255, .a = 255};
-                Common::UpdateFrame();
-                BlitBuffers(m_screen, sizeof(VideoPixel) * m_width, m_height);
-        }
+        m_screen[0] = { .r = 255, .g = 255, .b = 255, .a = 255 };
+        BlitBuffers(m_screen, sizeof(VideoPixel) * m_width, m_height);
 }
 
 /**************************************************
  * VideoScreen Set Screen Resolution
  **************************************************/
-void VideoScreen::ResizeScreen(uint32_t width, uint32_t height)
+void ScreenBuffer::ResizeScreen(uint32_t width, uint32_t height)
 {
         if (m_width == width || m_height == height)
         {

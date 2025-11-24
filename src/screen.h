@@ -14,24 +14,21 @@ struct VideoPixel final
         uint8_t a;
 };
 
-struct VideoScreen : Common
+struct ScreenBuffer : virtual Common
 {
-protected:
-        VideoScreen() = default;
-        ~VideoScreen() noexcept;
+        ScreenBuffer()                              = default;
+        ScreenBuffer(ScreenBuffer&&)                 = delete;
+        ScreenBuffer(const ScreenBuffer&)            = delete;
+        ScreenBuffer& operator=(ScreenBuffer&&)      = delete;
+        ScreenBuffer& operator=(const ScreenBuffer&) = delete;
+        ~ScreenBuffer() noexcept override;
 
-public:
-        VideoScreen(VideoScreen&&)                 = delete;
-        VideoScreen(const VideoScreen&)            = delete;
-        VideoScreen& operator=(VideoScreen&&)      = delete;
-        VideoScreen& operator=(const VideoScreen&) = delete;
+        virtual void InitializeDisplay();
+        virtual void SetupFrame();
+        virtual void RenderFrame();
 
-        void InitializeComponents() override;
-
-        void SetupFrame() override;
-        void UpdateFrame() override;
 private:
-        void ResizeScreen(uint32_t width, uint32_t height);
+        void         ResizeScreen(uint32_t width, uint32_t height);
         virtual void AllocateBuffers(uint32_t width, uint32_t height) = 0;
         virtual void BlitBuffers(const void* ptr, uint32_t pitch, uint32_t rows) = 0;
 

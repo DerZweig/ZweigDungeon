@@ -7,10 +7,10 @@
 /**************************************************
  * Application Class
  **************************************************/
-struct Application final : Platform
+struct Application final : virtual Platform
 {
         Application()                              = default;
-        ~Application()                             = default;
+        ~Application() override                    = default;
         Application(Application&&)                 = delete;
         Application(const Application&)            = delete;
         Application& operator=(Application&&)      = delete;
@@ -18,6 +18,15 @@ struct Application final : Platform
 
         void Start(int argc, char** argv);
 };
+
+/**************************************************
+ * App Start
+ **************************************************/
+void Application::Start(int argc, char** argv)
+{
+        Platform::InitializeDisplay();
+}
+
 
 /**************************************************
  * App Run
@@ -38,14 +47,6 @@ static std::optional<Application> g_current;
         while (true)
         {
                 g_current->SetupFrame();
-                g_current->UpdateFrame();
+                g_current->RenderFrame();
         }
-}
-
-/**************************************************
- * App Start
- **************************************************/
-void Application::Start(int argc, char** argv)
-{
-        Platform::InitializeComponents();
 }

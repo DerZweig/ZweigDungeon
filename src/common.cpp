@@ -28,26 +28,7 @@ Common::~Common() noexcept
 }
 
 /**************************************************
- * Common Initialize Components
- **************************************************/
-void Common::InitializeComponents()
-{
-}
-
-/**************************************************
- * Common Frame
- **************************************************/
-void Common::SetupFrame()
-{
-
-}
-
-void Common::UpdateFrame()
-{
-}
-
-/**************************************************
- * Errors & Crashes
+ * Errors Handling
  **************************************************/
 [[noreturn]] void Common::Fatal_Error(std::string_view where, std::string_view text) const
 {

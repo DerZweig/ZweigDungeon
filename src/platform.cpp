@@ -60,7 +60,7 @@ Platform::~Platform() noexcept
 /**************************************************
  * SDL Init
  **************************************************/
-void Platform::InitializeComponents()
+void Platform::InitializeDisplay()
 {
         if (SDL_WasInit(SDL_INIT_VIDEO))
         {
@@ -101,7 +101,7 @@ void Platform::InitializeComponents()
                 Fatal_Error("SDL", "Failed to create window & renderer");
         }
 
-        VideoScreen::InitializeComponents();
+        ScreenBuffer::InitializeDisplay();
         if (!SDL_ShowWindow(m_vars->window))
         {
                 Fatal_Error("SDL", "Failed to show window");
@@ -128,7 +128,7 @@ void Platform::SetupFrame()
 
         if (!m_vars->window || !m_vars->renderer)
         {
-                VideoScreen::SetupFrame();
+                return;
         }
 
         if (!SDL_GetWindowPosition(m_vars->window, &m_vars->window_position.x, &m_vars->window_position.y) ||
@@ -167,20 +167,20 @@ void Platform::SetupFrame()
                 m_vars->screen_scaled_height = static_cast<int>(scaleY * screenH * aspectRatio);
         }
 
-        VideoScreen::SetupFrame();
+        ScreenBuffer::SetupFrame();
 }
 
 /**************************************************
  * SDL Update Frame
  **************************************************/
-void Platform::UpdateFrame()
+void Platform::RenderFrame()
 {
         static SDL_FRect src_rect;
         static SDL_FRect dst_rect;
 
         if (m_vars->window == nullptr || m_vars->renderer == nullptr)
         {
-                VideoScreen::UpdateFrame();
+                ScreenBuffer::RenderFrame();
                 return;
         }
 
@@ -194,7 +194,7 @@ void Platform::UpdateFrame()
         dst_rect.w = static_cast<float>(m_vars->window_viewport.w);
         dst_rect.h = static_cast<float>(m_vars->window_viewport.h);
 
-        VideoScreen::UpdateFrame();
+        ScreenBuffer::RenderFrame();
         if (m_vars->screen)
         {
                 if (!SDL_SetRenderDrawColor(m_vars->renderer, 0, 0, 0, 0) ||
