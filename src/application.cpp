@@ -24,7 +24,7 @@ struct Application final : virtual Platform
  **************************************************/
 void Application::Start(int argc, char** argv)
 {
-        Platform::InitializeDisplay();
+        Platform::MakeDisplay(320, 240);
 }
 
 

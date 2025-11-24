@@ -16,26 +16,37 @@ struct VideoPixel final
 
 struct ScreenBuffer : virtual Common
 {
-        ScreenBuffer()                              = default;
+        ScreenBuffer()                               = default;
         ScreenBuffer(ScreenBuffer&&)                 = delete;
         ScreenBuffer(const ScreenBuffer&)            = delete;
         ScreenBuffer& operator=(ScreenBuffer&&)      = delete;
         ScreenBuffer& operator=(const ScreenBuffer&) = delete;
         ~ScreenBuffer() noexcept override;
 
-        virtual void InitializeDisplay();
+        [[nodiscard]] uint16_t HorizontalCapacity() const noexcept
+        {
+                return m_logical_width;
+        }
+
+        [[nodiscard]] uint16_t VerticalCapacity() const noexcept
+        {
+                return m_logical_height;
+        }
+
+        virtual void MakeDisplay(uint16_t width, uint16_t height);
         virtual void SetupFrame();
         virtual void RenderFrame();
 
 private:
-        void         ResizeScreen(uint32_t width, uint32_t height);
-        virtual void AllocateBuffers(uint32_t width, uint32_t height) = 0;
+        virtual void ReallocateBuffers(uint16_t width, uint16_t height) = 0;
         virtual void BlitBuffers(const void* ptr, uint32_t pitch, uint32_t rows) = 0;
 
-        uint32_t    m_width    = 0;
-        uint32_t    m_height   = 0;
-        uint32_t    m_capacity = 0;
-        VideoPixel* m_screen   = nullptr;
+        uint16_t    m_logical_width    = 0;
+        uint16_t    m_logical_height   = 0;
+        uint32_t    m_allocated_width  = 0;
+        uint32_t    m_allocated_height = 0;
+        uint32_t    m_capacity         = 0;
+        VideoPixel* m_screen           = nullptr;
 };
 
 #endif //ZE_VIDEO_H

@@ -3,7 +3,7 @@
 
 
 /**************************************************
- * VideoScreen Shutdown
+ * Screen Shutdown
  **************************************************/
 ScreenBuffer::~ScreenBuffer() noexcept
 {
@@ -11,42 +11,19 @@ ScreenBuffer::~ScreenBuffer() noexcept
 }
 
 /**************************************************
- * VideoScreen Initialize Components
+ * Screen Display Creation
  **************************************************/
-void ScreenBuffer::InitializeDisplay()
+void ScreenBuffer::MakeDisplay(uint16_t width, uint16_t height)
 {
-        ResizeScreen(256, 256);
-}
+        m_logical_width  = width;
+        m_logical_height = height;
 
-/**************************************************
- * VideoScreen Frame
- **************************************************/
-void ScreenBuffer::SetupFrame()
-{
-        std::memset(m_screen, 0, sizeof(VideoPixel) * m_capacity);
-}
+        //align sizes
+        width  = (width + 0xE) & ~0xF;
+        height = (height + 0xE) & ~0xF;
 
-void ScreenBuffer::RenderFrame()
-{
-        m_screen[0] = { .r = 255, .g = 255, .b = 255, .a = 255 };
-        BlitBuffers(m_screen, sizeof(VideoPixel) * m_width, m_height);
-}
-
-/**************************************************
- * VideoScreen Set Screen Resolution
- **************************************************/
-void ScreenBuffer::ResizeScreen(uint32_t width, uint32_t height)
-{
-        if (m_width == width || m_height == height)
-        {
-                return;
-        }
-
-        m_width = width;
-        m_height = height;
-
-        const auto capacity = width * height;
-        if (capacity > m_capacity)
+        const auto capacity = static_cast<uint32_t>(width) * height;
+        if (capacity != m_capacity)
         {
                 auto* ptr = new VideoPixel[capacity];
                 std::swap(m_screen, ptr);
@@ -55,5 +32,21 @@ void ScreenBuffer::ResizeScreen(uint32_t width, uint32_t height)
                 m_capacity = capacity;
         }
 
-        AllocateBuffers(width, height);
+        m_allocated_width  = width;
+        m_allocated_height = height;
+        ReallocateBuffers(width, height);
+}
+
+/**************************************************
+ * Screen Frame
+ **************************************************/
+void ScreenBuffer::SetupFrame()
+{
+        std::memset(m_screen, 0, sizeof(VideoPixel) * m_capacity);
+        m_screen[0] = {.r = 255, .g = 255, .b = 255, .a = 255};
+}
+
+void ScreenBuffer::RenderFrame()
+{
+        BlitBuffers(m_screen, sizeof(VideoPixel) * m_allocated_width, m_allocated_height);
 }
