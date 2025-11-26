@@ -25,7 +25,7 @@ void ScreenBuffer::MakeDisplay(uint16_t width, uint16_t height)
         const auto capacity = static_cast<uint32_t>(width) * height;
         if (capacity != m_capacity)
         {
-                auto* ptr = new VideoPixel[capacity];
+                auto* ptr = new Color[capacity];
                 std::swap(m_screen, ptr);
                 delete[] ptr;
 
@@ -42,11 +42,12 @@ void ScreenBuffer::MakeDisplay(uint16_t width, uint16_t height)
  **************************************************/
 void ScreenBuffer::SetupFrame()
 {
-        std::memset(m_screen, 0, sizeof(VideoPixel) * m_capacity);
+        std::memset(m_screen, 0, sizeof(Color) * m_capacity);
         m_screen[0] = {.r = 255, .g = 255, .b = 255, .a = 255};
 }
 
 void ScreenBuffer::RenderFrame()
 {
-        BlitBuffers(m_screen, sizeof(VideoPixel) * m_allocated_width, m_allocated_height);
+        auto const pitch = sizeof(Color) * m_allocated_width;
+        BlitBuffers(m_screen, static_cast<uint32_t>(pitch), m_allocated_height);
 }

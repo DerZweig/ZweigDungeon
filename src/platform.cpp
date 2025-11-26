@@ -1,5 +1,4 @@
 #include "platform.h"
-#include "application.h"
 #include <SDL3/SDL.h>
 
 /**************************************************
@@ -21,8 +20,8 @@ struct Platform::Variables
         SDL_Texture*  screen;
         SDL_Rect      window_position;
         SDL_Rect      window_viewport;
-        uint32_t      allocated_width;
-        uint32_t      allocated_height;
+        uint32_t      texture_width;
+        uint32_t      texture_height;
 };
 
 
@@ -31,7 +30,9 @@ struct Platform::Variables
  **************************************************/
 Platform::Platform()
 {
-        m_vars = new Variables();
+        m_vars          = new Variables();
+        m_scaled_width  = 0;
+        m_scaled_height = 0;
 }
 
 Platform::~Platform() noexcept
@@ -47,7 +48,7 @@ Platform::~Platform() noexcept
                 SDL_DestroyWindow(m_vars->window);
         }
 
-        if (SDL_WasInit(SDL_INIT_VIDEO) || SDL_WasInit(SDL_INIT_AUDIO))
+        if (SDL_WasInit(SDL_INIT_EVENTS))
         {
                 SDL_Quit();
         }
@@ -69,18 +70,17 @@ void Platform::MakeDisplay(uint16_t width, uint16_t height)
         Log_Info("SDL", "Initializing Platform...");
         if (!SDL_SetAppMetadata(APP_TITLE, APP_VERSION, APP_IDENTIFIER))
         {
-                Fatal_Error("SDL", "Failed to register app metadata");
+                Sys_Error("SDL", "Failed to register app metadata");
         }
 
+        if (!SDL_Init(SDL_INIT_EVENTS))
+        {
+                Sys_Error("SDL", "Failed to init event sub system");
+        }
 
         if (!SDL_Init(SDL_INIT_VIDEO))
         {
-                Fatal_Error("SDL", "Failed to init video sub system");
-        }
-
-        if (!SDL_Init(SDL_INIT_AUDIO))
-        {
-                Fatal_Error("SDL", "Failed to init audio sub system");
+                Sys_Error("SDL", "Failed to init video sub system");
         }
 
 
@@ -92,18 +92,18 @@ void Platform::MakeDisplay(uint16_t width, uint16_t height)
                                          &m_vars->window,
                                          &m_vars->renderer))
         {
-                Fatal_Error("SDL", "Failed to create window & renderer");
+                Sys_Error("SDL", "Failed to create window & renderer");
         }
 
         if (!SDL_SetRenderVSync(m_vars->renderer, 1))
         {
-                Fatal_Error("SDL", "Failed to create window & renderer");
+                Sys_Error("SDL", "Failed to configure renderer");
         }
 
         ScreenBuffer::MakeDisplay(width, height);
         if (!SDL_ShowWindow(m_vars->window))
         {
-                Fatal_Error("SDL", "Failed to show window");
+                Sys_Error("SDL", "Failed to show window");
         }
 }
 
@@ -119,7 +119,7 @@ void Platform::SetupFrame()
                 switch (event.type)
                 {
                 case SDL_EVENT_QUIT:
-                        App_Quit();
+                        Sys_Quit();
                 default:
                         break;
                 }
@@ -134,7 +134,7 @@ void Platform::SetupFrame()
             !SDL_GetWindowSize(m_vars->window, &m_vars->window_position.w, &m_vars->window_position.h) ||
             !SDL_GetRenderViewport(m_vars->renderer, &m_vars->window_viewport))
         {
-                Fatal_Error("SDL", "Failed to read window properties");
+                Sys_Error("SDL", "Failed to read window properties");
         }
 
         m_vars->window_viewport.w = std::max(m_vars->window_viewport.w, APP_VIEWPORT_MIN_WIDTH);
@@ -142,8 +142,8 @@ void Platform::SetupFrame()
 
 
         //scale screen coords for window viewport
-        const float viewW   = static_cast<float>(m_vars->window_viewport.w);
-        const float viewH   = static_cast<float>(m_vars->window_viewport.h);
+        const auto  viewW   = static_cast<float>(m_vars->window_viewport.w);
+        const auto  viewH   = static_cast<float>(m_vars->window_viewport.h);
         const float screenW = std::max(HorizontalCapacity(), static_cast<uint16_t>(1u));
         const float screenH = std::max(VerticalCapacity(), static_cast<uint16_t>(1u));
         float       scaleX  = 1.0f;
@@ -198,7 +198,7 @@ void Platform::RenderFrame()
             !SDL_RenderTexture(m_vars->renderer, m_vars->screen, &src_rect, &dst_rect) ||
             !SDL_RenderPresent(m_vars->renderer))
         {
-                Fatal_Error("SDL", "Failed to present screen.");
+                Sys_Error("SDL", "Failed to present screen.");
         }
 }
 
@@ -207,7 +207,7 @@ void Platform::RenderFrame()
  **************************************************/
 void Platform::ReallocateBuffers(uint16_t width, uint16_t height)
 {
-        if (m_vars->allocated_width == width && m_vars->allocated_height == height)
+        if (m_vars->texture_width == width && m_vars->texture_height == height)
         {
                 return;
         }
@@ -221,22 +221,22 @@ void Platform::ReallocateBuffers(uint16_t width, uint16_t height)
         m_vars->screen = SDL_CreateTexture(m_vars->renderer,
                                            SDL_PIXELFORMAT_RGBA32,
                                            SDL_TEXTUREACCESS_STREAMING,
-                                           static_cast<int>(width),
-                                           static_cast<int>(height));
+                                           width,
+                                           height);
 
         if (m_vars->screen == nullptr)
         {
-                Fatal_Error("SDL", "Failed to create screen texture");
+                Sys_Error("SDL", "Failed to create screen texture");
         }
 
         if (!SDL_SetTextureBlendMode(m_vars->screen, SDL_BLENDMODE_NONE) ||
             !SDL_SetTextureScaleMode(m_vars->screen, SDL_SCALEMODE_NEAREST))
         {
-                Fatal_Error("SDL", "Failed to configure screen texture");
+                Sys_Error("SDL", "Failed to configure screen texture");
         }
 
-        m_vars->allocated_width  = width;
-        m_vars->allocated_height = height;
+        m_vars->texture_width  = width;
+        m_vars->texture_height = height;
 }
 
 /**************************************************
@@ -249,26 +249,26 @@ void Platform::BlitBuffers(const void* ptr, uint32_t pitch, uint32_t rows)
                 return;
         }
 
-        void* screen_pix;
-        int   screen_pitch;
-        if (!SDL_LockTexture(m_vars->screen, nullptr, &screen_pix, &screen_pitch))
+        void* dstPtr;
+        int   dstPitch;
+        if (!SDL_LockTexture(m_vars->screen, nullptr, &dstPtr, &dstPitch))
         {
-                Fatal_Error("SDL", "Failed to lock screen texture");
+                Sys_Error("SDL", "Failed to lock screen texture");
         }
 
-        if (std::cmp_equal(screen_pitch, pitch))
+        if (std::cmp_equal(dstPitch, pitch))
         {
-                std::memcpy(screen_pix, ptr, static_cast<size_t>(pitch) * rows);
+                std::memcpy(dstPtr, ptr, static_cast<size_t>(pitch) * rows);
         }
-        else if (std::cmp_greater_equal(screen_pitch, pitch))
+        else if (std::cmp_greater_equal(dstPitch, pitch))
         {
-                auto* dst = static_cast<uint8_t*>(screen_pix);
+                auto* dst = static_cast<uint8_t*>(dstPtr);
                 auto* src = static_cast<const uint8_t*>(ptr);
 
                 for (auto iter = 0u; iter < rows; ++iter)
                 {
                         std::memcpy(dst, src, pitch);
-                        dst += screen_pitch;
+                        dst += dstPitch;
                         src += pitch;
                 }
         }

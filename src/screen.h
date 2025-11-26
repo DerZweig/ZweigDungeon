@@ -6,7 +6,7 @@
 /**************************************************
  * Screen Class
  **************************************************/
-struct VideoPixel final
+struct Color final
 {
         uint8_t r;
         uint8_t g;
@@ -39,14 +39,14 @@ struct ScreenBuffer : virtual Common
 
 private:
         virtual void ReallocateBuffers(uint16_t width, uint16_t height) = 0;
-        virtual void BlitBuffers(const void* ptr, uint32_t pitch, uint32_t rows) = 0;
+        virtual void BlitBuffers(const void* src, uint32_t pitch, uint32_t rows) = 0;
 
-        uint16_t    m_logical_width    = 0;
-        uint16_t    m_logical_height   = 0;
-        uint32_t    m_allocated_width  = 0;
-        uint32_t    m_allocated_height = 0;
-        uint32_t    m_capacity         = 0;
-        VideoPixel* m_screen           = nullptr;
+        uint16_t m_logical_width    = 0;
+        uint16_t m_logical_height   = 0;
+        uint32_t m_allocated_width  = 0;
+        uint32_t m_allocated_height = 0;
+        uint32_t m_capacity         = 0;
+        Color*   m_screen           = nullptr;
 };
 
 #endif //ZE_VIDEO_H

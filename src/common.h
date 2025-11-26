@@ -16,14 +16,15 @@ struct Common
         Common& operator=(const Common&) = delete;
         virtual ~Common() noexcept;
 
-        [[noreturn]] void Fatal_Error(std::string_view where, std::string_view text) const;
+        [[noreturn]] virtual void Sys_Quit() const = 0;
+        [[noreturn]] virtual void Sys_Error(std::string_view where, std::string_view text) const = 0;
 
         void Log_Info(std::string_view where, std::string_view text) const;
         void Log_Warning(std::string_view where, std::string_view text) const;
         void Log_Error(std::string_view where, std::string_view text) const;
 
 private:
-        void Print(std::string_view level, std::string_view where, std::string_view text) const;
+        void Log_Print(std::string_view level, std::string_view where, std::string_view text) const;
 
         struct Variables;
         Variables* m_vars;

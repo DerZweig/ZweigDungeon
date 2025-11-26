@@ -10,7 +10,8 @@
 
 #include <cstdlib>
 #include <Windows.h>
-#include "../application.h"
+
+[[noreturn]] void App_Run(int argc, char** argv);
 
 /*****************************************************
  * WinMain

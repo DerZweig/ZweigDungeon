@@ -32,8 +32,8 @@ struct Platform : virtual ScreenBuffer
 private:
         void ReallocateBuffers(uint16_t width, uint16_t height) override;
         void BlitBuffers(const void* ptr, uint32_t pitch, uint32_t rows) override;
-        struct Variables;
 
+        struct Variables;
         Variables* m_vars;
 
         uint16_t m_scaled_width;
