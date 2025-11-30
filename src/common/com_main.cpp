@@ -1,4 +1,5 @@
 #include "com_local.h"
+#include <memory>
 
 static std::unique_ptr<CommonInstance> g_current = {};
 
@@ -13,11 +14,19 @@ void Common_Init()
         }
 
         g_current = std::make_unique<CommonInstance>();
+        Common_LogInfo("Common", "Initialize");
+
         g_current->frame_timer.StartOrReset();
 }
 
 void Common_Shutdown() noexcept
 {
+        if (!g_current)
+        {
+                return;
+        }
+
+        Common_LogInfo("Common", "Shutdown");
         g_current.reset();
 }
 

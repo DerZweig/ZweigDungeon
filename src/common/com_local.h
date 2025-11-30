@@ -2,7 +2,6 @@
 #define ZE_COM_LOCAL_H
 
 #include "../com_shared.h"
-#include <memory>
 #include <chrono>
 #include <array>
 #include <fstream>

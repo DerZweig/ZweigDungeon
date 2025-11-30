@@ -4,6 +4,7 @@
 #include "snd_shared.h"
 #include "ui_shared.h"
 #include "ent_shared.h"
+#include "util/guard_func.h"
 
 /**************************************************
  * App Init & Shutdown
@@ -11,18 +12,15 @@
 void App_Init(int argc, char** argv)
 {
         Common_Init();
-        Common_LogInfo("App", "Starting...");
-
         System_Init();
         Video_Init();
         UI_Init();
         Entity_Init();
+        Common_LogInfo("App", "Starting...");
 }
 
 void App_Shutdown() noexcept
 {
-        Common_LogInfo("App", "Shutdown...");
-
         Entity_Shutdown();
         UI_Shutdown();
         Video_Shutdown();
@@ -69,13 +67,11 @@ void App_Update()
  **************************************************/
 void App_Main(int argc, char** argv)
 { // NOLINT(clang-diagnostic-missing-noreturn)
-        struct Guard // NOLINT(cppcoreguidelines-special-member-functions)
-        {
-                ~Guard() noexcept { App_Shutdown(); }
-        } g{};
+
+        auto const guard = guard_func{App_Shutdown};
 
         App_Init(argc, argv);
-        //while (true)
+        while (true)
         {
                 App_Update();
         }
