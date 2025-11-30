@@ -11,6 +11,8 @@
 void App_Init(int argc, char** argv)
 {
         Common_Init();
+        Common_LogInfo("App", "Starting...");
+
         System_Init();
         Video_Init();
         UI_Init();
@@ -19,6 +21,8 @@ void App_Init(int argc, char** argv)
 
 void App_Shutdown() noexcept
 {
+        Common_LogInfo("App", "Shutdown...");
+
         Entity_Shutdown();
         UI_Shutdown();
         Video_Shutdown();
@@ -34,15 +38,15 @@ void App_Update()
         static frame_t frame;
         frame = {};
 
-        Common_SetupFrame(frame);//update timers, config, files, etc...
-        System_SetupFrame(frame);//poll input events
+        Common_SetupFrame(frame); //update timers, config, files, etc...
+        System_SetupFrame(frame); //poll input events
 
-        Entity_UpdateFrame(frame);//update world objects
-        UI_UpdateFrame(frame);//update GUI widgets
-        Sound_UpdateFrame(frame);//mix sounds
-        Video_DrawFrame(frame);//draw everything
+        Entity_UpdateFrame(frame); //update world objects
+        UI_UpdateFrame(frame); //update GUI widgets
+        Sound_UpdateFrame(frame); //mix sounds
+        Video_DrawFrame(frame); //draw everything
 
-        System_FinishFrame(frame);//present screen, play sounds
+        System_FinishFrame(frame); //present screen, play sounds
 }
 
 /**************************************************
@@ -71,7 +75,7 @@ void App_Main(int argc, char** argv)
         } g{};
 
         App_Init(argc, argv);
-        while (true)
+        //while (true)
         {
                 App_Update();
         }

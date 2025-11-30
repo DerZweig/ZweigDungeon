@@ -5,32 +5,25 @@
 #include <string_view>
 
 /**************************************************
- * Per Frame Data
+ * Common Types
  **************************************************/
+struct date_time_t
+{
+        int32_t  date_year;
+        uint32_t date_month;
+        uint32_t date_day;
+        uint32_t time_hour;
+        uint32_t time_minute;
+        uint32_t time_second;
+};
+
 struct frame_t
 {
-        uint16_t viewport_width;
-        uint16_t viewport_height;
-
-        struct
-        {
-                uint16_t year;
-                uint8_t  month;
-                uint8_t  day;
-        } current_date;
-
-        struct
-        {
-                uint8_t hour;
-                uint8_t minute;
-                uint8_t second;
-                uint8_t padding;
-        } current_time;
-
-        struct
-        {
-                uint64_t milliseconds;
-        } time_since_start;
+        uint16_t    viewport_width;
+        uint16_t    viewport_height;
+        date_time_t frame_started_at;
+        date_time_t timer_started_at;
+        uint64_t    timer_elapsed_milliseconds;
 };
 
 /**************************************************
