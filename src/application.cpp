@@ -1,61 +1,104 @@
-#include "common.h"
-#include "platform.h"
-#include <optional>
-
-
-/**************************************************
- * Application Class
- **************************************************/
-struct Application final : virtual Platform
-{
-        Application()                              = default;
-        ~Application() override                    = default;
-        Application(Application&&)                 = delete;
-        Application(const Application&)            = delete;
-        Application& operator=(Application&&)      = delete;
-        Application& operator=(const Application&) = delete;
-
-        void Sys_Start(int argc, char** argv);
-        void Sys_Quit() const override;
-        void Sys_Error(std::string_view where, std::string_view text) const override;
-};
-
+#include "com_shared.h"
+#include "sys_shared.h"
+#include "vid_shared.h"
+#include "snd_shared.h"
+#include "ui_shared.h"
+#include "ent_shared.h"
 
 /**************************************************
- * App Run
+ * App Init & Shutdown
  **************************************************/
-static std::optional<Application> g_current;
-
-[[noreturn]] void App_Run(int argc, char** argv)
+void App_Init(int argc, char** argv)
 {
-        g_current.emplace();
-        g_current->Sys_Start(argc, argv);
-        while (true)
-        {
-                g_current->SetupFrame();
-                g_current->RenderFrame();
-        }
+        Common_Init();
+        System_Init();
+        Video_Init();
+        UI_Init();
+        Entity_Init();
+}
+
+void App_Shutdown() noexcept
+{
+        Entity_Shutdown();
+        UI_Shutdown();
+        Video_Shutdown();
+        System_Shutdown();
+        Common_Shutdown();
 }
 
 /**************************************************
- * App Start
+ * App Update
  **************************************************/
-void Application::Sys_Start(int argc, char** argv)
+void App_Update()
 {
-        MakeDisplay(320, 240);
+        static frame_t frame;
+        frame = {};
+
+        Common_SetupFrame(frame);//update timers, config, files, etc...
+        System_SetupFrame(frame);//poll input events
+
+        Entity_UpdateFrame(frame);//update world objects
+        UI_UpdateFrame(frame);//update GUI widgets
+        Sound_UpdateFrame(frame);//mix sounds
+        Video_DrawFrame(frame);//draw everything
+
+        System_FinishFrame(frame);//present screen, play sounds
 }
 
 /**************************************************
  * App Termination
  **************************************************/
-void Application::Sys_Quit() const
+[[noreturn]] void App_Quit() noexcept
 {
-        g_current.reset();
+        App_Shutdown();
         std::exit(EXIT_SUCCESS); // NOLINT(concurrency-mt-unsafe)
 }
 
-void Application::Sys_Error(std::string_view where, std::string_view text) const
+[[noreturn]] void App_Error(std::string_view where, std::string_view text) noexcept
 {
-        Log_Error(where, text);
-        Sys_Quit();
+        Common_LogError(where, text);
+        App_Quit();
 }
+
+/**************************************************
+ * App Main
+ **************************************************/
+void App_Main(int argc, char** argv)
+{ // NOLINT(clang-diagnostic-missing-noreturn)
+        struct Guard // NOLINT(cppcoreguidelines-special-member-functions)
+        {
+                ~Guard() noexcept { App_Shutdown(); }
+        } g{};
+
+        App_Init(argc, argv);
+        while (true)
+        {
+                App_Update();
+        }
+}
+
+/**************************************************
+ * Win32 Entry Point
+ **************************************************/
+#if(WIN32)
+/* only use minimal win32 imports from windows header */
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+/* remove conflicting helper macros from windows header */
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
+
+int WINAPI WinMain(_In_ HINSTANCE /*hInstance*/,
+                   _In_opt_ HINSTANCE /*hPrevInstance*/,
+                   _In_ LPSTR /*lpCmdLine*/,
+                   _In_ int /*nCmdShow*/)
+{
+        App_Main(__argc, __argv);
+        return 0;
+}
+#endif
