@@ -35,8 +35,8 @@ struct guard_func final
                 m_active = false;
         }
 private:
-        [[no_unique_address]] TFunc m_func;
-        [[no_unique_address]] bool  m_active;
+        TFunc m_func;
+        bool  m_active;
 };
 
 #endif //ZE_GUARD_FUNC_H
