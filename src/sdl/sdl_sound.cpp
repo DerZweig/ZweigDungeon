@@ -22,7 +22,7 @@ void SDLSound::Initialize()
         }
 
         m_init = true;
-        Common_LogInfo("SDL::Sound", "Initializing...");
+        Common_LogInfo("SDL::Sound", "Initialize");
 
         if (!SDL_WasInit(SDL_INIT_AUDIO) && !SDL_Init(SDL_INIT_AUDIO))
         {

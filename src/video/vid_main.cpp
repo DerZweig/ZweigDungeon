@@ -25,6 +25,7 @@ void Video_Shutdown() noexcept
                 return;
         }
 
+        Common_LogInfo("Video", "Shutdown");
         g_current.reset();
 }
 

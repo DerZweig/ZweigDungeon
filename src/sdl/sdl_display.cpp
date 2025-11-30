@@ -44,7 +44,7 @@ void SDLDisplay::Initialize()
         }
 
         m_init = true;
-        Common_LogInfo("SDL::Display", "Initializing...");
+        Common_LogInfo("SDL::Display", "Initialize");
 
         if (!SDL_WasInit(SDL_INIT_VIDEO) && !SDL_Init(SDL_INIT_VIDEO))
         {
