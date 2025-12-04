@@ -6,12 +6,6 @@
  **************************************************/
 SDLDisplay::~SDLDisplay() noexcept
 {
-        if (!m_init)
-        {
-                return;
-        }
-
-        m_init = false;
         Common_LogInfo("SDL::Display", "Shutdown");
 
         if (m_target)
@@ -38,14 +32,7 @@ SDLDisplay::~SDLDisplay() noexcept
  **************************************************/
 void SDLDisplay::Initialize()
 {
-        if (m_init)
-        {
-                return;
-        }
-
-        m_init = true;
         Common_LogInfo("SDL::Display", "Initialize");
-
         if (!SDL_WasInit(SDL_INIT_VIDEO) && !SDL_Init(SDL_INIT_VIDEO))
         {
                 Common_LogInfo("SDL::Display", "Failed to initialize subsystem");

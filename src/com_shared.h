@@ -15,27 +15,20 @@ constexpr auto APP_DEFAULT_HEIGHT = 600;
 constexpr auto APP_VIDEO_WIDTH    = 320;
 constexpr auto APP_VIDEO_HEIGHT   = 240;
 
-
 /**************************************************
  * Common Types
  **************************************************/
-struct date_time_t
-{
-        int32_t  date_year;
-        uint32_t date_month;
-        uint32_t date_day;
-        uint32_t time_hour;
-        uint32_t time_minute;
-        uint32_t time_second;
-};
-
 struct frame_t
 {
-        uint16_t    viewport_width;
-        uint16_t    viewport_height;
-        date_time_t frame_started_at;
-        date_time_t timer_started_at;
-        uint64_t    timer_elapsed_milliseconds;
+        uint16_t viewport_width;
+        uint16_t viewport_height;
+        int32_t  current_date_year;
+        uint32_t current_date_month;
+        uint32_t current_date_day;
+        uint32_t current_time_hour;
+        uint32_t current_time_minute;
+        uint32_t current_time_second;
+        uint64_t milliseconds_since_init;
 };
 
 /**************************************************
@@ -49,7 +42,6 @@ struct frame_t
  **************************************************/
 void Common_Init();
 void Common_Shutdown() noexcept;
-void Common_SetupFrame(frame_t& frame);
 
 void Common_LogInfo(std::string_view where, std::string_view text);
 void Common_LogWarning(std::string_view where, std::string_view text);

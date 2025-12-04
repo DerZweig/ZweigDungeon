@@ -5,12 +5,6 @@
  **************************************************/
 SDLInput::~SDLInput() noexcept
 {
-        if (!m_init)
-        {
-                return;
-        }
-
-        m_init = false;
         Common_LogInfo("SDL::Input", "Shutdown");
 }
 
@@ -19,17 +13,13 @@ SDLInput::~SDLInput() noexcept
  **************************************************/
 void SDLInput::Initialize()
 {
-        if (m_init)
-        {
-                return;
-        }
-
-        m_init = true;
         Common_LogInfo("SDL::Input", "Initialize");
         if (!SDL_WasInit(SDL_INIT_EVENTS) && !SDL_Init(SDL_INIT_EVENTS))
         {
                 App_Error("SDL::Input", "Failed to initialize subsystem");
         }
+
+        m_event = {};
 }
 
 /**************************************************

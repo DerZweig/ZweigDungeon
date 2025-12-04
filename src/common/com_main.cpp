@@ -1,7 +1,7 @@
 #include "com_local.h"
-#include <memory>
+#include <optional>
 
-static std::unique_ptr<CommonInstance> g_current = {};
+static std::optional<CommonInstance> g_current = {};
 
 /**************************************************
  * Common Startup / Shutdown
@@ -13,10 +13,8 @@ void Common_Init()
                 return;
         }
 
-        g_current = std::make_unique<CommonInstance>();
+        g_current.emplace();
         Common_LogInfo("Common", "Initialize");
-
-        g_current->frame_timer.StartOrReset();
 }
 
 void Common_Shutdown() noexcept
@@ -28,19 +26,6 @@ void Common_Shutdown() noexcept
 
         Common_LogInfo("Common", "Shutdown");
         g_current.reset();
-}
-
-/**************************************************
- * Common Frame
- **************************************************/
-void Common_SetupFrame(frame_t& frame)
-{
-        auto& com = *g_current;
-
-        com.frame_timer.Update();
-        com.frame_timer.ExtractStart(frame.timer_started_at);
-        com.frame_timer.ExtractNow(frame.frame_started_at);
-        frame.timer_elapsed_milliseconds = com.frame_timer.GetElapsedMilliseconds();
 }
 
 /**************************************************

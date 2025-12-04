@@ -36,9 +36,7 @@ void App_Update()
         static frame_t frame;
         frame = {};
 
-        Common_SetupFrame(frame); //update timers, config, files, etc...
-        System_SetupFrame(frame); //poll input events
-
+        System_SetupFrame(frame); //poll input events, timers, etc.
         Entity_UpdateFrame(frame); //update world objects
         UI_UpdateFrame(frame); //update GUI widgets
         Sound_UpdateFrame(frame); //mix sounds

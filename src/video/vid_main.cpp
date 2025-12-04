@@ -1,7 +1,7 @@
 #include "vid_local.h"
-#include <memory>
+#include <optional>
 
-static std::unique_ptr<VideoInstance> g_current = {};
+static std::optional<VideoInstance> g_current = {};
 
 /**************************************************
  * Video Init & Shutdown
@@ -14,7 +14,7 @@ void Video_Init()
         }
 
         Common_LogInfo("Video", "Initialize");
-        g_current = std::make_unique<VideoInstance>();
+        g_current.emplace();
         g_current->screen.Resize(APP_VIDEO_WIDTH, APP_VIDEO_HEIGHT);
 }
 
