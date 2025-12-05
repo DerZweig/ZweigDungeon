@@ -24,7 +24,6 @@ void System_Init()
         g_current->started_at = system_clock::now();
         g_current->input.Initialize();
         g_current->display.Initialize();
-        g_current->sound.Initialize();
 }
 
 void System_Shutdown() noexcept

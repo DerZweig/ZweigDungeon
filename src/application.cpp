@@ -21,6 +21,13 @@ void App_Init(int argc, char** argv)
 
 void App_Shutdown() noexcept
 {
+        static bool triggered = false;
+        if (triggered)
+        {
+                return;
+        }
+
+        triggered = true;
         Entity_Shutdown();
         UI_Shutdown();
         Video_Shutdown();

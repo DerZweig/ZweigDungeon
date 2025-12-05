@@ -15,7 +15,6 @@ set(SOURCES_FILES
         "${SOURCE_DIR}/common/com_logger.cpp"
         "${SOURCE_DIR}/common/com_config.cpp"
         "${SOURCE_DIR}/common/com_files.cpp"
-        "${SOURCE_DIR}/common/com_timer.cpp"
         "${SOURCE_DIR}/video/vid_main.cpp"
         "${SOURCE_DIR}/video/vid_buffer.cpp"
         "${SOURCE_DIR}/video/vid_font.cpp"
